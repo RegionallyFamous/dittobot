@@ -1,0 +1,13 @@
+{
+  "$schema": "https://skills.sh/schemas/skills.sh.schema.json",
+  "notGrouped": "bottom",
+  "groupings": [
+    {
+      "title": "Voice Editing",
+      "description": "Voice-faithful rewriting, copy editing, messy-note cleanup, and reusable voice profiles.",
+      "skills": [
+        "youish"
+      ]
+    }
+  ]
+}

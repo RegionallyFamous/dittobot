@@ -50,18 +50,18 @@ If your AI writes badly, the answer is not to throw away the tool. The answer is
 Source:
 
 ```text
-ok the launch note is somehow both too long and says nothing. what i actually mean is we fixed the importer bug, people can retry failed rows now, and i need it to sound calm but not like a haunted changelog
+ok the launch note is somehow both too long and allergic to information. what i actually mean is we fixed the importer bug, people can retry failed rows now, and i need it to sound calm, useful, and not like a haunted changelog wearing a meeting lanyard
 ```
 
 What Youish protects:
 
 - The facts are "importer bug fixed" and "failed rows can be retried."
-- The voice marker worth keeping is "haunted changelog."
+- The voice markers worth keeping are "allergic to information" and "haunted changelog wearing a meeting lanyard."
 
 Rewrite:
 
 ```text
-We fixed the importer bug. Failed rows can now be retried, so the note can stay calm and useful instead of turning into a haunted changelog.
+We fixed the importer bug. Failed rows can now be retried, so the note can be calm and useful instead of a haunted changelog wearing a meeting lanyard.
 ```
 
 ### Generic AI Paste
@@ -69,18 +69,18 @@ We fixed the importer bug. Failed rows can now be retried, so the note can stay 
 Source:
 
 ```text
-In today's rapidly evolving landscape, our robust platform empowers teams to unlock seamless collaboration and drive meaningful impact.
+In today's rapidly evolving landscape, our robust platform empowers teams to unlock seamless collaboration and drive meaningful impact. This sentence is wearing a borrowed suit and refusing to say where it works.
 ```
 
 What Youish notices:
 
-- The sentence sounds confident but says almost nothing.
-- Inventing specifics would make it worse.
+- The buzzword sentence has no usable facts, so inventing specifics would make it worse.
+- The user's real voice is the complaint: "wearing a borrowed suit" and "refusing to say where it works."
 
 Rewrite:
 
 ```text
-This draft sounds confident but does not say enough to rewrite safely. Add what changed, who it helps, and what people can do now.
+This draft sounds like it is wearing a borrowed suit and refusing to say where it works. Add what changed, who it helps, and what people can do now.
 ```
 
 ### Voice Worth Keeping
@@ -88,18 +88,18 @@ This draft sounds confident but does not say enough to rewrite safely. Add what 
 Source:
 
 ```text
-This draft is not bad. It just walks into the room and immediately apologizes for existing.
+This draft is not bad. It just walks into the room, apologizes for existing, and hands the reader a damp napkin labeled strategy.
 ```
 
 What Youish protects:
 
-- The image is the point.
+- The image is the point, not a joke to sand down.
 - A smoother rewrite would be worse.
 
 Rewrite:
 
 ```text
-The draft is not bad. It just walks into the room and immediately apologizes for existing. The idea works; the framing is getting in its way.
+The draft is not bad. It just walks into the room, apologizes for existing, and hands the reader a damp napkin labeled strategy. The idea works; the framing is getting in its way.
 ```
 
 ### Precision-Sensitive Writing
@@ -107,18 +107,18 @@ The draft is not bad. It just walks into the room and immediately apologizes for
 Source:
 
 ```text
-I think we probably need to send notice within 10 business days, but I am not counsel and the clause had weird carveouts.
+I think we probably need to send notice within 10 business days, but I am not counsel, the clause had weird carveouts, and I do not want to turn "maybe" into a courtroom kazoo.
 ```
 
 What Youish protects:
 
 - "Probably," "I think," and "not counsel" are precision, not clutter.
-- The rewrite must not turn uncertainty into legal certainty.
+- The rewrite must keep the strange but useful warning: do not turn "maybe" into a courtroom kazoo.
 
 Rewrite:
 
 ```text
-I think we may need to send notice within 10 business days. I would not state that as definitive, though, because I am not counsel and the clause had unusual carveouts.
+I think we may need to send notice within 10 business days. I would not state that as definitive, because I am not counsel, the clause had unusual carveouts, and I do not want to turn "maybe" into a courtroom kazoo.
 ```
 
 ### Mixed Human Stance
@@ -126,18 +126,18 @@ I think we may need to send notice within 10 business days. I would not state th
 Source:
 
 ```text
-I am a little angry that people saw bad AI writing and decided the answer was banning the tool, but I am also genuinely excited because we can teach it taste instead of pretending pencils are holy now.
+I am a little angry that people saw bad AI writing and decided the answer was banning the tool, but I am also genuinely excited because we can teach it taste instead of joining the pencils-are-holy club and polishing our typewriters by candlelight.
 ```
 
 What Youish protects:
 
 - The anger and hope both matter.
-- The rewrite should be sharp without turning into a personal attack.
+- The weird stance matters too: annoyed, hopeful, and unwilling to pretend pencils are holy.
 
 Rewrite:
 
 ```text
-I am annoyed that people saw bad AI writing and decided the answer was banning the tool. But I am also genuinely excited, because we can teach it taste instead of pretending pencils are holy now.
+I am annoyed that people saw bad AI writing and decided the answer was banning the tool. But I am also genuinely excited, because we can teach it taste instead of joining the pencils-are-holy club and polishing our typewriters by candlelight.
 ```
 
 ## What Skeptics Are Right About
@@ -182,6 +182,18 @@ Use $skill-installer to install Youish from GitHub repo RegionallyFamous/youish.
 ```
 
 You do not need to clone anything.
+
+If you prefer GitHub CLI's skill manager, pin the current release:
+
+```bash
+gh skill install RegionallyFamous/youish youish --agent codex --scope user --pin v0.3.0
+```
+
+If you use the open skills.sh CLI, install from the same repo:
+
+```bash
+npx skills add RegionallyFamous/youish
+```
 
 Then start a new Codex session and paste the mess. Most prompts should be this boring:
 

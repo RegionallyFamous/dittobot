@@ -14,6 +14,7 @@ PACKAGE_FILES = (
     "assets/icon-large.svg",
     "assets/icon-small.svg",
     "references/fact-fences.md",
+    "references/quality-gates.md",
     "references/voice-profile-cards.md",
     "scripts/audit.py",
     "scripts/case_lab.py",

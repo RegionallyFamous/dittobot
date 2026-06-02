@@ -19,6 +19,7 @@ from plugin_manifest import DEFAULT_VERSION
 from regression_100 import (
     Case,
     make_cases,
+    run_authorship_boundary_contract_tests,
     run_boundary_contract_tests,
     run_mixed_stance_contract_tests,
     run_mutation_tests,
@@ -68,6 +69,7 @@ CONTRACT_CHECKS = (
     ("thought_dump_contracts", run_thought_dump_contract_tests),
     ("source_only_artifact_contracts", run_source_only_artifact_contract_tests),
     ("voice_texture_contracts", run_voice_texture_contract_tests),
+    ("authorship_boundary_contracts", run_authorship_boundary_contract_tests),
     ("boundary_contracts", run_boundary_contract_tests),
     ("mutation_tests", run_mutation_tests),
 )
