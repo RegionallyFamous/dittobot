@@ -17,6 +17,7 @@ import sys
 import urllib.error
 import urllib.request
 from pathlib import Path
+from urllib.parse import urlparse
 
 from regression_100 import Case, make_cases, validate, words
 
@@ -115,12 +116,37 @@ def selected_cases(case_ids: list[str], limit: int) -> list[Case]:
     return cases[:limit]
 
 
+def validate_api_url(api_url: str, allow_custom: bool) -> None:
+    if api_url == DEFAULT_API_URL:
+        return
+    parsed = urlparse(api_url)
+    if parsed.scheme != "https":
+        raise SystemExit("Custom API URLs must use https.")
+    if not allow_custom:
+        raise SystemExit(
+            "Refusing to send OPENAI_API_KEY to a custom API URL. "
+            "Pass --allow-custom-api-url if you trust this endpoint."
+        )
+
+
+def validate_save_path(path: str | None) -> None:
+    if not path:
+        return
+    if not path.endswith(".local.jsonl"):
+        raise SystemExit("--save-jsonl path must end with .local.jsonl so git ignores it.")
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--limit", type=int, default=10, help="Number of cases to run.")
     parser.add_argument("--case", action="append", default=[], help="Specific case id to run.")
     parser.add_argument("--model", default=os.environ.get("OPENAI_MODEL", DEFAULT_MODEL))
     parser.add_argument("--api-url", default=os.environ.get("OPENAI_API_URL", DEFAULT_API_URL))
+    parser.add_argument(
+        "--allow-custom-api-url",
+        action="store_true",
+        help="Allow sending the bearer token to --api-url / OPENAI_API_URL.",
+    )
     parser.add_argument("--timeout", type=int, default=60)
     parser.add_argument("--max-output-tokens", type=int, default=500)
     parser.add_argument("--save-jsonl", help="Optional local transcript path. Do not commit it.")
@@ -130,6 +156,9 @@ def main() -> int:
         help="Exit nonzero instead of skipping when OPENAI_API_KEY is missing.",
     )
     args = parser.parse_args()
+
+    validate_api_url(args.api_url, args.allow_custom_api_url)
+    validate_save_path(args.save_jsonl)
 
     api_key = os.environ.get("OPENAI_API_KEY")
     if not api_key:

@@ -31,7 +31,7 @@ Before rewriting, identify:
 
 - **Task:** proofread, light edit, tighten, rewrite, punch up, compress, expand, adapt tone, diagnose, or provide options.
 - **Audience and purpose:** who reads it and what the text needs to do.
-- **Voice fingerprint:** directness, formality, humor, sentence length, punctuation, vocabulary, confidence, warmth, texture, idiosyncrasy, and favorite phrases.
+- **Voice fingerprint:** directness, formality, humor, sentence length, punctuation, vocabulary, confidence, warmth, texture, idiosyncrasy, favorite phrases, and what the user seems to prefer over the obvious generic alternative.
 - **Protected material:** facts, claims, names, dates, commitments, quotes, jokes, emotional beats, technical terms, and phrases that feel like the user.
 
 Keep three private ledgers while editing: constraints to obey, claims/facts not to change, and voice markers to preserve. Do not show these ledgers unless the user asks.
@@ -51,8 +51,8 @@ Use prior writing samples when available. Otherwise use the submitted draft. If 
 - **Punch up:** add energy from existing stakes, contrast, or phrasing; add wit only when requested or clearly present.
 - **Compress:** make it materially shorter without losing the point.
 - **Options:** provide 2-3 labeled versions when tone is subjective.
-- **Voice profile:** infer a compact reusable profile from samples: do/avoid, rhythm, diction, punctuation, humor, stance, protected quirks, and forbidden generic moves.
-- **Comparison:** when asked, show what changed and why in a short before/after or notes format.
+- **Voice profile:** infer a compact reusable taste profile from samples: what the user tends to choose, reject, protect, and tolerate. Include do/avoid rules, rhythm, diction, punctuation, humor, stance, protected quirks, forbidden generic moves, and 3-5 short evidence phrases. Prefer editing guidance over biography or long analysis.
+- **Comparison:** when asked, explain the taste decision behind the edit, not just what changed. Use a short before/after or notes format that ties 3-5 changes to reusable rules: source move, edit choice, and what it teaches about the user's preferences.
 - **Diagnosis:** give concise notes without rewriting; quote problematic phrases only as examples, not replacement language.
 
 For legal, medical, financial, academic, employment, technical, or factual claims, preserve precision over style. Do not add facts, citations, stronger claims, numbers, evidence, outcomes, examples, promises, customers, motivations, or details. Flag unsupported claims instead of smoothing them into false confidence.
@@ -105,6 +105,8 @@ Put the useful thing first.
 - Normal rewrite: return the revised text directly, or use `**Rewrite**` when a label helps readability.
 - Meaningful tradeoff or requested rationale: add `**Note**` with one short explanation.
 - Tone options: provide 2-3 labeled versions such as `Cleaner`, `Warmer`, or `Sharper`.
+- Voice profile: keep it compact and reusable. Default to sections: `Use`, `Avoid`, `Rhythm/Diction`, `Protected quirks`, and `Editing rules`.
+- Comparison: do not annotate every sentence. Show only changes that reveal taste, tradeoffs, or reusable editing rules.
 - Feedback-only: lead with the highest-impact notes and do not rewrite.
 
 Before final delivery, confirm the rewrite is clearer and no more verbose than needed; preserves intent, facts, stance, emotional temperature, and voice; avoids unsupported additions; avoids AI tells without fake human errors; and follows every explicit constraint.

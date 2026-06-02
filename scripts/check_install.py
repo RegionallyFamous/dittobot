@@ -15,6 +15,7 @@ FILES = (
     "scripts/regression_100.py",
     "scripts/check_install.py",
     "scripts/live_eval.py",
+    "scripts/validate_skill.py",
 )
 
 

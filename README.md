@@ -175,27 +175,38 @@ Why it works: it improves clarity without turning uncertainty into legal certain
 Run the deterministic fixture validator:
 
 ```bash
+python3 scripts/validate_skill.py
 python3 scripts/regression_100.py
+python3 -m py_compile scripts/*.py
+tmpdir="$(mktemp -d)"
+mkdir -p "$tmpdir/codex-skills"
+ln -s "$(pwd)" "$tmpdir/codex-skills/dittobot"
+python3 scripts/check_install.py --install-dir "$tmpdir/codex-skills/dittobot"
 ```
 
 Expected result:
 
 ```text
+Skill repo validation passed.
 VALIDATOR SELF-TESTS: PASS
 TOTAL: 100/100 passed
+Installed skill matches repo (symlink): ...
 ```
 
 This validates the fixtures and the validator itself. It covers corporate slop, blunt Slack, legal precision, apologies, concision, odd voice, technical notes, unsupported claims, sensitive writing, and exact constraint handling.
 
-Run the optional live model smoke test when you have an API key:
+Run the optional live model smoke test when you have an API key. This is not a benchmark or a guarantee of voice fidelity; it is a sampled smoke test against one model/API configuration and the deterministic string/marker validators. A pass means no obvious fixture failures in that sample.
 
 ```bash
-OPENAI_API_KEY=... python3 scripts/live_eval.py --limit 10
+export OPENAI_API_KEY="sk-..."
+python3 scripts/live_eval.py --limit 10
 python3 scripts/live_eval.py --case legal_precision_01 --model "$OPENAI_MODEL"
-python3 scripts/live_eval.py --limit 20 --save-jsonl live-eval-results.local.jsonl
+python3 scripts/live_eval.py --limit 20 --model gpt-5-mini --save-jsonl live-eval-results.local.jsonl
 ```
 
-If `OPENAI_API_KEY` is not set, the live eval skips cleanly. Saved JSONL transcripts are local debugging artifacts and should not be committed.
+Use `--limit` or `--case` to keep cost bounded. If `OPENAI_API_KEY` is not set, the live eval skips cleanly. Saved JSONL transcripts are local debugging artifacts and must use `.local.jsonl` so they stay ignored.
+
+Custom API URLs are blocked unless you pass `--allow-custom-api-url`; do that only for endpoints you trust with your bearer token and sample text.
 
 ## Privacy
 
