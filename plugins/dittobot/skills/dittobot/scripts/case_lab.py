@@ -4,13 +4,28 @@
 from __future__ import annotations
 
 import argparse
+import re
 import sys
 from pathlib import Path
 
-from ledger import merge_ledgers, parse_fences, parse_ledger_files, split_terms, strip_fences
+from ledger import (
+    boundary_forbid_terms,
+    merge_ledgers,
+    parse_fences,
+    parse_ledger_files,
+    split_terms,
+    strip_fences,
+)
+from regression_100 import numeric_claims
 
 
 PROMPT_MODES = ("explicit_rewrite", "source_only")
+NUMERIC_CONTEXT_RE = re.compile(
+    r"\b\d+(?::\d+)?(?:[.,]\d+)*(?:\.\d+)?%?\s+"
+    r"(?:(?:business|calendar)\s+)?"
+    r"(?:days?|weeks?|hours?|minutes?|months?|years?|percent|dollars?|users?|rows?|items?)\b",
+    re.IGNORECASE,
+)
 
 
 def read_value(value: str | None, file_path: str | None, label: str) -> str:
@@ -25,6 +40,10 @@ def read_value(value: str | None, file_path: str | None, label: str) -> str:
 
 def clean_terms(values: list[str]) -> tuple[str, ...]:
     return tuple(value.strip() for value in values if value.strip())
+
+
+def numeric_context_terms(text: str) -> list[str]:
+    return [match.group(0).strip() for match in NUMERIC_CONTEXT_RE.finditer(text)]
 
 
 def tuple_literal(values: tuple[str, ...]) -> str:
@@ -56,6 +75,7 @@ def main() -> int:
     parser.add_argument("--protected", action="append", default=[], help="Fact or phrase to protect.")
     parser.add_argument("--voice", action="append", default=[], help="Voice marker to preserve.")
     parser.add_argument("--forbid", action="append", default=[], help="Forbidden term or phrase.")
+    parser.add_argument("--boundary", action="append", default=[], help="Boundary guidance.")
     parser.add_argument(
         "--ledger-file",
         action="append",
@@ -100,6 +120,14 @@ def main() -> int:
     source = strip_fences(source)
     rewrite = read_value(args.rewrite, args.rewrite_file, "rewrite")
     must = clean_terms(args.must)
+    protected = (
+        ledger["protected"]
+        + split_terms(args.protected)
+        + sorted(numeric_claims(source))
+        + numeric_context_terms(source)
+    )
+    boundaries = ledger["boundary"] + split_terms(args.boundary)
+    forbid = ledger["forbid"] + split_terms(args.forbid) + boundary_forbid_terms(boundaries)
 
     lines = [
         "# Review before committing: keep fixtures redacted and focused.",
@@ -109,9 +137,10 @@ def main() -> int:
         f"    rewrite={rewrite!r},",
         f"    must={tuple_literal(must)},",
     ]
-    add_tuple_field(lines, "protected", clean_terms(ledger["protected"] + split_terms(args.protected)))
+    add_tuple_field(lines, "protected", clean_terms(protected))
     add_tuple_field(lines, "preserve_voice", clean_terms(ledger["voice"] + split_terms(args.voice)))
-    add_tuple_field(lines, "forbid", clean_terms(ledger["forbid"] + split_terms(args.forbid)))
+    add_tuple_field(lines, "forbid", clean_terms(forbid))
+    add_tuple_field(lines, "boundaries", clean_terms(boundaries))
     add_tuple_field(
         lines,
         "required_claims",

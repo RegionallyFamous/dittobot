@@ -6,6 +6,7 @@ from __future__ import annotations
 import json
 import re
 import sys
+import argparse
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -21,8 +22,13 @@ def read(rel: str) -> str:
 
 
 def main() -> int:
-    version = DEFAULT_VERSION
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--version", default=DEFAULT_VERSION, help="Expected strict semver version.")
+    args = parser.parse_args()
+    version = args.version
     errors: list[str] = []
+    if DEFAULT_VERSION != version:
+        errors.append(f"scripts/plugin_manifest.py DEFAULT_VERSION is {DEFAULT_VERSION}, expected {version}")
     checks = {
         "CHANGELOG.md": rf"^## {re.escape(version)} - ",
         "install.sh": rf'REF="\$\{{DITTOBOT_REF:-v{re.escape(version)}\}}"',
@@ -37,10 +43,13 @@ def main() -> int:
 
     manifest = json.loads(read(".codex-plugin/plugin.json"))
     if manifest.get("version") != version:
-        errors.append(".codex-plugin/plugin.json version differs from DEFAULT_VERSION")
+        errors.append(f".codex-plugin/plugin.json version is {manifest.get('version')}, expected {version}")
     mirror_manifest = json.loads(read("plugins/dittobot/.codex-plugin/plugin.json"))
     if mirror_manifest.get("version") != version:
-        errors.append("plugins/dittobot/.codex-plugin/plugin.json version differs from DEFAULT_VERSION")
+        errors.append(
+            f"plugins/dittobot/.codex-plugin/plugin.json version is {mirror_manifest.get('version')}, "
+            f"expected {version}"
+        )
 
     if errors:
         print("Version check failed:")

@@ -27,6 +27,27 @@ def run(args: list[str], *, stdout=None) -> None:
         raise SystemExit(result.returncode)
 
 
+def git_status() -> str:
+    result = subprocess.run(
+        ["git", "status", "--short"],
+        cwd=ROOT,
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.DEVNULL,
+        check=False,
+    )
+    return result.stdout.strip() if result.returncode == 0 else ""
+
+
+def assert_clean_worktree() -> None:
+    status = git_status()
+    if status:
+        raise SystemExit(
+            "Release builds require a clean tracked worktree. Commit or stash changes, "
+            "or pass --allow-dirty for local experiments.\n" + status
+        )
+
+
 def assert_safe_release_dir(path: Path) -> None:
     dist = (ROOT / "dist").resolve()
     resolved = path.resolve()
@@ -52,6 +73,11 @@ def main() -> int:
         "--output-dir",
         help="Release asset directory. Defaults to dist/release-vVERSION.",
     )
+    parser.add_argument(
+        "--allow-dirty",
+        action="store_true",
+        help="Allow tracked worktree changes. Intended only for local experiments.",
+    )
     args = parser.parse_args()
 
     require_semver(args.version)
@@ -71,8 +97,10 @@ def main() -> int:
     plugin_dir = work_dir / "dittobot-plugin"
     work_dir.mkdir()
 
-    run([sys.executable, "scripts/sync_skill_package.py"])
+    if not args.allow_dirty:
+        assert_clean_worktree()
     assert_mirror_fresh(ROOT)
+    run([sys.executable, "scripts/check_versions.py", "--version", args.version])
     run([sys.executable, "scripts/validate_skill.py"])
     run([sys.executable, "scripts/regression_100.py"])
     run(

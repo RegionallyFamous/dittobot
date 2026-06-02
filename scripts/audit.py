@@ -10,7 +10,14 @@ import sys
 from pathlib import Path
 
 from failure_taxonomy import unique_failure_buckets, unique_failure_codes
-from ledger import merge_ledgers, parse_fences, parse_ledger_files, split_terms, strip_fences
+from ledger import (
+    boundary_forbid_terms,
+    merge_ledgers,
+    parse_fences,
+    parse_ledger_files,
+    split_terms,
+    strip_fences,
+)
 from regression_100 import Case, numeric_claims, validate, words
 
 
@@ -40,6 +47,12 @@ def main() -> int:
     parser.add_argument("--protected", action="append", default=[], help="Fact or phrase that must survive.")
     parser.add_argument("--voice", action="append", default=[], help="Voice marker that must survive.")
     parser.add_argument("--forbid", action="append", default=[], help="Forbidden term or phrase.")
+    parser.add_argument(
+        "--boundary",
+        action="append",
+        default=[],
+        help="Boundary guidance. Explicit forbidden phrases are audited when extractable.",
+    )
     parser.add_argument(
         "--ledger-file",
         action="append",
@@ -99,6 +112,9 @@ def main() -> int:
     protected = ledger["protected"] + split_terms(args.protected)
     if not args.no_protect_source_numbers:
         protected.extend(sorted(numeric_claims(source)))
+    boundaries = ledger["boundary"] + split_terms(args.boundary)
+    boundary_forbids = boundary_forbid_terms(boundaries)
+    forbid = ledger["forbid"] + split_terms(args.forbid) + boundary_forbids
 
     case = Case(
         id="ad_hoc_audit",
@@ -107,7 +123,7 @@ def main() -> int:
         must=clean_terms(args.must),
         protected=clean_terms(protected),
         preserve_voice=clean_terms(ledger["voice"] + split_terms(args.voice)),
-        forbid=clean_terms(ledger["forbid"] + split_terms(args.forbid)),
+        forbid=clean_terms(forbid),
         required_claims=clean_terms(ledger["required_claims"] + split_terms(args.required_claim)),
         forbid_assertions=clean_terms(
             ledger["forbid_assertions"] + split_terms(args.forbid_assertion)
@@ -137,6 +153,8 @@ def main() -> int:
         "source_words": len(words(source)),
         "rewrite_words": len(words(rewrite)),
         "protected": dataclasses.asdict(case)["protected"],
+        "boundaries": clean_terms(boundaries),
+        "boundary_forbidden_terms": clean_terms(boundary_forbids),
         "failure_codes": unique_failure_codes(errors),
         "failure_buckets": unique_failure_buckets(errors),
         "errors": errors,

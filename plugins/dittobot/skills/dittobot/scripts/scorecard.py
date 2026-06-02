@@ -31,6 +31,7 @@ GUARDRAILS: tuple[tuple[str, GuardrailCheck], ...] = (
     ("uncertainty_handling", lambda case: case.preserve_uncertainty),
     ("stance_preservation", lambda case: bool(case.preserve_stance)),
     ("artifact_cleanup", lambda case: bool(case.forbid_artifacts)),
+    ("boundary_enforcement", lambda case: bool(case.boundaries)),
     ("unsupported_entity_guard", lambda case: case.forbid_added_entities),
     (
         "anti_generic_polish",
@@ -420,7 +421,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--transcript", action="append", default=[], help="Optional live eval JSONL transcript.")
     parser.add_argument("--plugin-dir", help="Optional generated plugin package to check.")
-    parser.add_argument("--version", default="0.2.4", help="Expected plugin version.")
+    parser.add_argument("--version", default="0.2.5", help="Expected plugin version.")
     parser.add_argument("--require-complete-suite", action="store_true")
     parser.add_argument("--public", action="store_true", help="Fail if transcript records contain raw source/output text.")
     parser.add_argument("--fail-under-score", type=float, default=1.0)

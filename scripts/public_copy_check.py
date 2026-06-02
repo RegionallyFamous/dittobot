@@ -146,26 +146,27 @@ def check_process_examples(markdown: str, errors: list[str]) -> None:
     watch_start = markdown.find("## Watch It Work")
     next_section = markdown.find("\n## ", watch_start + 1) if watch_start != -1 else -1
     watch_section = markdown[watch_start:next_section if next_section != -1 else None]
-    notice_count = watch_section.count("Dittobot notices:")
+    process_label = "What survives/changes:"
+    notice_count = watch_section.count(process_label)
     source_count = watch_section.count("Source:")
     rewrite_count = watch_section.count("Rewrite:")
     if notice_count < 4:
         fail(f"README must show at least 4 in-process examples; found {notice_count}", errors)
     if not (source_count == notice_count == rewrite_count):
         fail(
-            "README process examples must have matching Source, Dittobot notices, and Rewrite blocks; "
+            f"README process examples must have matching Source, {process_label}, and Rewrite blocks; "
             f"found Source={source_count}, notices={notice_count}, Rewrite={rewrite_count}",
             errors,
         )
 
-    blocks = watch_section.split("Dittobot notices:")[1:]
+    blocks = watch_section.split(process_label)[1:]
     for index, block in enumerate(blocks, start=1):
         before_rewrite = block.split("Rewrite:", 1)[0]
         bullet_count = sum(1 for line in before_rewrite.splitlines() if line.startswith("- "))
         if "Rewrite:" not in block:
             fail(f"in-process example {index} is missing a Rewrite block", errors)
         if bullet_count < 2:
-            fail(f"in-process example {index} must include at least 2 Dittobot notices", errors)
+            fail(f"in-process example {index} must include at least 2 process notes", errors)
 
 
 def check_banned_phrases(markdown: str, errors: list[str]) -> None:
@@ -193,6 +194,8 @@ def check_use_section(markdown: str, errors: list[str]) -> None:
             fail(f"README Use section reintroduced over-instructed prompt: {prompt!r}", errors)
     if "Use $dittobot on this:" not in markdown:
         fail("README must show the default drop-in usage prompt", errors)
+    if "\\|" in markdown:
+        fail("README should not escape shell pipes in install commands; use fenced blocks instead", errors)
     skill_installer_position = markdown.find("Use $skill-installer")
     curl_position = markdown.find("curl -fsSL")
     if skill_installer_position == -1:

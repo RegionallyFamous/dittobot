@@ -4,6 +4,15 @@
 
 Nothing yet.
 
+## 0.2.5 - 2026-06-02
+
+- Add auditable boundary extraction for explicit "do not use," "avoid," "does not apply," and "do not apply X to Y" guidance.
+- Thread boundary rules through audit, rewrite-report, failure-fixture, case-lab, regression, and public scorecard tooling.
+- Strengthen release builds so packaging verifies a clean committed state and fresh mirrors instead of mutating mirrors during release.
+- Make README install commands copy-safe, add the open skills CLI path, and keep the public story centered on voice-preserving editing.
+- Improve bad-rewrite and regression issue templates with prompt mode, precision context, boundary, and runnable fixture fields.
+- Add CI coverage for boundary failure fixtures, numeric-context case lab output, dirty release guards, and version-drift failures.
+
 ## 0.2.4 - 2026-06-02
 
 - Normalize GitHub CLI skill frontmatter whitespace in copied install checks so pinned `gh skill install` packages validate from the source repo checker.

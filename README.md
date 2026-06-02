@@ -5,28 +5,13 @@ Voice-faithful rewrites for people who want AI to sound like them, not like a co
 [![Validate](https://github.com/RegionallyFamous/dittobot/actions/workflows/validate.yml/badge.svg)](https://github.com/RegionallyFamous/dittobot/actions/workflows/validate.yml)
 ![License: GPL-2.0-or-later](https://img.shields.io/badge/license-GPL--2.0--or--later-blue.svg)
 ![Runtime dependencies: none](https://img.shields.io/badge/runtime_deps-none-brightgreen.svg)
+[![skills.sh](https://skills.sh/b/RegionallyFamous/dittobot)](https://skills.sh/RegionallyFamous/dittobot)
 
 ![A risograph-style Dittobot workshop turning messy notes into clean prose](assets/readme-riso-banner.jpg)
 
 Paste messy notes. Get sharp prose that still sounds like you. That should not be controversial. Apparently we needed a tool anyway.
 
-## Start Here
-
-In Codex, paste this:
-
-```text
-Use $skill-installer to install Dittobot from GitHub repo RegionallyFamous/dittobot. Use path "." and install it as "dittobot".
-```
-
-Then start a new Codex session and paste the mess:
-
-```text
-Use $dittobot on this:
-
-[paste the draft, notes, rant, email, announcement, post, caption, or half-formed thought]
-```
-
-That is the streamlined path: let Codex install the skill, then use the skill. No git ceremony. No tiny terminal archaeology expedition before you can fix a sentence.
+Dittobot turns rough drafts, notes, and rants into clear writing without sanding off the parts that sound like you. It is not AI trying to borrow a soul. It is an editor protecting the one already in the draft.
 
 ## What Dittobot Is
 
@@ -68,7 +53,7 @@ Source:
 ok the launch note is somehow both too long and says nothing. what i actually mean is we fixed the importer bug, people can retry failed rows now, and i need it to sound calm but not like a haunted changelog
 ```
 
-Dittobot notices:
+What survives/changes:
 
 - The facts are "importer bug fixed" and "failed rows can be retried."
 - The voice marker worth keeping is "haunted changelog."
@@ -87,7 +72,7 @@ Source:
 In today's rapidly evolving landscape, our robust platform empowers teams to unlock seamless collaboration and drive meaningful impact.
 ```
 
-Dittobot notices:
+What survives/changes:
 
 - The sentence sounds confident but says almost nothing.
 - Inventing specifics would make it worse.
@@ -106,7 +91,7 @@ Source:
 This draft is not bad. It just walks into the room and immediately apologizes for existing.
 ```
 
-Dittobot notices:
+What survives/changes:
 
 - The image is the point.
 - A smoother rewrite would be worse.
@@ -125,7 +110,7 @@ Source:
 I think we probably need to send notice within 10 business days, but I am not counsel and the clause had weird carveouts.
 ```
 
-Dittobot notices:
+What survives/changes:
 
 - "Probably," "I think," and "not counsel" are precision, not clutter.
 - The rewrite must not turn uncertainty into legal certainty.
@@ -144,7 +129,7 @@ Source:
 I am a little angry that people saw bad AI writing and decided the answer was banning the tool, but I am also genuinely excited because we can teach it taste instead of pretending pencils are holy now.
 ```
 
-Dittobot notices:
+What survives/changes:
 
 - The anger and hope both matter.
 - The rewrite should be sharp without turning into a personal attack.
@@ -168,15 +153,37 @@ The AI-writing backlash has receipts. People have seen enough soulless, padded, 
 
 The problem is not using AI. The problem is accepting the first bland answer, then blaming the whole category because nobody steered.
 
+So the behavior is deliberately boring where bad AI gets cute:
+
+- If the draft has no facts, Dittobot will not invent facts.
+- If the draft has uncertainty, Dittobot keeps the uncertainty.
+- If the draft has a weird good phrase, Dittobot protects it.
+- If the draft is bloated, Dittobot cuts before it decorates.
+- If a constraint says no dashes, no notes, or exactly 40 words, Dittobot treats that like the job.
+
 ## When Not To Use It
 
 Dittobot needs source text or a real voice sample. It is not for making up legal, medical, financial, academic, or factual certainty. It should not bypass publication policies, disclosure rules, or common sense around private data.
 
 When disclosure matters, say the true thing: edited with AI from my draft, grammar and clarity assistance only, or AI-assisted line edit with facts checked by me. Authorship is not a magic spell. Be honest about the workflow and keep responsibility where it belongs.
 
+| Good For | Not For |
+|---|---|
+| Emails, posts, notes, announcements, bios, captions, messy drafts, and half-formed thoughts | Inventing facts, citations, customers, legal certainty, medical certainty, or financial advice |
+| Making a real draft cleaner, sharper, shorter, warmer, stranger, or more readable | Hiding authorship, bypassing disclosure rules, or pretending nobody edited anything |
+| Preserving a personal, team, or publication voice | Replacing judgment, policy, review, or the writer's responsibility |
+
 ## Use It
 
-After install, most prompts should be this boring:
+First, install Dittobot from inside Codex:
+
+```text
+Use $skill-installer to install Dittobot from GitHub repo RegionallyFamous/dittobot. Use path "." and install it as "dittobot".
+```
+
+That `.` means the root Dittobot skill in the GitHub repo. You do not need to clone anything.
+
+Then start a new Codex session and paste the mess. Most prompts should be this boring:
 
 ```text
 Use $dittobot on this:
@@ -186,26 +193,52 @@ Use $dittobot on this:
 
 That is the point. Drop in the stream of consciousness; get back the version that sounds like you after sleep, coffee, and one more pass.
 
-Pinned GitHub CLI install:
+Choose one install path:
 
-```bash
-gh skill install RegionallyFamous/dittobot skills/dittobot --agent codex --scope user --pin v0.2.4
+| Path | Use When |
+|---|---|
+| Codex prompt | You want the streamlined Codex skill install. |
+| Terminal fallback | `$skill-installer` is unavailable and you are comfortable with Terminal. |
+| Pinned GitHub CLI | You want an explicit tagged skill install through `gh`. |
+| Codex plugin source | You want Dittobot as a Codex plugin package. |
+| Open skills CLI | You use skill-aware agents or ecosystems that support the shared `skills` installer. |
+
+Codex prompt:
+
+```text
+Use $skill-installer to install Dittobot from GitHub repo RegionallyFamous/dittobot. Use path "." and install it as "dittobot".
 ```
 
 Terminal fallback:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/RegionallyFamous/dittobot/v0.2.4/install.sh | DITTOBOT_REF=v0.2.4 bash
+curl -fsSL https://raw.githubusercontent.com/RegionallyFamous/dittobot/v0.2.5/install.sh | DITTOBOT_REF=v0.2.5 bash
 ```
 
-Codex plugin marketplace source:
+Pinned GitHub CLI:
 
 ```bash
-codex plugin marketplace add RegionallyFamous/dittobot --ref v0.2.4
+gh skill install RegionallyFamous/dittobot skills/dittobot --agent codex --scope user --pin v0.2.5
+```
+
+Codex plugin source:
+
+```bash
+codex plugin marketplace add RegionallyFamous/dittobot --ref v0.2.5
 codex plugin add dittobot@dittobot
 ```
 
-Requires `curl`, `tar`, and Python 3 for the terminal fallback. It installs a copy, backs up an existing Dittobot install, verifies itself, and does not use `sudo`.
+Open skills CLI:
+
+```bash
+npx skills add RegionallyFamous/dittobot
+```
+
+The plugin command means: install the plugin named `dittobot` from the marketplace source named `dittobot`. For normal skill use, the Codex prompt path is the one to use.
+
+The open skills CLI path is for skill-aware agents and ecosystems that use the shared `skills` installer. For Codex, use the Codex prompt path first.
+
+The terminal fallback requires `curl`, `tar`, and Python 3. It installs a copy, backs up an existing Dittobot install, verifies itself, and does not use `sudo`.
 
 Uploadable assets live in [Releases](https://github.com/RegionallyFamous/dittobot/releases): skill ZIP, plugin ZIP, public scorecard, and checksums.
 
@@ -214,6 +247,8 @@ Most of the time, the default prompt is enough. Add instructions only for hard c
 ## Proof, Not Vibes
 
 Dittobot's quality story is not "trust me, it feels good." The repo checks voice preservation, protected facts, uncertainty, claim fidelity, exact word counts, no-dash constraints, and anti-generic behavior.
+
+The tests check the boring things that matter in real writing: did it keep the facts, keep the voice marker, avoid fake certainty, obey the constraint, and return something useful?
 
 This does not prove literary taste. It proves Dittobot keeps the constraints it claims to protect: facts, uncertainty, length, format, and anti-generic behavior.
 
@@ -252,6 +287,8 @@ The critique is worth taking seriously. Research on human-AI co-writing has foun
 - [AI Suggestions Homogenize Writing Toward Western Styles and Diminish Cultural Nuances](https://arxiv.org/abs/2409.11360): suggestion systems can flatten voice, so voice preservation has to be a first-class requirement.
 - [Digital.gov: Principles of plain language](https://digital.gov/guides/plain-language/principles): write for the audience, make the useful action clear, and cut clutter.
 - [CPSC: Plain Language Principles](https://www.cpsc.gov/About-CPSC/Policies-Statements-and-Directives/plain-language-principles): plain writing is not dumbed-down writing. It is respect for the reader's time.
+- [OpenAI Codex skills](https://developers.openai.com/codex/skills): skills package reusable instructions, resources, and optional scripts; plugins are the installable distribution path for reusable Codex workflows.
+- [skills.sh docs](https://skills.sh/docs): open skills can also be discovered and installed through `npx skills add owner/repo`.
 
 ## About The Name
 

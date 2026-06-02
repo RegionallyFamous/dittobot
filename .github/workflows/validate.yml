@@ -36,9 +36,10 @@ jobs:
       - name: Check public README copy
         run: |
           python3 scripts/public_copy_check.py --description "Paste messy notes. Get sharp rewrites that sound like you on a good day."
-          grep "^## 0.2.4 - " CHANGELOG.md
+          grep "^## 0.2.5 - " CHANGELOG.md
           python3 scripts/check_versions.py
-          python3 scripts/check_marketplace.py --version 0.2.4
+          ! python3 scripts/check_versions.py --version 9.9.9
+          python3 scripts/check_marketplace.py --version 0.2.5
 
       - name: Run deterministic regression fixtures
         run: python3 scripts/regression_100.py
@@ -46,9 +47,14 @@ jobs:
       - name: Verify Dittobot lab tools
         run: |
           python3 scripts/audit.py --source "I think notice may be due in 10 days." --rewrite "I think notice may be due in 10 days." --preserve-uncertainty --protected "10 days"
-          python3 scripts/case_lab.py --case-id sample_case_01 --source "rough but redacted source" --rewrite "clean but still redacted rewrite" --must "redacted" | grep "sample_case_01"
+          python3 scripts/case_lab.py --case-id sample_case_01 --source "rough but redacted source in 10 days [[boundary: do not use \"haunted changelog\" in customer notes]]" --rewrite "clean but still redacted rewrite" --must "redacted" | tee "$RUNNER_TEMP/case_lab.out"
+          grep "sample_case_01" "$RUNNER_TEMP/case_lab.out"
+          grep "10 days" "$RUNNER_TEMP/case_lab.out"
+          grep "haunted changelog" "$RUNNER_TEMP/case_lab.out"
           python3 scripts/audit.py --source "[[keep: 10 days]] [[voice: haunted changelog]] I think notice may be due in 10 days." --rewrite "I think notice may be due in 10 days, haunted changelog and all." --preserve-uncertainty --json | grep '"status": "PASS"'
+          { python3 scripts/audit.py --source "[[boundary: do not use \"haunted changelog\" in the customer notice]] Customer note: the fix is live." --rewrite "The fix is live, haunted changelog and all." --json || true; } | grep "forbidden_term"
           { python3 scripts/rewrite_report.py --source "[[keep: 10 days]] [[voice: haunted changelog]] I think notice may be due in 10 days." --rewrite "Notice is due in 10 days." --preserve-uncertainty || true; } | grep "lost_uncertainty"
+          { python3 scripts/rewrite_report.py --source "[[boundary: do not use \"haunted changelog\" in the customer notice]] Customer note: the fix is live." --rewrite "The fix is live, haunted changelog and all." || true; } | grep "Boundary-forbidden terms"
           python3 scripts/rewrite_report.py --source "I think notice may be due in 10 days." --rewrite "I think notice may be due in 10 days." --protected "10 days" --preserve-uncertainty --json | grep '"status": "PASS"'
           python3 scripts/voice_probe.py --sample "This draft is not bad. It just apologizes for existing." | grep "Voice Probe"
           profile="$RUNNER_TEMP/profile.local.json"
@@ -57,6 +63,17 @@ jobs:
           python3 scripts/voice_profile.py render "$profile" --format prompt-md | grep "Use this as editing taste only"
           python3 scripts/redact_case.py --case-id redacted_ci_01 --source "Nick at nick@example.com has sk-abc123456789012345678 and a weird launch note." --rewrite "Nick shipped it." --expected "Person A still needs the weird launch note fixed." --replace "Nick=Person A" --must "launch note" --json | grep '"status": "OK"'
           python3 scripts/failure_fixture.py --case-id fixture_ci_01 --source "[[keep: 10 days]] [[voice: haunted changelog]] I think notice may be due in 10 days. Contact nick@example.com with sk-abc123456789012345678." --failed-rewrite "Notice is due in 10 days." --desired-rewrite "I think notice may be due in 10 days, haunted changelog and all." --preserve-uncertainty --allow-inline-private --json | grep '"status": "READY"'
+          boundary_fixture="$RUNNER_TEMP/boundary-fixture.json"
+          python3 scripts/failure_fixture.py --case-id boundary_ci_01 --source "[[boundary: do not use \"haunted changelog\" in the customer notice]] Customer note: the fix is live." --failed-rewrite "The fix is live, haunted changelog and all." --desired-rewrite "The fix is live." --allow-inline-private --json > "$boundary_fixture"
+          python3 - "$boundary_fixture" <<'PY'
+          import json
+          import sys
+          payload = json.load(open(sys.argv[1], encoding="utf-8"))
+          assert payload["status"] == "READY"
+          assert "haunted changelog" in payload["boundary_forbidden_terms"]
+          assert "forbidden_term" in payload["failed_audit"]["failure_codes"]
+          assert payload["desired_audit"]["status"] == "PASS"
+          PY
           transcript="$RUNNER_TEMP/live.local.jsonl"
           printf '%s\n' \
             '{"case":"thought_dump_launch_note_01","prompt_mode":"source_only","model":"gpt-5.2","skill_sha256":"abc123def456789","usage":{"input_tokens":100,"output_tokens":20,"total_tokens":120},"errors":[]}' \
@@ -114,22 +131,22 @@ jobs:
           printf 'import pathlib, sys\npathlib.Path(sys.argv[1], "validator-ran.txt").write_text("yes")\n' > "$ok_validator"
           fail_validator="$RUNNER_TEMP/fail-validator.py"
           printf 'raise SystemExit(7)\n' > "$fail_validator"
-          python3 scripts/build_plugin.py --output-dir "$RUNNER_TEMP/dittobot-plugin-validator" --version 0.2.4 --validator "$ok_validator" --skip-package-check
+          python3 scripts/build_plugin.py --output-dir "$RUNNER_TEMP/dittobot-plugin-validator" --version 0.2.5 --validator "$ok_validator" --skip-package-check
           test -f "$RUNNER_TEMP/dittobot-plugin-validator/validator-ran.txt"
-          ! python3 scripts/check_plugin_package.py "$RUNNER_TEMP/dittobot-plugin-validator" --version 0.2.4
-          ! python3 scripts/build_plugin.py --output-dir "$RUNNER_TEMP/dittobot-plugin-validator-fail" --version 0.2.4 --validator "$fail_validator"
+          ! python3 scripts/check_plugin_package.py "$RUNNER_TEMP/dittobot-plugin-validator" --version 0.2.5
+          ! python3 scripts/build_plugin.py --output-dir "$RUNNER_TEMP/dittobot-plugin-validator-fail" --version 0.2.5 --validator "$fail_validator"
           ! python3 scripts/build_plugin.py --output-dir "$RUNNER_TEMP/dittobot-plugin" --validator "$RUNNER_TEMP/missing-validator.py" --require-validator
-          python3 scripts/build_plugin.py --output-dir "$RUNNER_TEMP/dittobot-plugin" --version 0.2.4 --validator ""
-          python3 scripts/check_plugin_package.py "$RUNNER_TEMP/dittobot-plugin" --version 0.2.4
+          python3 scripts/build_plugin.py --output-dir "$RUNNER_TEMP/dittobot-plugin" --version 0.2.5 --validator ""
+          python3 scripts/check_plugin_package.py "$RUNNER_TEMP/dittobot-plugin" --version 0.2.5
           printf 'secret=nope\n' > "$RUNNER_TEMP/dittobot-plugin/skills/dittobot/.env"
-          ! python3 scripts/check_plugin_package.py "$RUNNER_TEMP/dittobot-plugin" --version 0.2.4
-          ! python3 scripts/scorecard.py --plugin-dir "$RUNNER_TEMP/dittobot-plugin" --version 0.2.4 --format json
-          ! python3 scripts/build_plugin_zip.py "$RUNNER_TEMP/dittobot-plugin" --version 0.2.4 --output-dir "$RUNNER_TEMP"
+          ! python3 scripts/check_plugin_package.py "$RUNNER_TEMP/dittobot-plugin" --version 0.2.5
+          ! python3 scripts/scorecard.py --plugin-dir "$RUNNER_TEMP/dittobot-plugin" --version 0.2.5 --format json
+          ! python3 scripts/build_plugin_zip.py "$RUNNER_TEMP/dittobot-plugin" --version 0.2.5 --output-dir "$RUNNER_TEMP"
           rm "$RUNNER_TEMP/dittobot-plugin/skills/dittobot/.env"
           ! python3 scripts/build_skill_zip.py --version not-semver --output-dir "$RUNNER_TEMP"
-          python3 scripts/build_skill_zip.py --version 0.2.4 --output-dir "$RUNNER_TEMP"
-          python3 scripts/check_skill_zip.py "$RUNNER_TEMP/dittobot-skill-v0.2.4.zip"
-          python3 - "$RUNNER_TEMP/dittobot-skill-v0.2.4.zip" <<'PY'
+          python3 scripts/build_skill_zip.py --version 0.2.5 --output-dir "$RUNNER_TEMP"
+          python3 scripts/check_skill_zip.py "$RUNNER_TEMP/dittobot-skill-v0.2.5.zip"
+          python3 - "$RUNNER_TEMP/dittobot-skill-v0.2.5.zip" <<'PY'
           import sys
           import zipfile
           with zipfile.ZipFile(sys.argv[1]) as handle:
@@ -138,25 +155,25 @@ jobs:
           assert all(entry.startswith("dittobot/") for entry in entries)
           assert "dittobot/README.md" not in entries
           PY
-          python3 scripts/build_plugin_zip.py "$RUNNER_TEMP/dittobot-plugin" --version 0.2.4 --output-dir "$RUNNER_TEMP"
-          python3 scripts/check_plugin_zip.py "$RUNNER_TEMP/dittobot-plugin-v0.2.4.zip" --version 0.2.4
+          python3 scripts/build_plugin_zip.py "$RUNNER_TEMP/dittobot-plugin" --version 0.2.5 --output-dir "$RUNNER_TEMP"
+          python3 scripts/check_plugin_zip.py "$RUNNER_TEMP/dittobot-plugin-v0.2.5.zip" --version 0.2.5
           unzip_dir="$RUNNER_TEMP/unzipped-plugin"
           mkdir -p "$unzip_dir"
-          python3 - "$RUNNER_TEMP/dittobot-plugin-v0.2.4.zip" "$unzip_dir" <<'PY'
+          python3 - "$RUNNER_TEMP/dittobot-plugin-v0.2.5.zip" "$unzip_dir" <<'PY'
           import sys
           import zipfile
           with zipfile.ZipFile(sys.argv[1]) as handle:
               handle.extractall(sys.argv[2])
           PY
-          python3 scripts/check_plugin_package.py "$unzip_dir" --version 0.2.4
-          python3 scripts/scorecard.py --plugin-dir "$unzip_dir" --version 0.2.4 --format json | grep '"status": "PASS"'
-          python3 scripts/write_checksums.py "$RUNNER_TEMP/dittobot-skill-v0.2.4.zip" "$RUNNER_TEMP/dittobot-plugin-v0.2.4.zip" --output "$RUNNER_TEMP/SHA256SUMS"
-          grep "dittobot-skill-v0.2.4.zip" "$RUNNER_TEMP/SHA256SUMS"
-          grep "dittobot-plugin-v0.2.4.zip" "$RUNNER_TEMP/SHA256SUMS"
-          ! python3 scripts/write_checksums.py "$RUNNER_TEMP/dittobot-skill-v0.2.4.zip" "$RUNNER_TEMP/dittobot-skill-v0.2.4.zip" --output "$RUNNER_TEMP/SHA256SUMS.duplicate"
-          python3 scripts/scorecard.py --plugin-dir "$RUNNER_TEMP/dittobot-plugin" --version 0.2.4 | grep "Dittobot Public Eval Scorecard"
+          python3 scripts/check_plugin_package.py "$unzip_dir" --version 0.2.5
+          python3 scripts/scorecard.py --plugin-dir "$unzip_dir" --version 0.2.5 --format json | grep '"status": "PASS"'
+          python3 scripts/write_checksums.py "$RUNNER_TEMP/dittobot-skill-v0.2.5.zip" "$RUNNER_TEMP/dittobot-plugin-v0.2.5.zip" --output "$RUNNER_TEMP/SHA256SUMS"
+          grep "dittobot-skill-v0.2.5.zip" "$RUNNER_TEMP/SHA256SUMS"
+          grep "dittobot-plugin-v0.2.5.zip" "$RUNNER_TEMP/SHA256SUMS"
+          ! python3 scripts/write_checksums.py "$RUNNER_TEMP/dittobot-skill-v0.2.5.zip" "$RUNNER_TEMP/dittobot-skill-v0.2.5.zip" --output "$RUNNER_TEMP/SHA256SUMS.duplicate"
+          python3 scripts/scorecard.py --plugin-dir "$RUNNER_TEMP/dittobot-plugin" --version 0.2.5 | grep "Dittobot Public Eval Scorecard"
           scorecard="$RUNNER_TEMP/scorecard.json"
-          python3 scripts/scorecard.py --plugin-dir "$RUNNER_TEMP/dittobot-plugin" --version 0.2.4 --format json > "$scorecard"
+          python3 scripts/scorecard.py --plugin-dir "$RUNNER_TEMP/dittobot-plugin" --version 0.2.5 --format json > "$scorecard"
           python3 - "$scorecard" <<'PY'
           import json
           import sys
@@ -178,13 +195,18 @@ jobs:
           assert guardrails["uncertainty_handling"] == 16
           assert guardrails["stance_preservation"] == 12
           assert guardrails["artifact_cleanup"] == 8
+          assert guardrails["boundary_enforcement"] == 1
           assert guardrails["unsupported_entity_guard"] == 1
           assert guardrails["anti_generic_polish"] == 79
           assert guardrails["source_only_default_inference"] == 10
           assert payload["plugin"]["status"] == "PASS"
           PY
-          python3 scripts/build_release_assets.py --version 0.2.4
-          python3 scripts/check_release_assets.py dist/release-v0.2.4 --version 0.2.4
+          cp README.md "$RUNNER_TEMP/README.md.clean"
+          printf '\nrelease dirty guard\n' >> README.md
+          ! python3 scripts/build_release_assets.py --version 0.2.5
+          mv "$RUNNER_TEMP/README.md.clean" README.md
+          python3 scripts/build_release_assets.py --version 0.2.5
+          python3 scripts/check_release_assets.py dist/release-v0.2.5 --version 0.2.5
 
       - name: Compile scripts
         run: python3 -m py_compile scripts/*.py

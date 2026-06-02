@@ -11,7 +11,14 @@ from typing import Any
 
 from case_lab import add_tuple_field, add_value_field, tuple_literal
 from failure_taxonomy import unique_failure_buckets, unique_failure_codes
-from ledger import merge_ledgers, parse_fences, parse_ledger_files, split_terms, strip_fences
+from ledger import (
+    boundary_forbid_terms,
+    merge_ledgers,
+    parse_fences,
+    parse_ledger_files,
+    split_terms,
+    strip_fences,
+)
 from redact_case import parse_replacements, redact_text, remaining_sensitive
 from regression_100 import Case, numeric_claims, validate
 
@@ -50,6 +57,7 @@ def make_case(
     forbid: tuple[str, ...],
     required_claims: tuple[str, ...],
     forbid_assertions: tuple[str, ...],
+    boundaries: tuple[str, ...],
     preserve_uncertainty: bool,
     no_dash: bool,
     max_words: int | None,
@@ -66,6 +74,7 @@ def make_case(
         forbid=forbid,
         required_claims=required_claims,
         forbid_assertions=forbid_assertions,
+        boundaries=boundaries,
         preserve_uncertainty=preserve_uncertainty,
         no_dash=no_dash,
         max_words=max_words,
@@ -96,6 +105,7 @@ def case_block(case: Case) -> str:
     add_tuple_field(lines, "protected", case.protected)
     add_tuple_field(lines, "preserve_voice", case.preserve_voice)
     add_tuple_field(lines, "forbid", case.forbid)
+    add_tuple_field(lines, "boundaries", case.boundaries)
     add_tuple_field(lines, "required_claims", case.required_claims)
     add_tuple_field(lines, "forbid_assertions", case.forbid_assertions)
     add_value_field(lines, "preserve_uncertainty", case.preserve_uncertainty)
@@ -155,6 +165,7 @@ def main() -> int:
     parser.add_argument("--protected", action="append", default=[])
     parser.add_argument("--voice", action="append", default=[])
     parser.add_argument("--forbid", action="append", default=[])
+    parser.add_argument("--boundary", action="append", default=[])
     parser.add_argument("--required-claim", action="append", default=[])
     parser.add_argument("--forbid-assertion", action="append", default=[])
     parser.add_argument("--preserve-uncertainty", action="store_true")
@@ -178,6 +189,8 @@ def main() -> int:
 
     ledger = merge_ledgers(parse_fences(source), parse_ledger_files(args.ledger_file))
     source = strip_fences(source)
+    boundaries = ledger["boundary"] + split_terms(args.boundary)
+    boundary_forbids = boundary_forbid_terms(boundaries)
     raw_fields = {
         "source": source,
         "failed": failed,
@@ -185,7 +198,9 @@ def main() -> int:
         "must": "\n".join(args.must),
         "protected": "\n".join(ledger["protected"] + split_terms(args.protected)),
         "voice": "\n".join(ledger["voice"] + split_terms(args.voice)),
-        "forbid": "\n".join(ledger["forbid"] + split_terms(args.forbid)),
+        "forbid": "\n".join(ledger["forbid"] + split_terms(args.forbid) + boundary_forbids),
+        "boundary": "\n".join(boundaries),
+        "boundary_forbids": "\n".join(boundary_forbids),
         "required_claims": "\n".join(ledger["required_claims"] + split_terms(args.required_claim)),
         "forbid_assertions": "\n".join(ledger["forbid_assertions"] + split_terms(args.forbid_assertion)),
     }
@@ -200,7 +215,16 @@ def main() -> int:
 
     redacted_terms = {
         key: clean_terms(redacted[key].splitlines())
-        for key in ("must", "protected", "voice", "forbid", "required_claims", "forbid_assertions")
+        for key in (
+            "must",
+            "protected",
+            "voice",
+            "forbid",
+            "boundary",
+            "boundary_forbids",
+            "required_claims",
+            "forbid_assertions",
+        )
     }
     failed_case = make_case(
         case_id=args.case_id + "_failed",
@@ -212,6 +236,7 @@ def main() -> int:
         forbid=redacted_terms["forbid"],
         required_claims=redacted_terms["required_claims"],
         forbid_assertions=redacted_terms["forbid_assertions"],
+        boundaries=redacted_terms["boundary"],
         preserve_uncertainty=args.preserve_uncertainty,
         no_dash=args.no_dash,
         max_words=args.max_words,
@@ -226,6 +251,7 @@ def main() -> int:
         forbid=redacted_terms["forbid"],
         required_claims=redacted_terms["required_claims"],
         forbid_assertions=redacted_terms["forbid_assertions"],
+        boundaries=redacted_terms["boundary"],
         preserve_uncertainty=args.preserve_uncertainty,
         no_dash=args.no_dash,
         max_words=args.max_words,
@@ -254,6 +280,8 @@ def main() -> int:
             "counts": redactions,
         },
         "warnings": warnings,
+        "boundaries": redacted_terms["boundary"],
+        "boundary_forbidden_terms": redacted_terms["boundary_forbids"],
         "failed_audit": failed_audit,
         "desired_audit": desired_audit,
         "case": case_block(desired_case),

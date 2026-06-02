@@ -16,6 +16,8 @@ import re
 import sys
 from dataclasses import dataclass, field, replace
 
+from ledger import boundary_forbid_terms
+
 
 GENERIC_MARKERS = [
     "in today's",
@@ -190,6 +192,7 @@ class Case:
     preserve_stance: tuple[str, ...] = field(default_factory=tuple)
     forbid_added_entities: bool = False
     allowed_entities: tuple[str, ...] = field(default_factory=tuple)
+    boundaries: tuple[str, ...] = field(default_factory=tuple)
 
 
 def words(text: str) -> list[str]:
@@ -374,7 +377,10 @@ def validate(case: Case) -> list[str]:
         if missing_prefixes:
             errors.append(f"lost required line prefixes: {missing_prefixes}")
 
-    forbidden = [term for term in case.forbid if contains_term(unquoted, term)]
+    forbidden = []
+    for term in (*case.forbid, *boundary_forbid_terms(list(case.boundaries))):
+        if contains_term(unquoted, term) and term not in forbidden:
+            forbidden.append(term)
     if forbidden:
         errors.append(f"forbidden terms appeared: {forbidden}")
 
@@ -1117,6 +1123,7 @@ def make_cases() -> list[Case]:
             forbid_assertions=("Friday will work", "QA is done"),
             ordered_terms=("Friday", "QA", "Monday"),
             forbid_artifacts=("i need to tell", "not sound like", "vibes"),
+            boundaries=("door closing does not apply to this reply",),
             max_question_marks=0,
             forbid_clarifying=True,
             forbid_wrappers=True,
@@ -1431,6 +1438,17 @@ def run_validator_self_tests() -> list[str]:
             "stance marker",
             Case("self_stance", "No.", "Maybe.", must=("Maybe",), preserve_stance=("No",)),
             "lost stance markers",
+        ),
+        (
+            "boundary term",
+            Case(
+                "self_boundary",
+                "A",
+                "A haunted changelog",
+                must=("A",),
+                boundaries=("do not use \"haunted changelog\" in customer notes",),
+            ),
+            "forbidden terms appeared",
         ),
         (
             "max question marks",
@@ -2160,6 +2178,76 @@ def run_voice_texture_contract_tests() -> list[str]:
     return failures
 
 
+def run_boundary_contract_tests() -> list[str]:
+    """Exercise explicit boundary fences as auditable constraints."""
+    checks = [
+        (
+            "quoted boundary honored",
+            Case(
+                id="boundary_fence_customer_notice_pass",
+                source=(
+                    '[[boundary: do not use "haunted changelog" in the customer notice]] '
+                    "Customer note: the fix is live."
+                ),
+                rewrite="The fix is live.",
+                must=("fix is live",),
+                boundaries=('do not use "haunted changelog" in the customer notice',),
+            ),
+            None,
+        ),
+        (
+            "quoted boundary violated",
+            Case(
+                id="boundary_fence_customer_notice_fail",
+                source=(
+                    '[[boundary: do not use "haunted changelog" in the customer notice]] '
+                    "Customer note: the fix is live."
+                ),
+                rewrite="The fix is live, haunted changelog and all.",
+                must=("fix is live",),
+                boundaries=('do not use "haunted changelog" in the customer notice',),
+            ),
+            "forbidden terms appeared",
+        ),
+        (
+            "profile habit boundary violated",
+            Case(
+                id="boundary_profile_habit_fail",
+                source=(
+                    "[[boundary: dry Slack voice does not apply to memorial text]] "
+                    "She made every room less sharp."
+                ),
+                rewrite="She made every room less sharp, dry Slack voice and all.",
+                must=("made every room less sharp",),
+                boundaries=("dry Slack voice does not apply to memorial text",),
+            ),
+            "forbidden terms appeared",
+        ),
+        (
+            "do-not-apply boundary violated",
+            Case(
+                id="boundary_do_not_apply_fail",
+                source=(
+                    "[[boundary: do not apply dry Slack voice to memorial text]] "
+                    "She made every room less sharp."
+                ),
+                rewrite="She made every room less sharp, dry Slack voice and all.",
+                must=("made every room less sharp",),
+                boundaries=("do not apply dry Slack voice to memorial text",),
+            ),
+            "forbidden terms appeared",
+        ),
+    ]
+    failures: list[str] = []
+    for name, case, expected in checks:
+        errors = validate(case)
+        if expected is None and errors:
+            failures.append(f"{name}: expected pass, got {errors}")
+        elif expected is not None and not any(expected in error for error in errors):
+            failures.append(f"{name}: expected {expected}, got {errors}")
+    return failures
+
+
 def run_mutation_tests() -> list[str]:
     """Mutate every good fixture in common bad-output ways and require failure."""
     failures: list[str] = []
@@ -2280,6 +2368,7 @@ def main() -> int:
     mixed_stance_test_failures = run_mixed_stance_contract_tests()
     reader_action_test_failures = run_reader_action_contract_tests()
     voice_texture_test_failures = run_voice_texture_contract_tests()
+    boundary_test_failures = run_boundary_contract_tests()
     mutation_test_failures = run_mutation_tests()
     if (
         self_test_failures
@@ -2288,6 +2377,7 @@ def main() -> int:
         or mixed_stance_test_failures
         or reader_action_test_failures
         or voice_texture_test_failures
+        or boundary_test_failures
         or mutation_test_failures
     ):
         print("VALIDATOR SELF-TESTS: FAIL")
@@ -2298,6 +2388,7 @@ def main() -> int:
             + mixed_stance_test_failures
             + reader_action_test_failures
             + voice_texture_test_failures
+            + boundary_test_failures
             + mutation_test_failures
         ):
             print(f"  - {failure}")

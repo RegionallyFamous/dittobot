@@ -25,6 +25,35 @@ body:
         - Other
     validations:
       required: true
+  - type: dropdown
+    id: prompt_mode
+    attributes:
+      label: Prompt mode
+      description: How was Dittobot used?
+      options:
+        - Source-only messy notes
+        - Explicit rewrite/edit request
+        - Voice profile
+        - Comparison/report
+        - Not sure
+    validations:
+      required: true
+  - type: dropdown
+    id: precision_context
+    attributes:
+      label: Precision context
+      description: Does this involve claims where factual drift matters more than style?
+      options:
+        - None
+        - Legal
+        - Medical
+        - Financial
+        - Academic
+        - Employment
+        - Technical
+        - Other factual claim
+    validations:
+      required: true
   - type: textarea
     id: source
     attributes:
@@ -62,7 +91,18 @@ body:
     attributes:
       label: Profile boundary
       description: Should this become reusable profile guidance? When should this voice or habit not apply?
-      placeholder: Example: Keep the dry Slack voice for internal notes, but do not apply it to legal/customer notices.
+      placeholder: Example: Dry Slack voice is good for internal notes. Do not apply dry Slack voice to legal/customer notices.
+  - type: textarea
+    id: boundary
+    attributes:
+      label: Boundary fence
+      description: Any explicit "do not apply this phrase/style here" or "do not use this phrase in this context" rule. Name the phrase/style directly so the audit can catch it.
+      placeholder: 'Example: [[boundary: do not use "haunted changelog" in customer notices]]'
+  - type: textarea
+    id: audit_json
+    attributes:
+      label: Audit or fixture JSON
+      description: Paste output from `python3 scripts/audit.py --json` or `python3 scripts/failure_fixture.py --json` if available.
   - type: checkboxes
     id: privacy
     attributes:

@@ -10,7 +10,14 @@ import sys
 from pathlib import Path
 
 from failure_taxonomy import unique_failure_buckets, unique_failure_codes
-from ledger import merge_ledgers, parse_fences, parse_ledger_files, split_terms, strip_fences
+from ledger import (
+    boundary_forbid_terms,
+    merge_ledgers,
+    parse_fences,
+    parse_ledger_files,
+    split_terms,
+    strip_fences,
+)
 from regression_100 import (
     Case,
     GENERIC_MARKERS,
@@ -69,6 +76,12 @@ def main() -> int:
     parser.add_argument("--voice", action="append", default=[], help="Voice marker that should survive.")
     parser.add_argument("--forbid", action="append", default=[], help="Forbidden term or phrase.")
     parser.add_argument(
+        "--boundary",
+        action="append",
+        default=[],
+        help="Boundary guidance. Explicit forbidden phrases are audited when extractable.",
+    )
+    parser.add_argument(
         "--ledger-file",
         action="append",
         default=[],
@@ -103,6 +116,9 @@ def main() -> int:
     protected = ledger["protected"] + split_terms(args.protected)
     if not args.no_protect_source_numbers:
         protected.extend(source_numbers)
+    boundaries = ledger["boundary"] + split_terms(args.boundary)
+    boundary_forbids = boundary_forbid_terms(boundaries)
+    forbid = ledger["forbid"] + split_terms(args.forbid) + boundary_forbids
 
     case = Case(
         id="rewrite_report",
@@ -111,7 +127,7 @@ def main() -> int:
         must=(),
         protected=clean_terms(protected),
         preserve_voice=clean_terms(ledger["voice"] + split_terms(args.voice)),
-        forbid=clean_terms(ledger["forbid"] + split_terms(args.forbid)),
+        forbid=clean_terms(forbid),
         required_claims=clean_terms(ledger["required_claims"]),
         forbid_assertions=clean_terms(ledger["forbid_assertions"]),
         exact_words=args.exact_words,
@@ -136,6 +152,8 @@ def main() -> int:
         "ratio": round(ratio, 3),
         "protected": term_status(rewrite, list(dataclasses.asdict(case)["protected"])),
         "voice": term_status(rewrite, list(dataclasses.asdict(case)["preserve_voice"])),
+        "boundaries": clean_terms(boundaries),
+        "boundary_forbidden_terms": clean_terms(boundary_forbids),
         "source_numbers": source_numbers,
         "rewrite_numbers": rewrite_numbers,
         "added_numbers": added_numbers,
@@ -158,6 +176,10 @@ def main() -> int:
             print(f"Failure buckets: {', '.join(result['failure_buckets'])}")
         print_section("Protected facts", result["protected"])
         print_section("Voice markers", result["voice"])
+        print("Boundaries")
+        print("- " + "; ".join(result["boundaries"]) if result["boundaries"] else "- none")
+        print("Boundary-forbidden terms")
+        print("- " + ", ".join(result["boundary_forbidden_terms"]) if result["boundary_forbidden_terms"] else "- none")
         print("Added numeric claims")
         print("- " + ", ".join(added_numbers) if added_numbers else "- none")
         print("Generic AI markers")

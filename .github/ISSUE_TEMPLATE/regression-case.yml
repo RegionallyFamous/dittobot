@@ -31,6 +31,32 @@ body:
         - Other
     validations:
       required: true
+  - type: dropdown
+    id: prompt_mode
+    attributes:
+      label: Prompt mode
+      options:
+        - explicit_rewrite
+        - source_only
+        - voice_profile
+        - comparison
+    validations:
+      required: true
+  - type: dropdown
+    id: precision_context
+    attributes:
+      label: Precision context
+      options:
+        - None
+        - Legal
+        - Medical
+        - Financial
+        - Academic
+        - Employment
+        - Technical
+        - Other factual claim
+    validations:
+      required: true
   - type: textarea
     id: source
     attributes:
@@ -56,6 +82,17 @@ body:
       label: Reusable profile guidance
       description: Should this become reusable profile guidance? When should this voice or habit not apply?
       placeholder: Example: This dry phrasing is good for internal Slack, but should be disabled for sensitive customer-facing text.
+  - type: textarea
+    id: boundary
+    attributes:
+      label: Boundary fence
+      description: Explicit boundary markup or equivalent rule.
+      placeholder: 'Example: [[boundary: do not use "haunted changelog" in customer notices]]'
+  - type: textarea
+    id: fixture_json
+    attributes:
+      label: Fixture JSON
+      description: Paste `scripts/failure_fixture.py --json` output if available.
   - type: checkboxes
     id: privacy
     attributes:

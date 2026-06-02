@@ -31,6 +31,22 @@ FENCE_TO_KEY = {
     "boundary": "boundary",
 }
 FENCE_PATTERN = re.compile(r"\[\[\s*([A-Za-z_ -]+)\s*:\s*(.*?)\s*\]\]", re.DOTALL)
+QUOTED_BOUNDARY_PATTERN = re.compile(r"['\"]([^'\"]+)['\"]")
+BOUNDARY_FORBID_PATTERNS = (
+    re.compile(
+        r"\b(?:do not|don't|dont|never)\s+use\s+(.+?)(?:\s+(?:for|in|on|with|when)\b|[.;]|$)",
+        re.IGNORECASE,
+    ),
+    re.compile(
+        r"\bavoid\s+(.+?)(?:\s+(?:for|in|on|with|when)\b|[.;]|$)",
+        re.IGNORECASE,
+    ),
+    re.compile(
+        r"\b(?:do not|don't|dont|never)\s+apply\s+(.+?)(?:\s+(?:to|for|in|on|with|when)\b|[.;]|$)",
+        re.IGNORECASE,
+    ),
+    re.compile(r"(.+?)\s+(?:does not|should not|must not)\s+apply\b", re.IGNORECASE),
+)
 
 
 def empty_ledger() -> dict[str, list[str]]:
@@ -113,3 +129,22 @@ def parse_ledger_file(path: str) -> dict[str, list[str]]:
 
 def parse_ledger_files(paths: list[str]) -> dict[str, list[str]]:
     return merge_ledgers(*(parse_ledger_file(path) for path in paths))
+
+
+def boundary_forbid_terms(boundaries: list[str]) -> list[str]:
+    terms: list[str] = []
+    for boundary in boundaries:
+        quoted = [term.strip() for term in QUOTED_BOUNDARY_PATTERN.findall(boundary)]
+        candidates = quoted[:]
+        if not candidates:
+            for pattern in BOUNDARY_FORBID_PATTERNS:
+                match = pattern.search(boundary)
+                if match:
+                    candidates.append(match.group(1).strip())
+                    break
+        for candidate in candidates:
+            candidate = re.sub(r"^(?:the|a|an)\s+", "", candidate, flags=re.IGNORECASE)
+            candidate = re.sub(r"\s+", " ", candidate).strip(" .;:")
+            if candidate and len(candidate.split()) <= 8 and candidate not in terms:
+                terms.append(candidate)
+    return terms

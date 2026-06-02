@@ -1,6 +1,6 @@
 {
   "name": "dittobot",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "description": "Voice-faithful rewrites that keep your claims, stance, and rhythm.",
   "skills": "./skills/",
   "author": {
