@@ -2,7 +2,7 @@
 set -euo pipefail
 
 REPO="${DITTOBOT_REPO:-RegionallyFamous/dittobot}"
-REF="${DITTOBOT_REF:-v0.2.6}"
+REF="${DITTOBOT_REF:-v0.2.7}"
 
 if [ -n "${DITTOBOT_ARCHIVE_URL:-}" ]; then
   ARCHIVE_URL="$DITTOBOT_ARCHIVE_URL"

@@ -212,19 +212,19 @@ Use $skill-installer to install Dittobot from GitHub repo RegionallyFamous/ditto
 Terminal fallback:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/RegionallyFamous/dittobot/v0.2.6/install.sh | DITTOBOT_REF=v0.2.6 bash
+curl -fsSL https://raw.githubusercontent.com/RegionallyFamous/dittobot/v0.2.7/install.sh | DITTOBOT_REF=v0.2.7 bash
 ```
 
 Pinned GitHub CLI:
 
 ```bash
-gh skill install RegionallyFamous/dittobot skills/dittobot --agent codex --scope user --pin v0.2.6
+gh skill install RegionallyFamous/dittobot skills/dittobot --agent codex --scope user --pin v0.2.7
 ```
 
 Codex plugin source:
 
 ```bash
-codex plugin marketplace add RegionallyFamous/dittobot --ref v0.2.6
+codex plugin marketplace add RegionallyFamous/dittobot --ref v0.2.7
 codex plugin add dittobot@dittobot
 ```
 

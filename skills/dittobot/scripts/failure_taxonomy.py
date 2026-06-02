@@ -8,6 +8,7 @@ RULES = (
     ("lost_voice_marker", "voice_loss", ("lost voice markers",)),
     ("lost_stance_marker", "stance_drift", ("lost stance markers",)),
     ("missing_required_term", "fact_loss", ("missing required terms",)),
+    ("missing_reader_action", "reader_action_drift", ("missing reader actions",)),
     ("lost_protected_fact", "fact_loss", ("lost protected facts",)),
     ("lost_exact_substring", "fact_loss", ("lost exact substrings",)),
     ("missing_required_claim", "claim_drift", ("missing required claims",)),
@@ -47,6 +48,7 @@ BUCKET_RULES = (
     ("voice_loss", ("lost voice markers",)),
     ("stance_drift", ("lost stance markers",)),
     ("fact_loss", ("missing required terms", "lost protected facts", "lost exact substrings")),
+    ("reader_action_drift", ("missing reader actions",)),
     ("claim_drift", ("missing required claims", "forbidden assertions appeared")),
     ("forbidden_term", ("forbidden terms appeared",)),
     ("unsupported_invention", (

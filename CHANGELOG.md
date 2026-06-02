@@ -4,6 +4,14 @@
 
 Nothing yet.
 
+## 0.2.7 - 2026-06-02
+
+- Add reader-action preservation as a first-class deterministic guardrail for asks, owners, deadlines, and next steps.
+- Add messy-dump contract tests for self-corrections and voice-density restraint without changing the public 100-case suite size.
+- Thread reader-action checks through audit, rewrite-report, case-lab, and failure-fixture tools.
+- Tighten SKILL.md while keeping it under the public word budget.
+- Verify release scorecard skill and validator hashes against the shipped plugin ZIP contents.
+
 ## 0.2.6 - 2026-06-02
 
 - Teach the install verifier to accept full repo-root skill copies, matching installers such as `npx skills add RegionallyFamous/dittobot`.

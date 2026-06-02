@@ -70,6 +70,12 @@ def main() -> int:
         help="Claim that must remain present.",
     )
     parser.add_argument(
+        "--reader-action",
+        action="append",
+        default=[],
+        help="Reader action, owner, deadline, or next step that must remain present.",
+    )
+    parser.add_argument(
         "--forbid-assertion",
         action="append",
         default=[],
@@ -125,6 +131,7 @@ def main() -> int:
         preserve_voice=clean_terms(ledger["voice"] + split_terms(args.voice)),
         forbid=clean_terms(forbid),
         required_claims=clean_terms(ledger["required_claims"] + split_terms(args.required_claim)),
+        reader_actions=clean_terms(split_terms(args.reader_action)),
         forbid_assertions=clean_terms(
             ledger["forbid_assertions"] + split_terms(args.forbid_assertion)
         ),
@@ -153,6 +160,7 @@ def main() -> int:
         "source_words": len(words(source)),
         "rewrite_words": len(words(rewrite)),
         "protected": dataclasses.asdict(case)["protected"],
+        "reader_actions": dataclasses.asdict(case)["reader_actions"],
         "boundaries": clean_terms(boundaries),
         "boundary_forbidden_terms": clean_terms(boundary_forbids),
         "failure_codes": unique_failure_codes(errors),

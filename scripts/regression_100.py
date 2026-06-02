@@ -193,6 +193,7 @@ class Case:
     forbid_added_entities: bool = False
     allowed_entities: tuple[str, ...] = field(default_factory=tuple)
     boundaries: tuple[str, ...] = field(default_factory=tuple)
+    reader_actions: tuple[str, ...] = field(default_factory=tuple)
 
 
 def words(text: str) -> list[str]:
@@ -389,6 +390,12 @@ def validate(case: Case) -> list[str]:
     ]
     if missing_claims:
         errors.append(f"missing required claims: {missing_claims}")
+
+    missing_reader_actions = [
+        action for action in case.reader_actions if not contains_term(case.rewrite, action)
+    ]
+    if missing_reader_actions:
+        errors.append(f"missing reader actions: {missing_reader_actions}")
 
     forbidden_assertions = [
         claim for claim in case.forbid_assertions if contains_term(unquoted, claim)
@@ -1093,6 +1100,7 @@ def make_cases() -> list[Case]:
             preserve_voice=("haunted changelog",),
             forbid=("somehow", "what I actually mean", "robust", "seamless"),
             required_claims=("fixed the importer bug", "retry failed rows"),
+            reader_actions=("retry failed rows",),
             forbid_assertions=("did not fix the importer bug", "cannot retry failed rows"),
             ordered_terms=("importer bug", "retry failed rows", "launch note"),
             forbid_artifacts=("ok", "what i actually mean"),
@@ -1120,6 +1128,7 @@ def make_cases() -> list[Case]:
             preserve_voice=("spreadsheet weather",),
             forbid=("happy to", "circle back", "door closing"),
             required_claims=("Friday will not work", "Monday is realistic"),
+            reader_actions=("Monday is realistic",),
             forbid_assertions=("Friday will work", "QA is done"),
             ordered_terms=("Friday", "QA", "Monday"),
             forbid_artifacts=("i need to tell", "not sound like", "vibes"),
@@ -1149,6 +1158,7 @@ def make_cases() -> list[Case]:
             preserve_voice=("lord's spreadsheet work",),
             forbid=("blaming support", "root cause", "latency"),
             required_claims=("cache fix is deployed", "docs are lagging"),
+            reader_actions=("Support may still see old screenshots",),
             forbid_assertions=("Support missed", "support is to blame"),
             ordered_terms=("cache fix", "2:15", "Support", "docs are lagging"),
             forbid_artifacts=("status thing", "please make"),
@@ -1248,6 +1258,7 @@ def make_cases() -> list[Case]:
             preserve_voice=("screenshot pilgrimage",),
             forbid=("seamless", "customer-centric"),
             required_claims=("check the job ID first", "then the retry count", "Ask for the CSV only if both look weird"),
+            reader_actions=("check the job ID first", "Ask for the CSV only if both look weird"),
             ordered_terms=("job ID", "retry count", "CSV", "screenshot pilgrimage"),
             forbid_artifacts=("process note", "->"),
             max_question_marks=0,
@@ -1272,6 +1283,7 @@ def make_cases() -> list[Case]:
             preserve_voice=("glitter cannon",),
             forbid=("vibes", "happy to", "circle back"),
             required_claims=("not adding another tracking pixel", "Legal has not reviewed"),
+            reader_actions=("not adding another tracking pixel",),
             forbid_assertions=("are adding another tracking pixel", "Legal has reviewed"),
             ordered_terms=("tracking pixel", "this week", "Legal", "glitter cannon"),
             preserve_stance=("not adding another tracking pixel",),
@@ -1321,6 +1333,7 @@ def make_cases() -> list[Case]:
             preserve_voice=("decorative sticker",),
             forbid=("weird auth question", "clean but"),
             required_claims=("Ana owns copy", "Dev owns the auth question", "Friday is not a deadline"),
+            reader_actions=("Ana owns copy", "Dev owns the auth question"),
             ordered_terms=("Ana", "Dev", "Finance", "decorative sticker"),
             forbid_artifacts=("recap from call",),
             max_question_marks=0,
@@ -1499,6 +1512,17 @@ def run_validator_self_tests() -> list[str]:
             "required claims",
             Case("self_claim", "We are not doing it", "We are doing it", must=("doing",), required_claims=("not doing it",)),
             "missing required claims",
+        ),
+        (
+            "reader actions",
+            Case(
+                "self_reader_action",
+                "The fix is live. Send the job ID if it fails.",
+                "The fix is live.",
+                must=("fix is live",),
+                reader_actions=("Send the job ID",),
+            ),
+            "missing reader actions",
         ),
         (
             "forbidden assertions",
@@ -2093,6 +2117,94 @@ def run_reader_action_contract_tests() -> list[str]:
     return failures
 
 
+def run_thought_dump_contract_tests() -> list[str]:
+    """Exercise messy dump correction and voice-density behavior outside the 100-case suite."""
+    self_correction = Case(
+        id="thought_dump_self_correction_contract",
+        source=(
+            "update for Jordan: Friday should work for QA, wait no scratch that, QA "
+            "still has the build and Monday is the real date. please keep it calm, "
+            "not like I learned scheduling from a haunted vending machine."
+        ),
+        rewrite=(
+            "Jordan, Friday will not work because QA still has the build. Monday is "
+            "the real date. I want to keep this calm, not make it sound like I learned "
+            "scheduling from a haunted vending machine."
+        ),
+        must=("Jordan", "Friday will not work", "QA", "Monday", "haunted vending machine"),
+        protected=("Jordan", "QA", "Monday"),
+        preserve_voice=("haunted vending machine",),
+        forbid=("Friday should work", "scratch that", "wait no"),
+        required_claims=("Friday will not work", "QA still has the build", "Monday is the real date"),
+        reader_actions=("Monday is the real date",),
+        forbid_assertions=("Friday should work", "Friday works"),
+        ordered_terms=("Jordan", "Friday", "QA", "Monday"),
+        forbid_artifacts=("wait no", "scratch that"),
+        max_question_marks=0,
+        forbid_clarifying=True,
+        forbid_wrappers=True,
+        max_paragraphs=1,
+        prompt_mode="source_only",
+    )
+    voice_density = Case(
+        id="thought_dump_voice_density_contract",
+        source=(
+            "team note: the demo moved to thursday, the recording is still missing, "
+            "and I need people to stop asking Eli for the deck. side jokes: calendar "
+            "lasagna, deck fog, meeting soup, spreadsheet confetti. keep one if it "
+            "helps, do not turn the note into a comedy drawer."
+        ),
+        rewrite=(
+            "The demo moved to Thursday, and the recording is still missing. Please "
+            "stop asking Eli for the deck. We can keep one bit of calendar lasagna, "
+            "but the note should not turn into a comedy drawer."
+        ),
+        must=("demo moved to Thursday", "recording is still missing", "Eli", "deck", "calendar lasagna"),
+        protected=("Thursday", "recording", "Eli", "deck"),
+        preserve_voice=("calendar lasagna", "comedy drawer"),
+        forbid=("deck fog", "meeting soup", "spreadsheet confetti"),
+        required_claims=("demo moved to Thursday", "recording is still missing", "stop asking Eli for the deck"),
+        reader_actions=("stop asking Eli for the deck",),
+        forbid_assertions=("recording is ready",),
+        ordered_terms=("demo", "recording", "Eli"),
+        forbid_artifacts=("side jokes",),
+        max_question_marks=0,
+        forbid_clarifying=True,
+        forbid_wrappers=True,
+        max_paragraphs=1,
+        prompt_mode="source_only",
+    )
+    checks = [
+        ("self-correction honored", self_correction, None),
+        (
+            "superseded fact preserved",
+            replace(self_correction, rewrite="Jordan, Friday should work for QA. Monday is a backup."),
+            "forbidden terms appeared",
+        ),
+        ("voice density honored", voice_density, None),
+        (
+            "voice density hoarded",
+            replace(
+                voice_density,
+                rewrite=(
+                    "The demo moved to Thursday, the recording is still missing, and Eli "
+                    "should not be asked for the deck. Calendar lasagna, deck fog, meeting "
+                    "soup, spreadsheet confetti, comedy drawer."
+                ),
+            ),
+            "forbidden terms appeared",
+        ),
+    ]
+    failures: list[str] = []
+    for name, case, expected in checks:
+        errors = validate(case)
+        if expected is None and errors:
+            failures.append(f"{name}: expected pass, got {errors}")
+        elif expected is not None and not any(expected in error for error in errors):
+            failures.append(f"{name}: expected {expected}, got {errors}")
+    return failures
+
+
 def run_voice_texture_contract_tests() -> list[str]:
     """Catch over-sanitizing that removes identity, plain words, or the best line."""
     checks = [
@@ -2367,6 +2479,7 @@ def main() -> int:
     profile_test_failures = run_profile_contract_tests()
     mixed_stance_test_failures = run_mixed_stance_contract_tests()
     reader_action_test_failures = run_reader_action_contract_tests()
+    thought_dump_test_failures = run_thought_dump_contract_tests()
     voice_texture_test_failures = run_voice_texture_contract_tests()
     boundary_test_failures = run_boundary_contract_tests()
     mutation_test_failures = run_mutation_tests()
@@ -2376,6 +2489,7 @@ def main() -> int:
         or profile_test_failures
         or mixed_stance_test_failures
         or reader_action_test_failures
+        or thought_dump_test_failures
         or voice_texture_test_failures
         or boundary_test_failures
         or mutation_test_failures
@@ -2387,6 +2501,7 @@ def main() -> int:
             + profile_test_failures
             + mixed_stance_test_failures
             + reader_action_test_failures
+            + thought_dump_test_failures
             + voice_texture_test_failures
             + boundary_test_failures
             + mutation_test_failures

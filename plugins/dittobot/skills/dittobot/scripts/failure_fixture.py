@@ -56,6 +56,7 @@ def make_case(
     voice: tuple[str, ...],
     forbid: tuple[str, ...],
     required_claims: tuple[str, ...],
+    reader_actions: tuple[str, ...],
     forbid_assertions: tuple[str, ...],
     boundaries: tuple[str, ...],
     preserve_uncertainty: bool,
@@ -73,6 +74,7 @@ def make_case(
         preserve_voice=voice,
         forbid=forbid,
         required_claims=required_claims,
+        reader_actions=reader_actions,
         forbid_assertions=forbid_assertions,
         boundaries=boundaries,
         preserve_uncertainty=preserve_uncertainty,
@@ -107,6 +109,7 @@ def case_block(case: Case) -> str:
     add_tuple_field(lines, "forbid", case.forbid)
     add_tuple_field(lines, "boundaries", case.boundaries)
     add_tuple_field(lines, "required_claims", case.required_claims)
+    add_tuple_field(lines, "reader_actions", case.reader_actions)
     add_tuple_field(lines, "forbid_assertions", case.forbid_assertions)
     add_value_field(lines, "preserve_uncertainty", case.preserve_uncertainty)
     add_value_field(lines, "no_dash", case.no_dash)
@@ -167,6 +170,7 @@ def main() -> int:
     parser.add_argument("--forbid", action="append", default=[])
     parser.add_argument("--boundary", action="append", default=[])
     parser.add_argument("--required-claim", action="append", default=[])
+    parser.add_argument("--reader-action", action="append", default=[])
     parser.add_argument("--forbid-assertion", action="append", default=[])
     parser.add_argument("--preserve-uncertainty", action="store_true")
     parser.add_argument("--no-dash", action="store_true")
@@ -202,6 +206,7 @@ def main() -> int:
         "boundary": "\n".join(boundaries),
         "boundary_forbids": "\n".join(boundary_forbids),
         "required_claims": "\n".join(ledger["required_claims"] + split_terms(args.required_claim)),
+        "reader_actions": "\n".join(split_terms(args.reader_action)),
         "forbid_assertions": "\n".join(ledger["forbid_assertions"] + split_terms(args.forbid_assertion)),
     }
     redacted: dict[str, str] = {}
@@ -223,6 +228,7 @@ def main() -> int:
             "boundary",
             "boundary_forbids",
             "required_claims",
+            "reader_actions",
             "forbid_assertions",
         )
     }
@@ -235,6 +241,7 @@ def main() -> int:
         voice=redacted_terms["voice"],
         forbid=redacted_terms["forbid"],
         required_claims=redacted_terms["required_claims"],
+        reader_actions=redacted_terms["reader_actions"],
         forbid_assertions=redacted_terms["forbid_assertions"],
         boundaries=redacted_terms["boundary"],
         preserve_uncertainty=args.preserve_uncertainty,
@@ -250,6 +257,7 @@ def main() -> int:
         voice=redacted_terms["voice"],
         forbid=redacted_terms["forbid"],
         required_claims=redacted_terms["required_claims"],
+        reader_actions=redacted_terms["reader_actions"],
         forbid_assertions=redacted_terms["forbid_assertions"],
         boundaries=redacted_terms["boundary"],
         preserve_uncertainty=args.preserve_uncertainty,
@@ -282,6 +290,7 @@ def main() -> int:
         "warnings": warnings,
         "boundaries": redacted_terms["boundary"],
         "boundary_forbidden_terms": redacted_terms["boundary_forbids"],
+        "reader_actions": redacted_terms["reader_actions"],
         "failed_audit": failed_audit,
         "desired_audit": desired_audit,
         "case": case_block(desired_case),

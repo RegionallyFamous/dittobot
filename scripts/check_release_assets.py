@@ -66,12 +66,18 @@ def parse_checksums(path: Path) -> tuple[dict[str, str], list[str]]:
     return hashes, errors
 
 
-def check_scorecard(path: Path, version: str) -> list[str]:
-    errors: list[str] = []
+def load_scorecard(path: Path) -> tuple[dict | None, list[str]]:
     try:
         payload = json.loads(path.read_text(encoding="utf-8"))
     except json.JSONDecodeError as exc:
-        return [f"scorecard is not valid JSON: {exc}"]
+        return None, [f"scorecard is not valid JSON: {exc}"]
+    if not isinstance(payload, dict):
+        return None, ["scorecard must be a JSON object"]
+    return payload, []
+
+
+def check_scorecard_payload(payload: dict, version: str) -> list[str]:
+    errors: list[str] = []
     if payload.get("schema_version") != "dittobot.scorecard.v1":
         errors.append("scorecard schema_version must be dittobot.scorecard.v1")
     if payload.get("project") != "dittobot":
@@ -84,6 +90,30 @@ def check_scorecard(path: Path, version: str) -> list[str]:
         errors.append(f"scorecard plugin version must be {version}")
     if payload.get("plugin", {}).get("status") != "PASS":
         errors.append("scorecard plugin package status must be PASS")
+    return errors
+
+
+def check_scorecard_hashes(payload: dict, plugin_root: Path) -> list[str]:
+    errors: list[str] = []
+    hash_checks = (
+        (
+            "subject.skill_sha256",
+            payload.get("subject", {}).get("skill_sha256"),
+            plugin_root / "skills" / "dittobot" / "SKILL.md",
+        ),
+        (
+            "suite.validator_sha256",
+            payload.get("suite", {}).get("validator_sha256"),
+            plugin_root / "skills" / "dittobot" / "scripts" / "regression_100.py",
+        ),
+    )
+    for label, expected, path in hash_checks:
+        if not isinstance(expected, str) or len(expected) != 64:
+            errors.append(f"scorecard {label} must be a sha256")
+        elif not path.exists():
+            errors.append(f"scorecard hash target missing: {path.relative_to(plugin_root)}")
+        elif digest(path) != expected:
+            errors.append(f"scorecard {label} does not match {path.relative_to(plugin_root)}")
     return errors
 
 
@@ -127,9 +157,13 @@ def main() -> int:
             if asset.exists() and digest(asset) != hashes[name]:
                 errors.append(f"checksum mismatch: {name}")
 
+    scorecard_payload: dict | None = None
     scorecard = release_dir / f"dittobot-scorecard-v{args.version}.json"
     if scorecard.exists():
-        errors.extend(check_scorecard(scorecard, args.version))
+        scorecard_payload, scorecard_errors = load_scorecard(scorecard)
+        errors.extend(scorecard_errors)
+        if scorecard_payload is not None:
+            errors.extend(check_scorecard_payload(scorecard_payload, args.version))
 
     if errors:
         print("Release asset check failed:")
@@ -154,6 +188,8 @@ def main() -> int:
     try:
         with zipfile.ZipFile(plugin_zip) as handle:
             handle.extractall(temp)
+        if scorecard_payload is not None:
+            errors.extend(check_scorecard_hashes(scorecard_payload, temp))
         run(
             [
                 sys.executable,
@@ -165,6 +201,12 @@ def main() -> int:
         )
     finally:
         shutil.rmtree(temp, ignore_errors=True)
+
+    if errors:
+        print("Release asset check failed:")
+        for error in errors:
+            print(f"  - {error}")
+        return 1
 
     print(f"Release asset check passed: {release_dir}")
     return 0

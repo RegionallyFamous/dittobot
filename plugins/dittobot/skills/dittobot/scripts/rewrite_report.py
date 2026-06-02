@@ -75,6 +75,7 @@ def main() -> int:
     parser.add_argument("--protected", action="append", default=[], help="Fact or phrase that must survive.")
     parser.add_argument("--voice", action="append", default=[], help="Voice marker that should survive.")
     parser.add_argument("--forbid", action="append", default=[], help="Forbidden term or phrase.")
+    parser.add_argument("--reader-action", action="append", default=[], help="Reader action, owner, deadline, or next step that should survive.")
     parser.add_argument(
         "--boundary",
         action="append",
@@ -129,6 +130,7 @@ def main() -> int:
         preserve_voice=clean_terms(ledger["voice"] + split_terms(args.voice)),
         forbid=clean_terms(forbid),
         required_claims=clean_terms(ledger["required_claims"]),
+        reader_actions=clean_terms(split_terms(args.reader_action)),
         forbid_assertions=clean_terms(ledger["forbid_assertions"]),
         exact_words=args.exact_words,
         max_words=args.max_words,
@@ -152,6 +154,7 @@ def main() -> int:
         "ratio": round(ratio, 3),
         "protected": term_status(rewrite, list(dataclasses.asdict(case)["protected"])),
         "voice": term_status(rewrite, list(dataclasses.asdict(case)["preserve_voice"])),
+        "reader_actions": term_status(rewrite, list(dataclasses.asdict(case)["reader_actions"])),
         "boundaries": clean_terms(boundaries),
         "boundary_forbidden_terms": clean_terms(boundary_forbids),
         "source_numbers": source_numbers,
@@ -176,6 +179,7 @@ def main() -> int:
             print(f"Failure buckets: {', '.join(result['failure_buckets'])}")
         print_section("Protected facts", result["protected"])
         print_section("Voice markers", result["voice"])
+        print_section("Reader actions", result["reader_actions"])
         print("Boundaries")
         print("- " + "; ".join(result["boundaries"]) if result["boundaries"] else "- none")
         print("Boundary-forbidden terms")

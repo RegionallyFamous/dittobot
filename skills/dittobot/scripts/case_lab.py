@@ -93,6 +93,12 @@ def main() -> int:
         help="Claim that must remain present.",
     )
     parser.add_argument(
+        "--reader-action",
+        action="append",
+        default=[],
+        help="Reader action, owner, deadline, or next step that must remain present.",
+    )
+    parser.add_argument(
         "--forbid-assertion",
         action="append",
         default=[],
@@ -146,6 +152,7 @@ def main() -> int:
         "required_claims",
         clean_terms(ledger["required_claims"] + split_terms(args.required_claim)),
     )
+    add_tuple_field(lines, "reader_actions", clean_terms(split_terms(args.reader_action)))
     add_tuple_field(
         lines,
         "forbid_assertions",

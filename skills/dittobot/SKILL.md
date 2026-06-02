@@ -18,15 +18,15 @@ When the source or user instruction carries mixed feelings, preserve the mix: fr
 
 ## Fast Defaults
 
-Use the lightest edit that satisfies the request. If the draft already works, make small improvements instead of demonstrating effort. Do not rewrite strong sentences merely to justify the skill.
+Use the lightest edit that satisfies the request. If the draft works, make small improvements. Do not rewrite strong sentences.
 
 For normal edits, run three silent gates: intent/facts, voice/rhythm, and constraints/output. For messy, high-stakes, or persuasive work, find the gap between draft behavior and intent before line-editing.
 
 For vague requests such as "make this better," preserve meaning, facts, stance, emotional temperature, and voice; tighten clutter; clarify the point; return only the rewrite unless the user asks for rationale or the edit involves a meaningful tradeoff.
 
-For raw notes, rough drafts, fragments, or stream-of-consciousness dumps with no explicit task, assume the user wants finished prose. Infer the likely artifact from cues: email, Slack message, announcement, post, note, recap, caption, or short prose. If no form is clear, return a polished short prose version. Find the throughline, keep the best human texture, remove repetition, organize just enough for the apparent audience, and return the clean version. False starts, self-corrections, repetition, and asides are voice evidence, not necessarily text to preserve; keep the fingerprints and remove the scratch-work. Do not make it sound more formal, certain, cheerful, generic, or complete than the source supports.
+For raw notes, rough drafts, fragments, or stream-of-consciousness dumps with no explicit task, assume finished prose. Infer the artifact from cues: email, Slack, announcement, post, note, recap, caption, or short prose. Find the throughline, keep the best texture, remove scratch-work, organize enough for the apparent audience, and return the clean version. False starts, corrections, repetition, and asides are voice evidence, not necessarily content. If the dump says "actually," "wait," "scratch that," "ignore that," or "no," treat the latest explicit correction as live; do not preserve superseded claims. Do not make it more formal, certain, cheerful, generic, or complete than the source supports.
 
-For reader-facing text, cold-read as the target reader: main point, stakes, next action, limits. If unclear, front-load the reader's next move.
+For reader-facing text, cold-read as the target reader: point, stakes, action, limits. If unclear, front-load the move.
 
 Honor explicit constraints exactly: word count, no notes, no dashes, no added humor, format, audience, and edit intensity. For exact word counts, count final words before answering and revise until they match.
 
@@ -107,7 +107,7 @@ If not, revert or soften the change.
 
 ## Voice And Anti-Generic Rules
 
-Preserve useful rough edges: odd phrases, bluntness, warmth, skepticism, contractions or lack of them, asymmetry, rhythm, and punctuation habits unless they confuse the reader. Remove fog, not fingerprints.
+Preserve useful rough edges: odd phrases, bluntness, warmth, skepticism, contractions or lack of them, asymmetry, rhythm, and punctuation habits unless they confuse the reader. Remove fog, not fingerprints. Keep the best fingerprints, not every colorful phrase; preserve only the voice density the artifact can carry.
 
 Preserve dialect, code-switching, regional idiom, profanity, culturally situated phrasing, and intentional nonstandard grammar unless the user asks to standardize or the audience/risk requires it.
 
