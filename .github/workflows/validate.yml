@@ -138,6 +138,14 @@ jobs:
           python3 scripts/install.py --copy --install-dir "$RUNNER_TEMP/codex-skills-installed/dittobot-copy"
           python3 scripts/check_install.py --install-dir "$RUNNER_TEMP/codex-skills-installed/dittobot-copy"
 
+      - name: Check one-line installer
+        run: |
+          bash -n install.sh
+          archive="$RUNNER_TEMP/dittobot.tar.gz"
+          tar -czf "$archive" --exclude .git --exclude dist -C "$GITHUB_WORKSPACE/.." "$(basename "$GITHUB_WORKSPACE")"
+          DITTOBOT_ARCHIVE_URL="file://$archive" bash install.sh --install-dir "$RUNNER_TEMP/codex-skills-one-line/dittobot"
+          python3 scripts/check_install.py --install-dir "$RUNNER_TEMP/codex-skills-one-line/dittobot"
+
       - name: Verify live eval skip path
         env:
           OPENAI_API_KEY: ""

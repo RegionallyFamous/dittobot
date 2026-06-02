@@ -27,6 +27,8 @@ REQUIRED_PHRASES = (
     "not a ghostwriter",
     "voice-preserving editor",
     "The better move, the more hopeful move",
+    "Use $skill-installer to install Dittobot",
+    "A risograph-style Dittobot workshop",
 )
 
 ALWAYS_BANNED = (
@@ -184,6 +186,12 @@ def check_use_section(markdown: str, errors: list[str]) -> None:
             fail(f"README Use section reintroduced over-instructed prompt: {prompt!r}", errors)
     if "Use $dittobot on this:" not in markdown:
         fail("README must show the default drop-in usage prompt", errors)
+    skill_installer_position = markdown.find("Use $skill-installer")
+    curl_position = markdown.find("curl -fsSL")
+    if skill_installer_position == -1:
+        fail("README must lead non-developers to $skill-installer", errors)
+    elif curl_position != -1 and curl_position < skill_installer_position:
+        fail("README should show $skill-installer before the terminal fallback", errors)
 
 
 def check_description(description: str | None, errors: list[str]) -> None:

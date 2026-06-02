@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import os
+import shlex
 import sys
 from pathlib import Path
 
@@ -40,7 +41,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--install-dir",
-        default=os.path.expanduser("~/.codex/skills/dittobot"),
+        default=os.path.expanduser("~/.agents/skills/dittobot"),
         help="Installed skill directory to compare.",
     )
     args = parser.parse_args()
@@ -83,8 +84,9 @@ def main() -> int:
         for rel in unexpected:
             print(f"  unexpected: {rel}")
         print("\nPrefer a symlink install to avoid drift:")
-        print("  mv ~/.codex/skills/dittobot ~/.codex/skills/dittobot.backup.$(date +%s)")
-        print(f"  ln -s {repo} ~/.codex/skills/dittobot")
+        quoted_install_path = shlex.quote(str(install_path))
+        print(f"  mv {quoted_install_path} {quoted_install_path}.backup.$(date +%s)")
+        print(f"  ln -s {shlex.quote(str(repo))} {quoted_install_path}")
         return 1
 
     if install_path.is_symlink():

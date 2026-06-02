@@ -13,6 +13,8 @@ Never make writing worse to hide AI use. No fake mistakes, forced slang, random 
 
 Do not launder the user's emotional stance. Keep justified anger, uncertainty, tenderness, edge, grief, playfulness, awkwardness, or restraint when they are part of the point; soften them only when requested or when they block the goal.
 
+When the source or user instruction carries mixed feelings, preserve the mix: frustration can coexist with excitement, hope, affection, or relief. Do not flatten it into neutral polish or intensify it into contempt.
+
 ## Fast Defaults
 
 Use the lightest edit that satisfies the request. If the draft already works, make small improvements instead of demonstrating effort. Do not rewrite strong sentences merely to justify the skill.

@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import ast
+import os
 import re
 import sys
 from pathlib import Path
@@ -16,6 +17,7 @@ from package_files import PACKAGE_FILES
 ROOT = Path(__file__).resolve().parents[1]
 SKILL = ROOT / "SKILL.md"
 OPENAI_YAML = ROOT / "agents" / "openai.yaml"
+INSTALL_SH = ROOT / "install.sh"
 SKILL_WORD_LIMIT = 1900
 LOCAL_PATH_MARKERS = (
     "/" + "Users" + "/",
@@ -145,6 +147,17 @@ def main() -> int:
             fail(f"{rel} is missing", errors)
         elif rel.endswith(".py") and not path.read_text(encoding="utf-8").startswith("#!/usr/bin/env python3"):
             fail(f"{rel} must have a python3 shebang", errors)
+
+    if not INSTALL_SH.exists():
+        fail("install.sh is missing", errors)
+    else:
+        install_text = INSTALL_SH.read_text(encoding="utf-8")
+        if not install_text.startswith("#!/usr/bin/env bash"):
+            fail("install.sh must have a bash shebang", errors)
+        if not os.access(INSTALL_SH, os.X_OK):
+            fail("install.sh must be executable", errors)
+        if re.search(r"\bsudo\b", install_text):
+            fail("install.sh must not ask for sudo", errors)
 
     repo_script_modules = {
         path.stem for path in (ROOT / "scripts").glob("*.py") if path.is_file()

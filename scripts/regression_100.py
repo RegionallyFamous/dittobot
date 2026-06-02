@@ -1658,6 +1658,134 @@ def run_profile_contract_tests() -> list[str]:
     return failures
 
 
+def run_mixed_stance_contract_tests() -> list[str]:
+    """Protect layered emotional voice from neutralization or overcorrection."""
+    checks = [
+        (
+            "angry but hopeful public note",
+            Case(
+                id="mixed_stance_angry_hopeful",
+                source=(
+                    "I am annoyed that people saw bad AI writing and decided the answer "
+                    "was banning the tool, but I am genuinely excited because we can "
+                    "teach it taste instead."
+                ),
+                rewrite=(
+                    "I am annoyed that people saw bad AI writing and decided the answer "
+                    "was banning the tool. But I am genuinely excited, because we can "
+                    "teach it taste instead."
+                ),
+                must=("annoyed", "bad AI writing", "banning the tool", "genuinely excited", "teach it taste"),
+                preserve_voice=("annoyed", "genuinely excited", "teach it taste"),
+                forbid=("thrilled", "deeply concerned", "never use AI"),
+            ),
+            None,
+        ),
+        (
+            "sarcastic but constructive",
+            Case(
+                id="mixed_stance_sarcastic_constructive",
+                source=(
+                    "This policy is a masterclass in solving the wrong problem, which "
+                    "would be impressive if it were not wasting everyone's time. We can "
+                    "fix it by teaching the tool our voice."
+                ),
+                rewrite=(
+                    "This policy is a masterclass in solving the wrong problem, which "
+                    "would be impressive if it were not wasting everyone's time. We can "
+                    "fix it by teaching the tool our voice."
+                ),
+                must=("masterclass in solving the wrong problem", "wasting everyone's time", "teaching the tool our voice"),
+                preserve_voice=("masterclass in solving the wrong problem", "wasting everyone's time"),
+                forbid=("idiots", "stupid", "hopeless"),
+            ),
+            None,
+        ),
+        (
+            "blunt but not cruel",
+            Case(
+                id="mixed_stance_blunt_not_cruel",
+                source=(
+                    "The draft is bad because it says nothing, not because humans are "
+                    "magical. Keep me irritated but not mean."
+                ),
+                rewrite=(
+                    "The draft is bad because it says nothing, not because humans are "
+                    "magical. I want this irritated, not mean."
+                ),
+                must=("draft is bad", "says nothing", "humans are magical", "irritated", "not mean"),
+                preserve_voice=("humans are magical", "irritated", "not mean"),
+                forbid=("morons", "idiots", "embarrassing"),
+            ),
+            None,
+        ),
+        (
+            "neutralized mixed stance",
+            Case(
+                id="mixed_stance_neutralized",
+                source=(
+                    "I am annoyed that people saw bad AI writing and decided the answer "
+                    "was banning the tool, but I am genuinely excited because we can "
+                    "teach it taste instead."
+                ),
+                rewrite=(
+                    "I have concerns about the policy, but I am optimistic that a better "
+                    "process can improve outcomes."
+                ),
+                must=("annoyed", "banning the tool", "genuinely excited", "teach it taste"),
+                preserve_voice=("annoyed", "genuinely excited", "teach it taste"),
+            ),
+            "missing required terms",
+        ),
+        (
+            "made sharper than source",
+            Case(
+                id="mixed_stance_meaner_than_source",
+                source=(
+                    "This policy is a masterclass in solving the wrong problem. We can "
+                    "fix it by teaching the tool our voice."
+                ),
+                rewrite=(
+                    "This policy is a masterclass in solving the wrong problem, and the "
+                    "people defending it are idiots. We can fix it by teaching the tool "
+                    "our voice."
+                ),
+                must=("masterclass in solving the wrong problem", "teaching the tool our voice"),
+                preserve_voice=("masterclass in solving the wrong problem",),
+                forbid=("idiots",),
+            ),
+            "forbidden terms appeared",
+        ),
+        (
+            "false cheer over anger",
+            Case(
+                id="mixed_stance_false_cheer",
+                source=(
+                    "I am annoyed that people saw bad AI writing and decided the answer "
+                    "was banning the tool, but I am genuinely excited because we can "
+                    "teach it taste instead."
+                ),
+                rewrite=(
+                    "Great news: this gives us a wonderful opportunity to align on better "
+                    "writing outcomes and move forward together."
+                ),
+                must=("annoyed", "banning the tool", "genuinely excited", "teach it taste"),
+                preserve_voice=("annoyed", "genuinely excited", "teach it taste"),
+                forbid=("great news", "align", "outcomes"),
+            ),
+            "missing required terms",
+        ),
+    ]
+    failures: list[str] = []
+    for name, case, expected in checks:
+        errors = validate(case)
+        if expected is None and errors:
+            failures.append(f"{name}: expected pass, got {errors}")
+        elif expected is not None and not any(expected in error for error in errors):
+            failures.append(f"{name}: expected {expected}, got {errors}")
+    return failures
+
+
 def run_mutation_tests() -> list[str]:
     """Mutate every good fixture in common bad-output ways and require failure."""
     failures: list[str] = []
@@ -1775,11 +1903,13 @@ def main() -> int:
     self_test_failures = run_validator_self_tests()
     negative_test_failures = run_negative_fixture_tests()
     profile_test_failures = run_profile_contract_tests()
+    mixed_stance_test_failures = run_mixed_stance_contract_tests()
     mutation_test_failures = run_mutation_tests()
     if (
         self_test_failures
         or negative_test_failures
         or profile_test_failures
+        or mixed_stance_test_failures
         or mutation_test_failures
     ):
         print("VALIDATOR SELF-TESTS: FAIL")
@@ -1787,6 +1917,7 @@ def main() -> int:
             self_test_failures
             + negative_test_failures
             + profile_test_failures
+            + mixed_stance_test_failures
             + mutation_test_failures
         ):
             print(f"  - {failure}")

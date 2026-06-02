@@ -52,7 +52,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--install-dir",
-        default=os.path.expanduser("~/.codex/skills/dittobot"),
+        default=os.path.expanduser("~/.agents/skills/dittobot"),
         help="Destination skill directory.",
     )
     parser.add_argument(

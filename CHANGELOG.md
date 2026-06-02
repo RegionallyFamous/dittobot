@@ -19,6 +19,9 @@
 - Add `scripts/scorecard.py` for deterministic release scorecards across fixtures, package health, skill budget, and optional live eval transcripts.
 - Move operational runbooks into the GitHub wiki and refocus the README on the anti-slop argument and in-process examples.
 - Add repo-only `scripts/public_copy_check.py` to keep README and repo-description copy sharp, voice-forward, and free of stiff marketing mush.
+- Add mixed-emotional-stance guidance and contract tests for writing that is angry or sarcastic without losing hope, excitement, or restraint.
+- Add `$skill-installer`-first install docs, a no-git terminal fallback installer, and a CI check for the one-line install path.
+- Add a risograph README banner generated for Dittobot's voice-preserving editing metaphor.
 - Add reusable fact-fence and voice-profile-card references.
 - Add real `[[boundary: ...]]` ledger parsing.
 - Add package-file manifest sharing between install drift checks and repo validation.
