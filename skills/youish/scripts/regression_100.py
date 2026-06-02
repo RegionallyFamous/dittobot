@@ -197,6 +197,7 @@ class Case:
     allowed_entities: tuple[str, ...] = field(default_factory=tuple)
     boundaries: tuple[str, ...] = field(default_factory=tuple)
     reader_actions: tuple[str, ...] = field(default_factory=tuple)
+    polarity_sensitive: tuple[str, ...] = field(default_factory=tuple)
     min_avg_sentence_words: float | None = None
 
 
@@ -223,6 +224,42 @@ def contains_term(text: str, term: str) -> bool:
         return True
     width = len(needle)
     return any(haystack[index:index + width] == needle for index in range(len(haystack) - width + 1))
+
+
+NEGATION_WORDS = {
+    "avoid",
+    "dont",
+    "don't",
+    "never",
+    "no",
+    "not",
+    "skip",
+    "stop",
+    "without",
+}
+
+
+def polarity_is_negative(term: str) -> bool:
+    return any(word in NEGATION_WORDS for word in words(term.lower()))
+
+
+def has_negated_term(text: str, term: str) -> bool:
+    if polarity_is_negative(term):
+        return False
+    haystack = words(text.lower())
+    needle = words(term.lower())
+    if not needle:
+        return False
+    width = len(needle)
+    for index in range(len(haystack) - width + 1):
+        if haystack[index:index + width] != needle:
+            continue
+        prefix = haystack[max(0, index - 4):index]
+        if any(word in NEGATION_WORDS for word in prefix):
+            return True
+        if len(prefix) >= 2 and prefix[-2:] in (["do", "not"], ["did", "not"], ["does", "not"]):
+            return True
+    return False
 
 
 def has_note(text: str) -> bool:
@@ -442,6 +479,14 @@ def validate(case: Case) -> list[str]:
     ]
     if missing_reader_actions:
         errors.append(f"missing reader actions: {missing_reader_actions}")
+
+    polarity_terms = tuple(dict.fromkeys((*case.polarity_sensitive, *case.reader_actions)))
+    negated_terms = [
+        term for term in polarity_terms
+        if contains_term(case.rewrite, term) and has_negated_term(case.rewrite, term)
+    ]
+    if negated_terms:
+        errors.append(f"polarity drift: negated required phrases: {negated_terms}")
 
     forbidden_assertions = [
         claim for claim in case.forbid_assertions if contains_term(unquoted, claim)
@@ -1601,6 +1646,17 @@ def run_validator_self_tests() -> list[str]:
                 reader_actions=("Send the job ID",),
             ),
             "missing reader actions",
+        ),
+        (
+            "reader action polarity",
+            Case(
+                "self_reader_action_polarity",
+                "The fix is live. Send the job ID if it fails.",
+                "The fix is live. Do not send the job ID if it fails.",
+                must=("fix is live",),
+                reader_actions=("send the job ID",),
+            ),
+            "polarity drift",
         ),
         (
             "forbidden assertions",
@@ -2936,6 +2992,11 @@ def run_mutation_tests() -> list[str]:
                 errors,
                 "forbidden assertions appeared",
             )
+
+        if case.reader_actions and not polarity_is_negative(case.reader_actions[0]):
+            rewrite = f"{case.rewrite} Do not {case.reader_actions[0]}."
+            errors = validate(replace(case, rewrite=rewrite))
+            expect_error(case.id, "negated reader action", errors, "polarity drift")
 
         if case.protected:
             protected = case.protected[0]

@@ -206,15 +206,15 @@ You do not need to say "preserve my voice," "do not add facts," or "keep uncerta
 Other install paths:
 
 ```bash
-gh skill install RegionallyFamous/youish youish --agent codex --scope user --pin v0.3.0
+npx skills add RegionallyFamous/youish --skill youish
 ```
 
 ```bash
-npx skills add RegionallyFamous/youish
+gh skill install RegionallyFamous/youish youish --agent codex --scope user --pin v0.3.1
 ```
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/RegionallyFamous/youish/v0.3.0/install.sh | YOUISH_REF=v0.3.0 bash
+curl -fsSL https://raw.githubusercontent.com/RegionallyFamous/youish/v0.3.1/install.sh | YOUISH_REF=v0.3.1 bash
 ```
 
 More options live in the [Install wiki](https://github.com/RegionallyFamous/youish/wiki/Install).
@@ -223,7 +223,7 @@ More options live in the [Install wiki](https://github.com/RegionallyFamous/youi
 
 Youish's quality story is not "trust me, it feels good."
 
-Youish has tests for the stuff bad AI writing usually breaks: facts, uncertainty, voice markers, no-dash rules, exact word counts, reader actions, and empty buzzword paste.
+Youish has tests for the stuff bad AI writing usually breaks: facts, uncertainty, voice markers, exact quotes, identity markers, no-dash rules, exact word counts, requested output shape, reader actions, empty buzzword paste, and scorecard integrity.
 
 This does not prove literary taste. It proves Youish keeps the constraints it claims to protect: facts, uncertainty, length, format, and anti-generic behavior.
 
@@ -232,10 +232,13 @@ This does not prove literary taste. It proves Youish keeps the constraints it cl
 | Keep the user's voice | Voice marker fixtures, profile contracts, and mutation tests that remove keeper phrases |
 | Preserve facts and claims | Protected fact checks, required claims, forbidden assertions, numeric drift checks |
 | Preserve uncertainty | Legal and technical cases that fail if "maybe" becomes false certainty |
+| Preserve exact quotes and identity markers | Quote and identity contracts for punctuation, diacritics, pronouns, protected names, and source-specific phrasing |
 | Refuse invented details | Unsupported detail markers, invented numbers, and unsupported entity detection |
 | Avoid generic AI polish | Buzzword checks plus pattern tests for shiny but empty phrasing |
 | Respect constraints | Exact word count, no-dash, format, wrapper, and paragraph-shape checks |
+| Keep requested output shape | Format contracts for options, greetings, signoffs, diagnosis-only responses, code fences, and line prefixes |
 | Turn notes into usable text | Source-only thought-dump cases with artifact cleanup and reader-action checks |
+| Keep scorecards honest | Transcript integrity checks recompute from raw output, reject unproven passing records, and distinguish partial suites from complete public scores |
 
 The scorecard is intentionally boring: full-suite gates, stable failure codes, hashes, package checks, marketplace checks, and public-safe reporting. That is the point. Taste up front. Receipts in the back.
 

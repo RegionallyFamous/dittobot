@@ -4,6 +4,15 @@
 
 Nothing yet.
 
+## 0.3.1 - 2026-06-02
+
+- Add Vercel-style skills.sh listing metadata and sharpen the public skill preview for voice-faithful rewriting.
+- Require live transcript scorecards to use a complete 100-case suite unless partial private scoring is explicitly requested.
+- Add a contract-registration guard so new regression contract groups cannot be omitted from public scorecards.
+- Reject release scorecards generated from a dirty or stale commit.
+- Add polarity checks for reader actions so a negated action cannot pass by substring match.
+- Update release pins from `v0.3.0` to `v0.3.1` for GitHub CLI and one-line installs.
+
 ## 0.3.0 - 2026-06-02
 
 - Rename the project from Dittobot to Youish to avoid confusion with an existing Ditto writing app.

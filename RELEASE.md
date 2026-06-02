@@ -27,4 +27,6 @@ gh release create vX.Y.Z \
 
 Use `--verify-tag`; without it, `gh release create` can create a missing tag from the default branch, which is exactly the kind of release magic trick nobody asked for.
 
+Run GitHub CLI skill publishing from `skills`, not the repo root. The repo root also has `SKILL.md` for local Codex installs, and `gh skill publish /path/to/repo --dry-run` treats the root directory name as the skill slug.
+
 Use live eval only as a bounded smoke test. Deterministic checks are release proof. Only call a live transcript score "passing" if it was run with an explicit threshold such as `--fail-under-score 0.95`.

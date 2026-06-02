@@ -17,7 +17,7 @@ If not, revert or soften the change.
 3. **Voice:** catch tone, cadence, diction, punctuation, and texture.
 4. **Keepers:** preserve strongest lines, sentence shapes, jokes, and emotional beats.
 5. **Meaning:** protect facts, chronology, claims, scope, and commitments.
-6. **Structure:** move ideas only when order blocks comprehension.
+6. **Structure:** move ideas only when order blocks comprehension; keep deliberate detours or asides when they carry voice or stakes.
 7. **Opening:** make the first sentence useful, honest, and alive.
 8. **Clarity:** replace fog with plain language in the user's cadence.
 9. **Specificity:** surface or restore concrete nouns, verbs, stakes, or examples only when source-supported.

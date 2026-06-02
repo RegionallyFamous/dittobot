@@ -44,6 +44,19 @@ def run(args: list[str]) -> None:
         raise SystemExit(result.returncode)
 
 
+def git_value(args: list[str]) -> str | None:
+    result = subprocess.run(
+        ["git", *args],
+        cwd=ROOT,
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.DEVNULL,
+        check=False,
+    )
+    value = result.stdout.strip()
+    return value if result.returncode == 0 and value else None
+
+
 def parse_checksums(path: Path) -> tuple[dict[str, str], list[str]]:
     hashes: dict[str, str] = {}
     errors: list[str] = []
@@ -90,6 +103,15 @@ def check_scorecard_payload(payload: dict, version: str) -> list[str]:
         errors.append(f"scorecard plugin version must be {version}")
     if payload.get("plugin", {}).get("status") != "PASS":
         errors.append("scorecard plugin package status must be PASS")
+    subject = payload.get("subject", {})
+    if subject.get("dirty") is not False:
+        errors.append("scorecard subject.dirty must be false")
+    current_commit = git_value(["rev-parse", "--short", "HEAD"])
+    if current_commit and subject.get("commit") != current_commit:
+        errors.append(
+            "scorecard subject.commit must match current HEAD "
+            f"({current_commit}), got {subject.get('commit')}"
+        )
     contracts = payload.get("contract_tests")
     if not isinstance(contracts, dict):
         errors.append("scorecard contract_tests must be present")
@@ -97,8 +119,12 @@ def check_scorecard_payload(payload: dict, version: str) -> list[str]:
         if contracts.get("status") != "PASS":
             errors.append("scorecard contract_tests status must be PASS")
         groups = contracts.get("groups")
-        if not isinstance(groups, list) or len(groups) != 13:
-            errors.append("scorecard contract_tests.groups must contain 13 groups")
+        if not isinstance(groups, list) or len(groups) != 14:
+            errors.append("scorecard contract_tests.groups must contain 14 groups")
+        elif "contract_registration_contracts" not in {
+            str(group.get("name")) for group in groups if isinstance(group, dict)
+        }:
+            errors.append("scorecard contract_tests.groups must include contract_registration_contracts")
     return errors
 
 

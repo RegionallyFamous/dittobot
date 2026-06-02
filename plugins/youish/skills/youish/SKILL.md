@@ -4,10 +4,19 @@ license: GPL-2.0-or-later
 description: Rewrite, edit, tighten, punch up, or diagnose user prose while preserving voice, intent, facts, stance, rhythm, humor, and formality. Use for emails, posts, raw notes, thought dumps, essays, docs, web copy, speeches, bios, captions, cover letters, or requests to make writing clearer, shorter, more natural, less AI-sounding, warmer, sharper, more persuasive, or more like the user. Do not use for pure from-scratch drafting unless the user provides source text or asks for a draft in an established voice.
 metadata:
   author: Regionally Famous
-  version: "0.3.0"
+  version: "0.3.1"
 ---
 
 # Youish
+
+Voice-faithful rewriting and editing for emails, posts, raw notes, thought dumps, docs, captions, bios, speeches, and web copy. Use when the user provides source text and wants it clearer, shorter, warmer, sharper, more persuasive, less AI-sounding, or more like them without losing facts, stance, rhythm, uncertainty, humor, or useful weirdness.
+
+## When To Apply
+
+- Rewrite or tighten user-provided prose while preserving voice and intent.
+- Turn messy notes, rough drafts, fragments, or rants into a usable artifact.
+- Diagnose why a draft feels generic, bloated, off-tone, or not like the writer.
+- Build a compact voice profile from samples, then apply it only as editing taste.
 
 ## Core Rule
 
@@ -27,7 +36,7 @@ For normal edits, run three silent gates: intent/facts/stance, voice/rhythm/tast
 
 For vague requests such as "make this better," preserve meaning, facts, stance, emotional temperature, and voice; tighten clutter; clarify the point; return only the rewrite unless the user asks for rationale or the edit involves a meaningful tradeoff.
 
-For raw notes, rough drafts, fragments, or thought dumps with no explicit task, infer the artifact from cues: email, Slack, announcement, post, note, recap, caption, or short prose. Find the throughline, keep the best texture, remove scratch-work, and return the most usable version the notes support for the apparent audience. Treat false starts, corrections, repetition, and asides as voice evidence, not necessarily content. If the dump says "actually," "wait," "scratch that," "ignore that," or "no," treat the latest explicit correction as live. Do not make it more formal, certain, cheerful, generic, or complete than the source supports.
+For raw notes, rough drafts, fragments, or thought dumps with no explicit task, infer the artifact from cues: email, Slack, announcement, post, note, recap, caption, or short prose. Find the throughline, keep the best texture, remove scratch-work, and return the most usable version the notes support for the apparent audience. Treat false starts, corrections, repetition, and asides as voice evidence, not necessarily content. If the dump says "actually," "wait," "scratch that," "ignore that," or "no," treat the latest explicit correction as live. Do not make it more formal, certain, cheerful, generic, complete, or single-minded than the source supports.
 
 For high-authorship or trust-sensitive writing (apologies, condolences, personal, creative, academic, testimonial, review, hiring, journalistic, or identity-heavy text), prefer minimal edits, options, or feedback unless asked for a full rewrite.
 
@@ -39,7 +48,7 @@ When purpose or audience is blurry: infer if one artifact is obvious; provide 2 
 
 ## Intake
 
-Before rewriting, identify task, audience/purpose, voice fingerprint, and protected material. Voice fingerprint includes directness, formality, humor, sentence length, punctuation, vocabulary, confidence, warmth, texture, quirks, favorite phrases, and preferences over generic alternatives. Protected material includes facts, claims, names, dates, commitments, quotes, jokes, emotional beats, load-bearing weirdness, technical terms, and phrases that feel like the user.
+Before rewriting, identify task, audience/purpose, voice fingerprint, and protected material. Voice fingerprint includes directness, formality, humor, sentence length, punctuation, vocabulary, confidence, warmth, texture, quirks, favorite phrases, and preferences over generic alternatives. Protected material includes facts, claims, names, dates, commitments, quotes, jokes, emotional beats, load-bearing weirdness, technical terms, and phrases the user chose against smoother alternatives.
 
 Keep private ledgers for constraints, claims/facts, and voice markers. Do not show them unless asked.
 
@@ -55,7 +64,7 @@ Preserve format, paragraphing, line breaks, headings, bullets, subject lines, gr
 
 Use prior writing samples when available; otherwise use the submitted draft. If the draft is corporate, generic, committee-written, or artifact-like rather than personal, preserve meaning, stance, audience, and formality, but do not treat generic phrasing as the user's voice.
 
-Value voice evidence in this order: exact keepers, stance, sentence shape, rhythm, diction, punctuation, dialect or code-switching, and useful rough edges. Preserve enough for recognizability, not every quirk.
+Value voice evidence in this order: exact keepers, explicit taste/avoid signals, stance, sentence shape, rhythm, diction, punctuation, dialect or code-switching, and useful rough edges. Preserve enough for recognizability, not every quirk.
 
 ## Edit Modes
 
@@ -73,7 +82,7 @@ For legal, medical, financial, academic, employment, technical, interpersonal, o
 
 ## Quality Gates
 
-Before delivery, check: meaning unchanged, facts intact, uncertainty preserved, stance recognizable, reader need clearer, rhythm alive, constraints obeyed, no generic AI polish. If anyone could have written it, restore 2-3 source markers.
+Before delivery, check: meaning unchanged, facts intact, uncertainty preserved, stance recognizable, reader need clearer, rhythm alive, constraints obeyed, no generic AI polish. If anyone could have written it, restore 2-3 source markers and cut one generic addition.
 
 Edit in this order when the work is messy: purpose, reader, protected facts, structure, sentence clarity, rhythm, ending. Do not polish sentence-level style while the point, ask, or claim is still broken.
 
@@ -81,7 +90,7 @@ For long, high-stakes, or regression-test work, read `references/quality-gates.m
 
 ## Voice And Anti-Generic Rules
 
-Preserve useful rough edges: odd phrases, bluntness, warmth, skepticism, contraction habits, asymmetry, rhythm, and punctuation unless they confuse the reader. Remove fog, not fingerprints. Keep the best fingerprints, not every colorful phrase.
+Preserve useful rough edges: odd phrases, bluntness, warmth, skepticism, contraction habits, asymmetry, unresolved tension, rhythm, and punctuation unless they confuse the reader. Remove fog, not fingerprints. Keep the best fingerprints, not every colorful phrase.
 
 Preserve dialect, code-switching, regional idiom, profanity, culturally situated phrasing, and intentional nonstandard grammar unless the user asks to standardize or the audience/risk requires it.
 

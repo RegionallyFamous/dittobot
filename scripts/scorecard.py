@@ -16,6 +16,7 @@ from failure_taxonomy import unique_failure_buckets, unique_failure_codes
 from live_report import read_records, summarize as summarize_live
 from package_files import PACKAGE_FILES
 from plugin_manifest import DEFAULT_VERSION
+import regression_100 as regression_harness
 from regression_100 import (
     Case,
     make_cases,
@@ -113,6 +114,22 @@ def run_scorecard_integrity_tests() -> list[str]:
     return failures
 
 
+def run_contract_registration_tests() -> list[str]:
+    """Fail if a regression contract exists but is not exposed in scorecards."""
+    discovered = sorted(
+        name
+        for name, value in vars(regression_harness).items()
+        if name.startswith("run_")
+        and name.endswith("_contract_tests")
+        and callable(value)
+    )
+    registered = sorted(check.__name__ for _label, check in CONTRACT_CHECKS)
+    missing = [name for name in discovered if name not in registered]
+    if missing:
+        return [f"unregistered contract test function(s): {missing}"]
+    return []
+
+
 CONTRACT_CHECKS = (
     ("validator_self_tests", run_validator_self_tests),
     ("negative_fixtures", run_negative_fixture_tests),
@@ -127,6 +144,7 @@ CONTRACT_CHECKS = (
     ("boundary_contracts", run_boundary_contract_tests),
     ("mutation_tests", run_mutation_tests),
     ("scorecard_integrity_contracts", run_scorecard_integrity_tests),
+    ("contract_registration_contracts", run_contract_registration_tests),
 )
 
 
@@ -332,12 +350,12 @@ def summarize_records(records: list[dict[str, Any]]) -> dict[str, Any]:
     }
 
 
-def integrity(records: list[dict[str, Any]], known_cases: set[str], require_complete_suite: bool, raw_records: list[dict[str, Any]] | None) -> dict[str, Any]:
+def integrity(records: list[dict[str, Any]], known_cases: set[str], raw_records: list[dict[str, Any]] | None) -> dict[str, Any]:
     ids = [str(record["case"]) for record in records]
     counts = Counter(ids)
     duplicates = sorted(case_id for case_id, count in counts.items() if count > 1)
     unknown_cases = sorted(case_id for case_id in counts if case_id not in known_cases)
-    missing_cases = sorted(known_cases - set(ids)) if require_complete_suite else []
+    missing_cases = sorted(known_cases - set(ids))
     raw_text_present = False
     if raw_records is not None:
         raw_text_present = any(
@@ -346,6 +364,7 @@ def integrity(records: list[dict[str, Any]], known_cases: set[str], require_comp
         )
     return {
         "complete_suite": not missing_cases and not unknown_cases and not duplicates,
+        "partial_suite": bool(missing_cases) and not unknown_cases and not duplicates,
         "duplicates": duplicates,
         "unknown_cases": unknown_cases,
         "missing_cases": missing_cases,
@@ -439,17 +458,28 @@ def scorecard(args: argparse.Namespace) -> dict[str, Any]:
     suite_integrity = integrity(
         normalized,
         set(case_by_id),
-        args.require_complete_suite or raw_live_records is None,
         raw_live_records,
     )
     plugin = plugin_summary(args.plugin_dir, args.version)
     subject_models = sorted(
         {str(record.get("model")) for record in raw_live_records or [] if record.get("model")}
     )
+    contracts = contract_summary()
+    allow_partial_score = (
+        raw_live_records is not None
+        and args.allow_partial_score
+        and not args.require_complete_suite
+    )
+    suite_integrity["allow_partial_score"] = allow_partial_score
     status = "PASS"
     if (summary["public_score"] / 100) < args.fail_under_score:
         status = "FAIL"
-    if not suite_integrity["complete_suite"] or (args.public and suite_integrity["raw_text_present"]):
+    integrity_failed = bool(
+        suite_integrity["duplicates"]
+        or suite_integrity["unknown_cases"]
+        or (suite_integrity["missing_cases"] and not allow_partial_score)
+    )
+    if integrity_failed or (args.public and suite_integrity["raw_text_present"]):
         status = "FAIL"
     skill = skill_summary()
     if not skill["skill_under_budget"] or skill["missing_package_files"]:
@@ -457,7 +487,6 @@ def scorecard(args: argparse.Namespace) -> dict[str, Any]:
     if plugin and plugin["status"] != "PASS":
         status = "FAIL"
     live_summary = summarize_live(raw_live_records) if raw_live_records else None
-    contracts = contract_summary() if raw_live_records is None else None
     if contracts and contracts["status"] != "PASS":
         status = "FAIL"
     return {
@@ -555,12 +584,19 @@ def write_markdown(report: dict[str, Any]) -> None:
     print(f"- Unknown cases: {', '.join(integrity['unknown_cases']) or 'none'}")
     print(f"- Missing cases: {len(integrity['missing_cases'])}")
     print(f"- Raw text present: {'yes' if integrity['raw_text_present'] else 'no'}")
+    print(f"- Partial score allowed: {'yes' if integrity.get('allow_partial_score') else 'no'}")
     plugin = report.get("plugin")
     if plugin:
         print(f"- Plugin package: {plugin['status']} ({plugin.get('version') or 'unknown'})")
     contracts = report.get("contract_tests")
     if contracts:
         print(f"- Contract tests: {contracts['status']} ({contracts['group_count']} groups)")
+        print()
+        print("## Contract Groups")
+        print("| Group | Status | Failures |")
+        print("|---|---|---:|")
+        for group in contracts["groups"]:
+            print(f"| {group['name']} | {group['status']} | {group['failure_count']} |")
 
 
 def main() -> int:
@@ -569,6 +605,7 @@ def main() -> int:
     parser.add_argument("--plugin-dir", help="Optional generated plugin package to check.")
     parser.add_argument("--version", default=DEFAULT_VERSION, help="Expected plugin version.")
     parser.add_argument("--require-complete-suite", action="store_true")
+    parser.add_argument("--allow-partial-score", action="store_true", help="Allow a live transcript scorecard to report a partial private suite.")
     parser.add_argument("--public", action="store_true", help="Fail if transcript records contain raw source/output text.")
     parser.add_argument("--fail-under-score", type=float, default=1.0)
     parser.add_argument("--format", choices=("markdown", "json"), default="markdown")
