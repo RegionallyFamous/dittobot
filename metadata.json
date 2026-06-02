@@ -1,7 +1,7 @@
 {
   "name": "youish",
   "displayName": "Youish",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "organization": "Regionally Famous",
   "date": "June 2026",
   "abstract": "Voice-faithful rewriting for AI agents, designed to preserve a writer's claims, stance, rhythm, uncertainty, useful weirdness, and exact constraints while removing clutter and generic AI polish. Includes compact runtime instructions, optional quality-gate references, and deterministic regression checks for facts, quotes, identity markers, output shape, source-only thought dumps, and live-eval integrity.",
@@ -33,7 +33,7 @@
     "summaryBullets": [
       "Preserves the user's claims, stance, uncertainty, rhythm, humor, useful weirdness, and exact constraints.",
       "Turns rough notes, rants, fragments, and corporate fog into usable prose without inventing facts or flattening voice.",
-      "Includes deterministic regression checks for fact drift, invented details, unsupported entities, wrappers, word counts, output shape, and live scorecard integrity.",
+      "Includes deterministic regression checks for fact drift, invented details, unsupported entities, cultural voice flattening, option diversity, wrappers, word counts, output shape, and live scorecard integrity.",
       "Uses progressive disclosure: compact runtime guidance, optional quality gates, and scripts loaded only for validation or profile work."
     ],
     "sourceControlledFields": [
@@ -62,6 +62,8 @@
     "https://arxiv.org/abs/2411.13032",
     "https://arxiv.org/abs/2409.11360",
     "https://arxiv.org/abs/2603.18161",
+    "https://arxiv.org/abs/2604.22142",
+    "https://arxiv.org/abs/2605.13055",
     "https://openreview.net/pdf?id=n0AIlfxDU0",
     "https://digital.gov/guides/plain-language/principles",
     "https://www.cpsc.gov/About-CPSC/Policies-Statements-and-Directives/plain-language-principles"

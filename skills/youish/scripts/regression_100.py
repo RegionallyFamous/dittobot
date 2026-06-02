@@ -15,6 +15,7 @@ from __future__ import annotations
 import re
 import sys
 from dataclasses import dataclass, field, replace
+from difflib import SequenceMatcher
 
 from ledger import boundary_forbid_terms
 
@@ -190,6 +191,7 @@ class Case:
     preserve_identity: tuple[str, ...] = field(default_factory=tuple)
     line_prefixes: tuple[str, ...] = field(default_factory=tuple)
     exact_option_count: int | None = None
+    min_distinct_option_templates: int | None = None
     ordered_terms: tuple[str, ...] = field(default_factory=tuple)
     required_claims: tuple[str, ...] = field(default_factory=tuple)
     forbid_assertions: tuple[str, ...] = field(default_factory=tuple)
@@ -307,10 +309,64 @@ OPTION_LABEL_RE = re.compile(
     r"plain|direct|casual|formal|gentler|bolder):)",
     re.IGNORECASE,
 )
+OPTION_PREFIX_RE = re.compile(
+    r"^\s*((?:option\s*)?\d+[.) :]|\d+\s*[-:)]|"
+    r"(?:cleaner|warmer|sharper|firmer|softer|shorter|punchier|"
+    r"plain|direct|casual|formal|gentler|bolder):)\s*",
+    re.IGNORECASE,
+)
 
 
 def option_count(text: str) -> int:
     return sum(1 for line in text.splitlines() if OPTION_LABEL_RE.search(line))
+
+
+def option_items(text: str) -> list[tuple[str, str]]:
+    items: list[tuple[str, list[str]]] = []
+    current: tuple[str, list[str]] | None = None
+    for raw_line in text.splitlines():
+        line = raw_line.strip()
+        if not line:
+            continue
+        match = OPTION_PREFIX_RE.match(line)
+        if match:
+            if current is not None:
+                items.append(current)
+            label = match.group(1).strip().rstrip(":.)-")
+            current = (label, [line[match.end():].strip()])
+        elif current is not None:
+            current[1].append(line)
+    if current is not None:
+        items.append(current)
+    return [(label, " ".join(part for part in body if part).strip()) for label, body in items]
+
+
+def option_template_signature(text: str) -> str:
+    return " ".join(words(text.lower()))
+
+
+def option_templates_are_similar(a: str, b: str) -> bool:
+    left = option_template_signature(a)
+    right = option_template_signature(b)
+    if not left or not right:
+        return True
+    if left == right:
+        return True
+    left_tokens = set(left.split())
+    right_tokens = set(right.split())
+    overlap = len(left_tokens & right_tokens) / max(len(left_tokens | right_tokens), 1)
+    ratio = SequenceMatcher(None, left, right).ratio()
+    return ratio >= 0.92 or (overlap >= 0.9 and abs(len(left.split()) - len(right.split())) <= 2)
+
+
+def distinct_option_template_count(text: str) -> int:
+    distinct: list[str] = []
+    for _label, body in option_items(text):
+        if not body:
+            continue
+        if not any(option_templates_are_similar(body, existing) for existing in distinct):
+            distinct.append(body)
+    return len(distinct)
 
 
 def sentence_chunks(text: str) -> list[str]:
@@ -511,6 +567,14 @@ def validate(case: Case) -> list[str]:
                 "exact option count failed: expected "
                 f"{case.exact_option_count}, got {actual_options}"
             )
+    if case.min_distinct_option_templates is not None:
+        actual_templates = distinct_option_template_count(case.rewrite)
+        if actual_templates < case.min_distinct_option_templates:
+            errors.append(
+                "option diversity failed: expected at least "
+                f"{case.min_distinct_option_templates} distinct option templates, "
+                f"got {actual_templates}"
+            )
 
     forbidden = []
     for term in (*case.forbid, *boundary_forbid_terms(list(case.boundaries))):
@@ -612,6 +676,7 @@ def validate(case: Case) -> list[str]:
             "may",
             "might",
             "probably",
+            "not sure",
             "not definitive",
             "not state that as definitive",
             "I think",
@@ -1566,6 +1631,18 @@ def run_validator_self_tests() -> list[str]:
             "option count",
             Case("self_options", "Give 3", "1. A\n2. B", must=("A",), exact_option_count=3),
             "exact option count failed",
+        ),
+        (
+            "option diversity",
+            Case(
+                "self_option_diversity",
+                "Give 3",
+                "Cleaner: A B C\nWarmer: A B C\nSharper: A B C",
+                must=("A",),
+                exact_option_count=3,
+                min_distinct_option_templates=3,
+            ),
+            "option diversity failed",
         ),
         (
             "markdown fence",
@@ -2546,6 +2623,7 @@ def run_format_contract_tests() -> list[str]:
         must=("Cleaner", "Warmer", "Sharper", "tiny paper moon"),
         preserve_voice=("tiny paper moon",),
         exact_option_count=3,
+        min_distinct_option_templates=3,
         ordered_terms=("Cleaner", "Warmer", "Sharper"),
         forbid=("fourth option", "bonus option"),
         forbid_wrappers=True,
@@ -2595,6 +2673,18 @@ def run_format_contract_tests() -> list[str]:
                 ),
             ),
             "exact option count failed",
+        ),
+        (
+            "three options cloned",
+            replace(
+                three_options,
+                rewrite=(
+                    "Cleaner: Tiny paper moon deck check before Friday.\n"
+                    "Warmer: Tiny paper moon deck check before Friday.\n"
+                    "Sharper: Tiny paper moon deck check before Friday."
+                ),
+            ),
+            "option diversity failed",
         ),
         ("greeting and signoff kept", greeting, None),
         (
@@ -3011,6 +3101,224 @@ def run_authorship_boundary_contract_tests() -> list[str]:
     return failures
 
 
+def run_cultural_voice_contract_tests() -> list[str]:
+    """Protect culturally situated rhetoric from generic professionalization."""
+    checks = [
+        (
+            "indirect refusal preserved",
+            Case(
+                id="cultural_indirect_refusal_kept",
+                source=(
+                    "I'm not sure Friday would be kind to the team. If we can give "
+                    "it until Monday, people can breathe and still do the work well."
+                ),
+                rewrite=(
+                    "I'm not sure Friday would be kind to the team. Monday gives "
+                    "people can breathe and still do the work well."
+                ),
+                must=("Friday", "Monday", "people", "work well"),
+                preserve_voice=("not sure Friday would be kind", "people can breathe"),
+                preserve_uncertainty=True,
+                forbid=("We cannot ship", "hard deadline"),
+            ),
+            None,
+        ),
+        (
+            "indirect refusal flattened",
+            Case(
+                id="cultural_indirect_refusal_flattened",
+                source=(
+                    "I'm not sure Friday would be kind to the team. If we can give "
+                    "it until Monday, people can breathe and still do the work well."
+                ),
+                rewrite="We cannot ship Friday. Monday is the hard deadline.",
+                must=("Friday", "Monday"),
+                preserve_voice=("not sure Friday would be kind", "people can breathe"),
+                preserve_uncertainty=True,
+                forbid=("We cannot ship", "hard deadline"),
+            ),
+            "lost voice markers",
+        ),
+        (
+            "family framing preserved",
+            Case(
+                id="cultural_family_framing_kept",
+                source=(
+                    "This is for my mom, my aunties, and the neighbors who ride "
+                    "with them, not a generic patient group."
+                ),
+                rewrite=(
+                    "This is for my mom, my aunties, and the neighbors who ride "
+                    "with them. It is not a generic patient group."
+                ),
+                must=("mom", "aunties", "neighbors"),
+                preserve_voice=("not a generic patient group",),
+                forbid=("stakeholders", "users", "target audience"),
+            ),
+            None,
+        ),
+        (
+            "family framing abstracted",
+            Case(
+                id="cultural_family_framing_flattened",
+                source=(
+                    "This is for my mom, my aunties, and the neighbors who ride "
+                    "with them, not a generic patient group."
+                ),
+                rewrite="This is for community stakeholders, not a target audience.",
+                must=("mom", "aunties", "neighbors"),
+                preserve_voice=("not a generic patient group",),
+                forbid=("stakeholders", "users", "target audience"),
+            ),
+            "missing required terms",
+        ),
+        (
+            "local idiom preserved",
+            Case(
+                id="cultural_local_idiom_kept",
+                source=(
+                    "We might could move the pickup to Saturday if the rain keeps "
+                    "acting brand new."
+                ),
+                rewrite=(
+                    "We might could move the pickup to Saturday if the rain keeps "
+                    "acting brand new."
+                ),
+                must=("Saturday", "rain"),
+                preserve_voice=("might could", "acting brand new"),
+                forbid=("may be able", "due to weather"),
+            ),
+            None,
+        ),
+        (
+            "local idiom standardized",
+            Case(
+                id="cultural_local_idiom_flattened",
+                source=(
+                    "We might could move the pickup to Saturday if the rain keeps "
+                    "acting brand new."
+                ),
+                rewrite="We may be able to reschedule the pickup to Saturday due to weather.",
+                must=("Saturday", "rain"),
+                preserve_voice=("might could", "acting brand new"),
+                forbid=("may be able", "due to weather"),
+            ),
+            "lost voice markers",
+        ),
+        (
+            "honorific code switch preserved",
+            Case(
+                id="cultural_honorific_codeswitch_kept",
+                source=(
+                    "Salamat po for waiting; Ate Lina has the forms, and I'll bring "
+                    "them after work."
+                ),
+                rewrite=(
+                    "Salamat po for waiting. Ate Lina has the forms, and I'll bring "
+                    "them after work."
+                ),
+                must=("forms", "after work"),
+                preserve_identity=("Ate Lina",),
+                preserve_voice=("Salamat po",),
+                forbid=("Thank you for waiting",),
+            ),
+            None,
+        ),
+        (
+            "honorific code switch translated away",
+            Case(
+                id="cultural_honorific_codeswitch_flattened",
+                source=(
+                    "Salamat po for waiting; Ate Lina has the forms, and I'll bring "
+                    "them after work."
+                ),
+                rewrite="Thank you for waiting. Lina has the forms, and I'll bring them after work.",
+                must=("forms", "after work"),
+                preserve_identity=("Ate Lina",),
+                preserve_voice=("Salamat po",),
+                forbid=("Thank you for waiting",),
+            ),
+            "lost voice markers",
+        ),
+        (
+            "story first ask preserved",
+            Case(
+                id="cultural_story_first_ask_kept",
+                source=(
+                    "When the well is shared, nobody fixes the rope alone. That is "
+                    "why I'm asking everyone to bring one note before Friday."
+                ),
+                rewrite=(
+                    "When the well is shared, nobody fixes the rope alone. That is "
+                    "why I'm asking everyone to bring one note before Friday."
+                ),
+                must=("asking everyone", "one note", "Friday"),
+                preserve_voice=("well is shared", "nobody fixes the rope alone"),
+                ordered_terms=("well is shared", "rope", "asking everyone", "Friday"),
+            ),
+            None,
+        ),
+        (
+            "story first ask flattened",
+            Case(
+                id="cultural_story_first_ask_flattened",
+                source=(
+                    "When the well is shared, nobody fixes the rope alone. That is "
+                    "why I'm asking everyone to bring one note before Friday."
+                ),
+                rewrite="Please submit one note before Friday.",
+                must=("asking everyone", "one note", "Friday"),
+                preserve_voice=("well is shared", "nobody fixes the rope alone"),
+                ordered_terms=("well is shared", "rope", "asking everyone", "Friday"),
+            ),
+            "missing required terms",
+        ),
+        (
+            "respectful softening preserved",
+            Case(
+                id="cultural_respectful_softening_kept",
+                source=(
+                    "I may be wrong, but I want to say this gently: the plan leaves "
+                    "the elders out."
+                ),
+                rewrite=(
+                    "I may be wrong, but I want to say this gently: the plan leaves "
+                    "the elders out."
+                ),
+                must=("plan", "elders"),
+                preserve_voice=("I may be wrong", "say this gently", "elders"),
+                preserve_uncertainty=True,
+                forbid=("older participants", "excludes"),
+            ),
+            None,
+        ),
+        (
+            "respectful softening stripped",
+            Case(
+                id="cultural_respectful_softening_flattened",
+                source=(
+                    "I may be wrong, but I want to say this gently: the plan leaves "
+                    "the elders out."
+                ),
+                rewrite="The plan excludes older participants.",
+                must=("plan", "elders"),
+                preserve_voice=("I may be wrong", "say this gently", "elders"),
+                preserve_uncertainty=True,
+                forbid=("older participants", "excludes"),
+            ),
+            "missing required terms",
+        ),
+    ]
+    failures: list[str] = []
+    for name, case, expected in checks:
+        errors = validate(case)
+        if expected is None and errors:
+            failures.append(f"{name}: expected pass, got {errors}")
+        elif expected is not None and not any(expected in error for error in errors):
+            failures.append(f"{name}: expected {expected}, got {errors}")
+    return failures
+
+
 def run_boundary_contract_tests() -> list[str]:
     """Exercise explicit boundary fences as auditable constraints."""
     checks = [
@@ -3210,6 +3518,7 @@ def main() -> int:
     format_test_failures = run_format_contract_tests()
     voice_texture_test_failures = run_voice_texture_contract_tests()
     authorship_boundary_test_failures = run_authorship_boundary_contract_tests()
+    cultural_voice_test_failures = run_cultural_voice_contract_tests()
     boundary_test_failures = run_boundary_contract_tests()
     mutation_test_failures = run_mutation_tests()
     if (
@@ -3223,6 +3532,7 @@ def main() -> int:
         or format_test_failures
         or voice_texture_test_failures
         or authorship_boundary_test_failures
+        or cultural_voice_test_failures
         or boundary_test_failures
         or mutation_test_failures
     ):
@@ -3238,6 +3548,7 @@ def main() -> int:
             + format_test_failures
             + voice_texture_test_failures
             + authorship_boundary_test_failures
+            + cultural_voice_test_failures
             + boundary_test_failures
             + mutation_test_failures
         ):

@@ -206,15 +206,21 @@ You do not need to say "preserve my voice," "do not add facts," or "keep uncerta
 Other install paths:
 
 ```bash
-npx skills add RegionallyFamous/youish --skill youish
+npx skills add https://github.com/RegionallyFamous/youish --skill youish
 ```
 
 ```bash
-gh skill install RegionallyFamous/youish skills/youish --agent codex --scope user --pin v0.3.2
+gh skill install RegionallyFamous/youish skills/youish --agent codex --scope user --pin v0.3.3
 ```
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/RegionallyFamous/youish/v0.3.2/install.sh | YOUISH_REF=v0.3.2 bash
+curl -fsSL https://raw.githubusercontent.com/RegionallyFamous/youish/v0.3.3/install.sh | YOUISH_REF=v0.3.3 bash
+```
+
+For a deterministic release-asset install that pulls the published skill ZIP and verifies it against `SHA256SUMS`:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/RegionallyFamous/youish/v0.3.3/install.sh | YOUISH_REF=v0.3.3 YOUISH_SOURCE=release-zip bash
 ```
 
 Install destinations differ by tool: `npx skills` currently installs Codex-compatible skills into `~/.agents/skills/youish`; `gh skill install --agent codex --scope user` installs into `~/.codex/skills/youish`.
@@ -254,7 +260,7 @@ This does not prove literary taste. It proves Youish keeps the constraints it cl
 | Refuse invented details | Unsupported detail markers, invented numbers, and unsupported entity detection |
 | Avoid generic AI polish | Buzzword checks plus pattern tests for shiny but empty phrasing |
 | Respect constraints | Exact word count, no-dash, format, wrapper, and paragraph-shape checks |
-| Keep requested output shape | Format contracts for options, greetings, signoffs, diagnosis-only responses, code fences, and line prefixes |
+| Keep requested output shape | Format contracts for options, option diversity, greetings, signoffs, diagnosis-only responses, code fences, and line prefixes |
 | Turn notes into usable text | Source-only thought-dump cases with artifact cleanup and reader-action checks |
 | Keep scorecards honest | Transcript integrity checks recompute from raw output, reject unproven passing records, and distinguish partial suites from complete public scores |
 
@@ -280,6 +286,8 @@ The critique is worth taking seriously. Research on human-AI co-writing has foun
 - ["It was 80% me, 20% AI": Seeking Authenticity in Co-Writing with Large Language Models](https://arxiv.org/abs/2411.13032): authenticity depends on writers feeling the final piece still carries their choices.
 - [AI Suggestions Homogenize Writing Toward Western Styles and Diminish Cultural Nuances](https://arxiv.org/abs/2409.11360): suggestion systems can flatten voice, so voice preservation has to be a first-class requirement.
 - [How LLMs Distort Our Written Language](https://arxiv.org/abs/2603.18161): even edits framed as grammar help can alter meaning, neutrality, and perceived voice. Youish treats meaning and stance preservation as release-tested behavior, not a nice-to-have.
+- [Voice Under Revision](https://arxiv.org/abs/2604.22142): even voice-preserving rewrite prompts can normalize personal narrative style, reduce situated markers, and make texts harder to match back to their source. Youish treats source markers as protected evidence, not decoration.
+- [The Cost of Perfect English](https://arxiv.org/abs/2605.13055): grammar polishing can preserve propositions while erasing dialogic engagement, politeness, and sociopragmatic stance. Youish now tests culturally situated indirectness, honorifics, local idiom, and family framing.
 - [What Keeps Agent Skills from Being Reusable? Evidence from 138K SKILL.md Files](https://openreview.net/pdf?id=n0AIlfxDU0): reusable skills need clear routing metadata, lean bodies, local procedural knowledge, validation, and low context waste. Youish keeps runtime guidance compact and pushes proof into scripts.
 - [Digital.gov: Principles of plain language](https://digital.gov/guides/plain-language/principles): write for the audience, make the useful action clear, and cut clutter.
 - [CPSC: Plain Language Principles](https://www.cpsc.gov/About-CPSC/Policies-Statements-and-Directives/plain-language-principles): plain writing is not dumbed-down writing. It is respect for the reader's time.
@@ -287,8 +295,8 @@ The critique is worth taking seriously. Research on human-AI co-writing has foun
 | Research Risk | Youish Behavior | Tested By |
 |---|---|---|
 | The writer stops feeling like the piece is theirs | Prefer light edits, protected voice markers, and tradeoff notes for high-authorship text | Voice marker fixtures, authorship boundary contracts |
-| AI suggestions flatten culturally situated voice | Preserve dialect, code-switching, local idiom, indirectness, and community framing unless the user asks otherwise | Identity, dialect, and boundary tests |
-| Options become the same template in different pants | Use meaningfully different strategies: cleaner, warmer, sharper, plainer, or more source-textured | Option-count, distinct-label, and output-shape contracts |
+| AI suggestions flatten culturally situated voice | Preserve dialect, code-switching, local idiom, indirectness, honorifics, family/community framing, and story-first structure unless the user asks otherwise | Cultural voice, identity, dialect, and boundary contracts |
+| Options become the same template in different pants | Use meaningfully different strategies: cleaner, warmer, sharper, plainer, or more source-textured | Option-count, option-diversity, and output-shape contracts |
 | Plain language turns into generic simplification | Put source-supported actors next to actions, keep uncertainty, and refuse invented facts | Reader-action, protected-fact, polarity, and numeric/entity drift checks |
 | Skills waste context or hide behavior | Keep `SKILL.md` compact, move heavy checks to scripts, and publish scorecards | Progressive-disclosure validation and release-asset checks |
 

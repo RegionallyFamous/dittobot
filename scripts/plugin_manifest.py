@@ -7,7 +7,7 @@ import re
 
 
 PLUGIN_NAME = "youish"
-DEFAULT_VERSION = "0.3.2"
+DEFAULT_VERSION = "0.3.3"
 PLUGIN_DESCRIPTION = "Voice-faithful rewrites that keep your claims, stance, and rhythm."
 SEMVER_RE = re.compile(
     r"^(0|[1-9]\d*)\."
@@ -41,11 +41,19 @@ def manifest(version: str) -> dict:
             "writing",
             "editing",
             "copyediting",
+            "copywriting",
             "proofreading",
             "email",
+            "email-writing",
+            "line-editing",
+            "tone",
             "voice",
             "voice-preserving",
+            "rewrite",
             "rewrites",
+            "messy-notes",
+            "ai-writing",
+            "less-ai-sounding",
             "skills",
         ],
         "interface": {

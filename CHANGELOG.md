@@ -4,6 +4,15 @@
 
 Nothing yet.
 
+## 0.3.3 - 2026-06-02
+
+- Add option-diversity validation so tone options cannot pass as the same template with different labels.
+- Add a public cultural-voice contract group for indirectness, family/community framing, local idiom, honorifics, story-first structure, and respectful softening.
+- Teach Youish to explicitly preserve indirectness, honorifics, family/community framing, and story-first structure when culturally situated phrasing matters.
+- Add 2026 research notes on personal-narrative normalization and pragmatic flattening in AI-assisted writing.
+- Add a verified release-ZIP installer mode and exact version checks for public install commands.
+- Broaden plugin search keywords for copywriting, line editing, tone, messy notes, and less-AI-sounding rewrites.
+
 ## 0.3.2 - 2026-06-02
 
 - Add spelled-out metric invention checks, such as `forty percent`, to the deterministic validator.

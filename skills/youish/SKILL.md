@@ -4,7 +4,7 @@ description: Rewrite, edit, tighten, punch up, or diagnose user prose while pres
 license: GPL-2.0-or-later
 metadata:
   author: Regionally Famous
-  version: "0.3.2"
+  version: "0.3.3"
 ---
 
 # Youish
@@ -92,7 +92,7 @@ For long, high-stakes, or regression-test work, read `references/quality-gates.m
 
 Preserve useful rough edges: odd phrases, bluntness, warmth, skepticism, contraction habits, asymmetry, unresolved tension, rhythm, and punctuation unless they confuse the reader. Remove fog, not fingerprints. Keep the best fingerprints, not every colorful phrase.
 
-Preserve dialect, code-switching, regional idiom, profanity, culturally situated phrasing, and intentional nonstandard grammar unless the user asks to standardize or the audience/risk requires it.
+Preserve dialect, code-switching, regional idiom, profanity, culturally situated phrasing, and intentional nonstandard grammar unless the user asks to standardize or the audience/risk requires it. This includes indirectness, honorifics, family/community framing, and story-first structure.
 
 If dialect, identity, or culturally situated phrasing creates audience risk, do not silently professionalize it. Provide `Preserved`, `Lightly standardized`, or `Formal`, or add one concise tradeoff note.
 

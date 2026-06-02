@@ -2,7 +2,8 @@
 set -euo pipefail
 
 REPO="${YOUISH_REPO:-RegionallyFamous/youish}"
-REF="${YOUISH_REF:-v0.3.2}"
+REF="${YOUISH_REF:-v0.3.3}"
+SOURCE="${YOUISH_SOURCE:-tag-archive}"
 
 if [ -n "${YOUISH_ARCHIVE_URL:-}" ]; then
   ARCHIVE_URL="$YOUISH_ARCHIVE_URL"
@@ -22,14 +23,83 @@ need() {
 }
 
 need curl
-need tar
 need python3
+if [ "$SOURCE" != "release-zip" ]; then
+  need tar
+fi
 
 tmpdir="$(mktemp -d "${TMPDIR:-/tmp}/youish-install.XXXXXX")"
 cleanup() {
   rm -rf "$tmpdir"
 }
 trap cleanup EXIT
+
+if [ "$SOURCE" = "release-zip" ]; then
+  if [[ "$REF" != v[0-9]* ]]; then
+    printf 'YOUISH_SOURCE=release-zip requires YOUISH_REF to be a release tag such as v0.3.3.\n' >&2
+    exit 1
+  fi
+  version="${REF#v}"
+  release_base="${YOUISH_RELEASE_URL:-https://github.com/${REPO}/releases/download/${REF}}"
+  asset_name="youish-skill-v${version}.zip"
+  asset="$tmpdir/$asset_name"
+  sums="$tmpdir/SHA256SUMS"
+  printf 'Downloading Youish release asset from %s/%s\n' "$release_base" "$asset_name"
+  curl -fsSL "$release_base/$asset_name" -o "$asset"
+  curl -fsSL "$release_base/SHA256SUMS" -o "$sums"
+  expected_sha="$(awk -v name="$asset_name" '$2 == name { print $1 }' "$sums")"
+  if [ -z "$expected_sha" ]; then
+    printf 'Could not find %s in release SHA256SUMS.\n' "$asset_name" >&2
+    exit 1
+  fi
+  actual_sha="$(python3 - "$asset" <<'PY'
+import hashlib
+import sys
+
+with open(sys.argv[1], "rb") as handle:
+    print(hashlib.sha256(handle.read()).hexdigest())
+PY
+)"
+  if [ "$actual_sha" != "$expected_sha" ]; then
+    printf 'Downloaded release asset checksum mismatch.\nExpected: %s\nActual:   %s\n' "$expected_sha" "$actual_sha" >&2
+    exit 1
+  fi
+  python3 - "$asset" "$tmpdir" <<'PY'
+import stat
+import sys
+import zipfile
+from pathlib import PurePosixPath
+
+zip_path, destination = sys.argv[1], sys.argv[2]
+with zipfile.ZipFile(zip_path) as archive:
+    for info in archive.infolist():
+        name = PurePosixPath(info.filename)
+        if info.filename.startswith("/") or not name.parts or ".." in name.parts:
+            raise SystemExit(f"Unsafe ZIP path: {info.filename}")
+        if name.parts[0] != "youish":
+            raise SystemExit(f"Unexpected ZIP root: {info.filename}")
+        file_type = stat.S_IFMT((info.external_attr >> 16) & 0o777777)
+        if file_type == stat.S_IFLNK:
+            raise SystemExit(f"Refusing symlink in ZIP: {info.filename}")
+    archive.extractall(destination)
+PY
+  repo_dir="$tmpdir/youish"
+  if [ ! -f "$repo_dir/SKILL.md" ] || ! grep -q '^name: youish$' "$repo_dir/SKILL.md"; then
+    printf 'Downloaded release asset does not look like the Youish skill package.\n' >&2
+    exit 1
+  fi
+  if [ ! -f "$repo_dir/scripts/install.py" ]; then
+    printf 'Could not find scripts/install.py in the Youish release asset.\n' >&2
+    exit 1
+  fi
+  printf 'Installing verified Youish release asset into the Codex user skills folder...\n'
+  python3 "$repo_dir/scripts/install.py" --copy "$@"
+  printf 'Youish is installed. Start a new Codex session if $youish does not appear right away.\n'
+  exit 0
+elif [ "$SOURCE" != "tag-archive" ]; then
+  printf 'Unknown YOUISH_SOURCE: %s. Use tag-archive or release-zip.\n' "$SOURCE" >&2
+  exit 1
+fi
 
 archive="$tmpdir/youish.tar.gz"
 printf 'Downloading Youish from %s\n' "$ARCHIVE_URL"

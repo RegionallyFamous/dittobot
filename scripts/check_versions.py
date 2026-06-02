@@ -32,7 +32,6 @@ def main() -> int:
     checks = {
         "CHANGELOG.md": rf"^## {re.escape(version)} - ",
         "install.sh": rf'REF="\$\{{YOUISH_REF:-v{re.escape(version)}\}}"',
-        "README.md": rf"v{re.escape(version)}",
         "SKILL.md": rf'version:\s+"{re.escape(version)}"',
         ".github/workflows/validate.yml": rf"{re.escape(version)}",
         "scripts/scorecard.py": r"default=DEFAULT_VERSION",
@@ -48,6 +47,34 @@ def main() -> int:
     metadata = json.loads(read("metadata.json"))
     if metadata.get("version") != version:
         errors.append(f"metadata.json version is {metadata.get('version')}, expected {version}")
+    expected_npx = "npx skills add https://github.com/RegionallyFamous/youish --skill youish"
+    expected_gh = (
+        "gh skill install RegionallyFamous/youish skills/youish "
+        f"--agent codex --scope user --pin v{version}"
+    )
+    expected_curl = (
+        "curl -fsSL https://raw.githubusercontent.com/RegionallyFamous/youish/"
+        f"v{version}/install.sh | YOUISH_REF=v{version} bash"
+    )
+    expected_release_zip = (
+        "curl -fsSL https://raw.githubusercontent.com/RegionallyFamous/youish/"
+        f"v{version}/install.sh | YOUISH_REF=v{version} YOUISH_SOURCE=release-zip bash"
+    )
+    readme = read("README.md")
+    for label, command in (
+        ("README npx install command", expected_npx),
+        ("README gh skill install command", expected_gh),
+        ("README curl install command", expected_curl),
+        ("README release ZIP install command", expected_release_zip),
+    ):
+        if command not in readme:
+            errors.append(f"{label} is missing or not pinned exactly: {command}")
+    install_command = metadata.get("skillsSh", {}).get("installCommand")
+    if install_command != expected_npx:
+        errors.append(
+            "metadata.json skillsSh.installCommand is "
+            f"{install_command!r}, expected {expected_npx!r}"
+        )
     mirror_manifest = json.loads(read("plugins/youish/.codex-plugin/plugin.json"))
     if mirror_manifest.get("version") != version:
         errors.append(
