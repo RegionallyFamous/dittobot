@@ -175,27 +175,13 @@ When disclosure matters, say the true thing: edited with AI from my draft, gramm
 
 ## Use It
 
-First, install Youish from inside Codex:
+Install Youish from inside Codex:
 
 ```text
 Use $skill-installer to install Youish from GitHub repo RegionallyFamous/youish. Use path "skills/youish" and install it as "youish".
 ```
 
-You do not need to clone anything.
-
-If you prefer GitHub CLI's skill manager, pin the current release:
-
-```bash
-gh skill install RegionallyFamous/youish youish --agent codex --scope user --pin v0.3.0
-```
-
-If you use the open skills.sh CLI, install from the same repo:
-
-```bash
-npx skills add RegionallyFamous/youish
-```
-
-Then start a new Codex session and paste the mess. Most prompts should be this boring:
+Restart Codex, then most prompts can stay this boring:
 
 ```text
 Use $youish on this:
@@ -203,17 +189,35 @@ Use $youish on this:
 [paste the messy draft, notes, rant, email, announcement, post, caption, or half-formed thought]
 ```
 
+To verify the install with a real rewrite:
+
+```text
+Use $youish on this and return only the rewrite:
+
+ok the launch note is somehow both too long and allergic to information. what i actually mean is we fixed the importer bug, people can retry failed rows now, and i need it to sound calm, useful, and not like a haunted changelog wearing a meeting lanyard
+```
+
+A good result should keep the facts: `importer bug fixed` and `failed rows can be retried`. It should also keep at least one live voice marker, like `haunted changelog`.
+
 That is the point. Drop in the stream of consciousness; get back the version that sounds like you after sleep, coffee, and one more pass.
 
 You do not need to say "preserve my voice," "do not add facts," or "keep uncertainty." That is the job. Add instructions only when you mean it: exact word count, no dashes, a specific audience, options, diagnosis-only, or show what changed.
 
-If the Codex prompt is unavailable, this one-line install does the same basic job:
+Other install paths:
+
+```bash
+gh skill install RegionallyFamous/youish youish --agent codex --scope user --pin v0.3.0
+```
+
+```bash
+npx skills add RegionallyFamous/youish
+```
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/RegionallyFamous/youish/v0.3.0/install.sh | YOUISH_REF=v0.3.0 bash
 ```
 
-Other install paths are in the [Install wiki](https://github.com/RegionallyFamous/youish/wiki/Install) for GitHub CLI, Codex plugin packaging, release assets, and open-skills ecosystems.
+More options live in the [Install wiki](https://github.com/RegionallyFamous/youish/wiki/Install).
 
 ## Proof, Not Vibes
 

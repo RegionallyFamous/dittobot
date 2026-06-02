@@ -1,0 +1,13 @@
+{
+  "version": "0.3.0",
+  "organization": "Regionally Famous",
+  "date": "June 2026",
+  "abstract": "Voice-faithful rewriting for AI agents, designed to preserve a writer's claims, stance, rhythm, uncertainty, useful weirdness, and exact constraints while removing clutter and generic AI polish. Includes compact runtime instructions, optional quality-gate references, and deterministic regression checks for facts, quotes, identity markers, output shape, source-only thought dumps, and live-eval integrity.",
+  "references": [
+    "https://github.com/RegionallyFamous/youish",
+    "https://arxiv.org/abs/2411.13032",
+    "https://arxiv.org/abs/2409.11360",
+    "https://digital.gov/guides/plain-language/principles",
+    "https://www.cpsc.gov/About-CPSC/Policies-Statements-and-Directives/plain-language-principles"
+  ]
+}

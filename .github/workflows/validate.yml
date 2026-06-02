@@ -96,10 +96,35 @@ jobs:
           assert payload["desired_audit"]["status"] == "PASS"
           PY
           transcript="$RUNNER_TEMP/live.local.jsonl"
-          printf '%s\n' \
-            '{"case":"thought_dump_launch_note_01","prompt_mode":"source_only","model":"gpt-5.2","skill_sha256":"abc123def456789","usage":{"input_tokens":100,"output_tokens":20,"total_tokens":120},"errors":[]}' \
-            '{"case":"legal_precision_01","prompt_mode":"explicit_rewrite","model":"gpt-5.2","skill_sha256":"abc123def456789","usage":{"input_tokens":90,"output_tokens":30},"errors":["lost uncertainty marker"]}' \
-            > "$transcript"
+          python3 - "$transcript" <<'PY'
+          import json
+          import sys
+          sys.path.insert(0, "scripts")
+          from regression_100 import make_cases
+          cases = {case.id: case for case in make_cases()}
+          records = [
+              {
+                  "case": "thought_dump_launch_note_01",
+                  "prompt_mode": "source_only",
+                  "model": "gpt-5.2",
+                  "skill_sha256": "abc123def456789",
+                  "usage": {"input_tokens": 100, "output_tokens": 20, "total_tokens": 120},
+                  "output": cases["thought_dump_launch_note_01"].rewrite,
+                  "errors": [],
+              },
+              {
+                  "case": "legal_precision_01",
+                  "prompt_mode": "explicit_rewrite",
+                  "model": "gpt-5.2",
+                  "skill_sha256": "abc123def456789",
+                  "usage": {"input_tokens": 90, "output_tokens": 30},
+                  "errors": ["lost uncertainty marker"],
+              },
+          ]
+          with open(sys.argv[1], "w", encoding="utf-8") as handle:
+              for record in records:
+                  handle.write(json.dumps(record) + "\n")
+          PY
           python3 scripts/live_report.py "$transcript" | grep "LIVE EVAL REPORT"
           python3 scripts/live_report.py "$transcript" | grep "legal_precision_01"
           python3 scripts/live_report.py "$transcript" --json | grep "lost_uncertainty"
@@ -238,7 +263,7 @@ jobs:
           assert guardrails["source_only_default_inference"] == 10
           contracts = payload["contract_tests"]
           assert contracts["status"] == "PASS"
-          assert contracts["group_count"] == 10
+          assert contracts["group_count"] == 13
           assert [group["name"] for group in contracts["groups"]] == [
               "validator_self_tests",
               "negative_fixtures",
@@ -247,9 +272,12 @@ jobs:
               "reader_action_contracts",
               "thought_dump_contracts",
               "source_only_artifact_contracts",
+              "format_contracts",
               "voice_texture_contracts",
+              "authorship_boundary_contracts",
               "boundary_contracts",
               "mutation_tests",
+              "scorecard_integrity_contracts",
           ]
           assert all(group["failure_count"] == 0 for group in contracts["groups"])
           assert payload["plugin"]["status"] == "PASS"

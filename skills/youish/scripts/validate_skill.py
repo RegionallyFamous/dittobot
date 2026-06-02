@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import ast
 import hashlib
+import json
 import os
 import re
 import sys
@@ -18,6 +19,7 @@ from package_files import PACKAGE_FILES
 ROOT = Path(__file__).resolve().parents[1]
 SKILL = ROOT / "SKILL.md"
 OPENAI_YAML = ROOT / "agents" / "openai.yaml"
+METADATA_JSON = ROOT / "metadata.json"
 INSTALL_SH = ROOT / "install.sh"
 SPEC_SKILL_ROOT = ROOT / "skills" / "youish"
 SKILL_WORD_LIMIT = 1900
@@ -40,6 +42,8 @@ def frontmatter(text: str) -> tuple[dict[str, str], str]:
     data: dict[str, str] = {}
     for line in raw.splitlines():
         if not line.strip():
+            continue
+        if line.startswith((" ", "\t")):
             continue
         if ":" not in line:
             raise ValueError(f"invalid frontmatter line: {line!r}")
@@ -110,14 +114,14 @@ def main() -> int:
                 fail("frontmatter license must be GPL-2.0-or-later", errors)
             if not description or len(description.split()) < 20:
                 fail("frontmatter description must be informative", errors)
-            allowed_keys = {"name", "license", "description"}
+            allowed_keys = {"name", "license", "description", "metadata"}
             if not SOURCE_REPO_ROOT:
-                allowed_keys |= {"metadata"} | {
+                allowed_keys |= {
                     key for key in data if key.startswith("github-")
                 }
             if any(key not in allowed_keys for key in data):
                 if SOURCE_REPO_ROOT:
-                    fail("frontmatter must contain only name, license, and description", errors)
+                    fail("frontmatter must contain only name, license, description, and metadata", errors)
                 else:
                     fail("frontmatter contains unsupported install metadata", errors)
             if "# Youish" not in body:
@@ -158,6 +162,22 @@ def main() -> int:
             rel = raw_path.removeprefix("./")
             if not (ROOT / rel).exists():
                 fail(f"agents/openai.yaml {field} points to missing file {raw_path}", errors)
+
+    if not METADATA_JSON.exists():
+        fail("metadata.json is missing", errors)
+    else:
+        try:
+            metadata = json.loads(METADATA_JSON.read_text(encoding="utf-8"))
+        except json.JSONDecodeError as exc:
+            fail(f"metadata.json is invalid JSON: {exc}", errors)
+        else:
+            for field in ("version", "organization", "date", "abstract", "references"):
+                if field not in metadata:
+                    fail(f"metadata.json missing {field}", errors)
+            if not isinstance(metadata.get("references"), list) or not metadata.get("references"):
+                fail("metadata.json references must be a non-empty list", errors)
+            if len(str(metadata.get("abstract", "")).split()) < 20:
+                fail("metadata.json abstract must be informative", errors)
 
     for rel in PACKAGE_FILES:
         path = ROOT / rel

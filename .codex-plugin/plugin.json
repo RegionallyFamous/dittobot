@@ -13,7 +13,11 @@
   "keywords": [
     "writing",
     "editing",
+    "copyediting",
+    "proofreading",
+    "email",
     "voice",
+    "voice-preserving",
     "rewrites",
     "skills"
   ],
@@ -36,8 +40,8 @@
     "composerIcon": "skills/youish/assets/icon-small.svg",
     "logo": "skills/youish/assets/icon-large.svg",
     "defaultPrompt": [
-      "Use $youish on this. Paste the messy draft below.",
-      "Use $youish to infer a compact voice profile.",
+      "Use $youish on this and return only the rewrite.",
+      "Use $youish to tighten this for the reader without losing my voice.",
       "Use $youish and show what changed and why."
     ]
   }

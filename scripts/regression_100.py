@@ -179,7 +179,10 @@ class Case:
     starts_with: str | None = None
     ends_with: str | None = None
     exact_substrings: tuple[str, ...] = field(default_factory=tuple)
+    preserve_quotes: tuple[str, ...] = field(default_factory=tuple)
+    preserve_identity: tuple[str, ...] = field(default_factory=tuple)
     line_prefixes: tuple[str, ...] = field(default_factory=tuple)
+    exact_option_count: int | None = None
     ordered_terms: tuple[str, ...] = field(default_factory=tuple)
     required_claims: tuple[str, ...] = field(default_factory=tuple)
     forbid_assertions: tuple[str, ...] = field(default_factory=tuple)
@@ -252,6 +255,18 @@ def paragraph_count(text: str) -> int:
 
 def has_bullet_line(text: str) -> bool:
     return any(re.search(r"^\s*(?:[-*+]|\d+[.)])\s+", line) for line in text.splitlines())
+
+
+OPTION_LABEL_RE = re.compile(
+    r"^\s*(?:(?:option\s*)?\d+[.) :]|\d+\s*[-:)]|"
+    r"(?:cleaner|warmer|sharper|firmer|softer|shorter|punchier|"
+    r"plain|direct|casual|formal|gentler|bolder):)",
+    re.IGNORECASE,
+)
+
+
+def option_count(text: str) -> int:
+    return sum(1 for line in text.splitlines() if OPTION_LABEL_RE.search(line))
 
 
 def sentence_chunks(text: str) -> list[str]:
@@ -380,6 +395,18 @@ def validate(case: Case) -> list[str]:
     if missing_exact:
         errors.append(f"lost exact substrings: {missing_exact}")
 
+    missing_quotes = [
+        snippet for snippet in case.preserve_quotes if snippet not in case.rewrite
+    ]
+    if missing_quotes:
+        errors.append(f"lost preserved quotes: {missing_quotes}")
+
+    missing_identity = [
+        snippet for snippet in case.preserve_identity if snippet not in case.rewrite
+    ]
+    if missing_identity:
+        errors.append(f"lost identity markers: {missing_identity}")
+
     if case.line_prefixes:
         lines = [line.rstrip() for line in case.rewrite.splitlines()]
         missing_prefixes = [
@@ -388,6 +415,14 @@ def validate(case: Case) -> list[str]:
         ]
         if missing_prefixes:
             errors.append(f"lost required line prefixes: {missing_prefixes}")
+
+    if case.exact_option_count is not None:
+        actual_options = option_count(case.rewrite)
+        if actual_options != case.exact_option_count:
+            errors.append(
+                "exact option count failed: expected "
+                f"{case.exact_option_count}, got {actual_options}"
+            )
 
     forbidden = []
     for term in (*case.forbid, *boundary_forbid_terms(list(case.boundaries))):
@@ -1414,9 +1449,24 @@ def run_validator_self_tests() -> list[str]:
             "lost exact substrings",
         ),
         (
+            "preserved quote",
+            Case("self_quote", '"Keep this."', "Keep this.", must=("Keep",), preserve_quotes=('"Keep this."',)),
+            "lost preserved quotes",
+        ),
+        (
+            "identity marker",
+            Case("self_identity", "Mx. Álvarez uses they/them", "Mr. Alvarez uses he/him", must=("uses",), preserve_identity=("Mx. Álvarez", "they/them")),
+            "lost identity markers",
+        ),
+        (
             "line prefix",
             Case("self_prefix", "- A", "A", must=("A",), line_prefixes=("- A",)),
             "lost required line prefixes",
+        ),
+        (
+            "option count",
+            Case("self_options", "Give 3", "1. A\n2. B", must=("A",), exact_option_count=3),
+            "exact option count failed",
         ),
         (
             "markdown fence",
@@ -2178,6 +2228,33 @@ def run_thought_dump_contract_tests() -> list[str]:
         max_paragraphs=1,
         prompt_mode="source_only",
     )
+    quoted_keeper = Case(
+        id="thought_dump_quote_fidelity_contract",
+        source=(
+            'note for the release: Maia said "do not turn this into soup." We fixed '
+            "the duplicate import, but the retry button is still manual. Actually, "
+            "scratch the first opener. The point is calm, exact, and keep her quote "
+            "because it is the only good sentence in the room."
+        ),
+        rewrite=(
+            'We fixed the duplicate import, but the retry button is still manual. '
+            'Maia said "do not turn this into soup." That is still the right '
+            "energy: calm and exact."
+        ),
+        must=("duplicate import", "retry button", "Maia", "calm and exact"),
+        protected=("Maia", "duplicate import", "retry button is still manual"),
+        preserve_quotes=('"do not turn this into soup."',),
+        preserve_voice=("do not turn this into soup",),
+        forbid=("scratch the first opener", "first opener"),
+        required_claims=("duplicate import", "retry button is still manual"),
+        forbid_assertions=("retry button is automatic", "retry button is fixed"),
+        forbid_artifacts=("Actually", "scratch the first opener"),
+        max_question_marks=0,
+        forbid_clarifying=True,
+        forbid_wrappers=True,
+        max_paragraphs=1,
+        prompt_mode="source_only",
+    )
     voice_density = Case(
         id="thought_dump_voice_density_contract",
         source=(
@@ -2213,6 +2290,18 @@ def run_thought_dump_contract_tests() -> list[str]:
             replace(self_correction, rewrite="Jordan, Friday should work for QA. Monday is a backup."),
             "forbidden terms appeared",
         ),
+        ("messy quote preserved exactly", quoted_keeper, None),
+        (
+            "messy quote paraphrased away",
+            replace(
+                quoted_keeper,
+                rewrite=(
+                    "We fixed the duplicate import, but the retry button is still "
+                    "manual. Maia said not to make this messy, so keep it calm and exact."
+                ),
+            ),
+            "lost preserved quotes",
+        ),
         ("voice density honored", voice_density, None),
         (
             "voice density hoarded",
@@ -2225,6 +2314,115 @@ def run_thought_dump_contract_tests() -> list[str]:
                 ),
             ),
             "forbidden terms appeared",
+        ),
+    ]
+    failures: list[str] = []
+    for name, case, expected in checks:
+        errors = validate(case)
+        if expected is None and errors:
+            failures.append(f"{name}: expected pass, got {errors}")
+        elif expected is not None and not any(expected in error for error in errors):
+            failures.append(f"{name}: expected {expected}, got {errors}")
+    return failures
+
+
+def run_format_contract_tests() -> list[str]:
+    """Protect requested output shape: options, frames, fences, and diagnosis-only."""
+    by_id = {case.id: case for case in make_cases()}
+    three_options = Case(
+        id="format_three_options_contract",
+        source=(
+            "Give me 3 subject line options. Keep the weird bit: the deck is a tiny "
+            "paper moon, but do not make it more dramatic than that."
+        ),
+        rewrite=(
+            "Cleaner: Friday deck check\n"
+            "Warmer: Can you look at the tiny paper moon?\n"
+            "Sharper: Deck check before Friday"
+        ),
+        must=("Cleaner", "Warmer", "Sharper", "tiny paper moon"),
+        preserve_voice=("tiny paper moon",),
+        exact_option_count=3,
+        ordered_terms=("Cleaner", "Warmer", "Sharper"),
+        forbid=("fourth option", "bonus option"),
+        forbid_wrappers=True,
+        max_question_marks=1,
+    )
+    diagnosis_only = Case(
+        id="format_diagnosis_only_contract",
+        source=(
+            "Diagnose only, do not rewrite: this paragraph spends 80 words arriving "
+            "at the point and then hides the ask in a cupboard."
+        ),
+        rewrite=(
+            "The main issue is order: the ask arrives too late. Cut the setup, move "
+            "the ask into the first sentence, and keep the cupboard image only if it "
+            "helps the reader see the problem."
+        ),
+        must=("ask arrives too late", "first sentence", "cupboard image"),
+        preserve_voice=("cupboard",),
+        diagnosis=True,
+        forbid_artifacts=("Try:", "Suggested rewrite:", "Cleaned up:"),
+        forbid_wrappers=True,
+        max_question_marks=0,
+    )
+    fenced_example = Case(
+        id="format_markdown_fence_allowed_contract",
+        source="Return only this fenced example, with no extra note: console.log('ship it')",
+        rewrite="```js\nconsole.log('ship it')\n```",
+        must=("console", "ship it"),
+        exact_substrings=("```js", "console.log('ship it')", "```"),
+        allow_markdown_fence=True,
+        forbid_wrappers=True,
+    )
+    greeting = replace(
+        by_id["format_greeting_signoff_01"],
+        exact_substrings=("Hey Jordan,", "Thanks,\nNick"),
+        exact_paragraphs=3,
+    )
+    checks = [
+        ("three options kept", three_options, None),
+        (
+            "three options collapsed",
+            replace(
+                three_options,
+                rewrite=(
+                    "Cleaner: Friday deck check.\n"
+                    "Warmer: Can you look at the tiny paper moon?"
+                ),
+            ),
+            "exact option count failed",
+        ),
+        ("greeting and signoff kept", greeting, None),
+        (
+            "greeting signoff collapsed",
+            replace(
+                greeting,
+                rewrite=(
+                    "Jordan, we need the final numbers before we publish. Otherwise "
+                    "we are guessing in public, which sounds like a sport I do not "
+                    "want to play. Thanks, Nick"
+                ),
+            ),
+            "lost exact substrings",
+        ),
+        ("diagnosis stayed diagnosis", diagnosis_only, None),
+        (
+            "diagnosis smuggled rewrite",
+            replace(
+                diagnosis_only,
+                rewrite=(
+                    "Suggested rewrite: Move the ask into the first sentence and cut "
+                    "the setup."
+                ),
+            ),
+            "note artifacts appeared",
+        ),
+        ("requested fence allowed", fenced_example, None),
+        (
+            "unrequested fence blocked",
+            replace(fenced_example, allow_markdown_fence=False),
+            "unexpected markdown fence",
         ),
     ]
     failures: list[str] = []
@@ -2558,6 +2756,47 @@ def run_authorship_boundary_contract_tests() -> list[str]:
             ),
             "missing required terms",
         ),
+        (
+            "identity markers kept",
+            Case(
+                id="authorship_identity_markers_kept",
+                source=(
+                    "Please make this bio cleaner: Mélina runs the lab notes and "
+                    "they prefer their name with the accent. Keep it warm but not "
+                    "sparkly."
+                ),
+                rewrite=(
+                    "Mélina runs the lab notes, and they prefer their name with the "
+                    "accent. Keep the bio warm, not sparkly."
+                ),
+                must=("Mélina", "they", "their", "lab notes"),
+                protected=("Mélina", "they", "their"),
+                preserve_identity=("Mélina", "they", "their"),
+                preserve_voice=("warm", "not sparkly"),
+                forbid=("Melina", "she", "he", "Mr.", "Mrs."),
+                forbid_added_entities=True,
+            ),
+            None,
+        ),
+        (
+            "identity markers flattened",
+            Case(
+                id="authorship_identity_markers_flattened",
+                source=(
+                    "Please make this bio cleaner: Mélina runs the lab notes and "
+                    "they prefer their name with the accent. Keep it warm but not "
+                    "sparkly."
+                ),
+                rewrite="Melina runs the lab notes, and she brings warm energy to the work.",
+                must=("Mélina", "they", "their", "lab notes"),
+                protected=("Mélina", "they", "their"),
+                preserve_identity=("Mélina", "they", "their"),
+                preserve_voice=("not sparkly",),
+                forbid=("Melina", "she", "he", "Mr.", "Mrs."),
+                forbid_added_entities=True,
+            ),
+            "missing required terms",
+        ),
     ]
     failures: list[str] = []
     for name, case, expected in checks:
@@ -2760,6 +2999,7 @@ def main() -> int:
     reader_action_test_failures = run_reader_action_contract_tests()
     thought_dump_test_failures = run_thought_dump_contract_tests()
     source_only_artifact_test_failures = run_source_only_artifact_contract_tests()
+    format_test_failures = run_format_contract_tests()
     voice_texture_test_failures = run_voice_texture_contract_tests()
     authorship_boundary_test_failures = run_authorship_boundary_contract_tests()
     boundary_test_failures = run_boundary_contract_tests()
@@ -2772,6 +3012,7 @@ def main() -> int:
         or reader_action_test_failures
         or thought_dump_test_failures
         or source_only_artifact_test_failures
+        or format_test_failures
         or voice_texture_test_failures
         or authorship_boundary_test_failures
         or boundary_test_failures
@@ -2786,6 +3027,7 @@ def main() -> int:
             + reader_action_test_failures
             + thought_dump_test_failures
             + source_only_artifact_test_failures
+            + format_test_failures
             + voice_texture_test_failures
             + authorship_boundary_test_failures
             + boundary_test_failures

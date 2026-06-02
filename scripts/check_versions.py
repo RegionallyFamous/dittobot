@@ -33,6 +33,7 @@ def main() -> int:
         "CHANGELOG.md": rf"^## {re.escape(version)} - ",
         "install.sh": rf'REF="\$\{{YOUISH_REF:-v{re.escape(version)}\}}"',
         "README.md": rf"v{re.escape(version)}",
+        "SKILL.md": rf'version:\s+"{re.escape(version)}"',
         ".github/workflows/validate.yml": rf"{re.escape(version)}",
         "scripts/scorecard.py": r"default=DEFAULT_VERSION",
     }
@@ -44,6 +45,9 @@ def main() -> int:
     manifest = json.loads(read(".codex-plugin/plugin.json"))
     if manifest.get("version") != version:
         errors.append(f".codex-plugin/plugin.json version is {manifest.get('version')}, expected {version}")
+    metadata = json.loads(read("metadata.json"))
+    if metadata.get("version") != version:
+        errors.append(f"metadata.json version is {metadata.get('version')}, expected {version}")
     mirror_manifest = json.loads(read("plugins/youish/.codex-plugin/plugin.json"))
     if mirror_manifest.get("version") != version:
         errors.append(

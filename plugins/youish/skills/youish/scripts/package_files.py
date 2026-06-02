@@ -10,6 +10,7 @@ from pathlib import Path
 PACKAGE_FILES = (
     "SKILL.md",
     "LICENSE",
+    "metadata.json",
     "agents/openai.yaml",
     "assets/icon-large.svg",
     "assets/icon-small.svg",

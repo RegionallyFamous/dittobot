@@ -97,8 +97,8 @@ def check_scorecard_payload(payload: dict, version: str) -> list[str]:
         if contracts.get("status") != "PASS":
             errors.append("scorecard contract_tests status must be PASS")
         groups = contracts.get("groups")
-        if not isinstance(groups, list) or len(groups) != 10:
-            errors.append("scorecard contract_tests.groups must contain 10 groups")
+        if not isinstance(groups, list) or len(groups) != 13:
+            errors.append("scorecard contract_tests.groups must contain 13 groups")
     return errors
 
 

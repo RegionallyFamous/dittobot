@@ -61,6 +61,11 @@ def looks_like_youish(path: Path) -> bool:
     return "name: youish" in text[:500]
 
 
+def default_install_dir() -> str:
+    codex_home = os.environ.get("CODEX_HOME", os.path.expanduser("~/.codex"))
+    return str(Path(codex_home) / "skills" / "youish")
+
+
 def guard_install_target(repo: Path, target: Path, force: bool) -> None:
     resolved_repo = repo.resolve()
     resolved_target = target.resolve(strict=False)
@@ -92,7 +97,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--install-dir",
-        default=os.path.expanduser("~/.agents/skills/youish"),
+        default=default_install_dir(),
         help="Destination skill directory.",
     )
     parser.add_argument(

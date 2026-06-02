@@ -11,6 +11,8 @@ RULES = (
     ("missing_reader_action", "reader_action_drift", ("missing reader actions",)),
     ("lost_protected_fact", "fact_loss", ("lost protected facts",)),
     ("lost_exact_substring", "fact_loss", ("lost exact substrings",)),
+    ("lost_preserved_quote", "quote_drift", ("lost preserved quotes",)),
+    ("lost_identity_marker", "identity_drift", ("lost identity markers",)),
     ("missing_required_claim", "claim_drift", ("missing required claims",)),
     ("forbidden_assertion", "claim_drift", ("forbidden assertions appeared",)),
     ("forbidden_term", "forbidden_term", ("forbidden terms appeared",)),
@@ -38,9 +40,11 @@ RULES = (
     ("diagnosis_drift", "format_drift", ("diagnosis case produced rewrite heading",)),
     ("dash_violation", "constraint_violation", ("dash constraint violated",)),
     ("question_count_violation", "constraint_violation", ("question mark count failed",)),
+    ("option_count_violation", "constraint_violation", ("exact option count failed",)),
     ("exact_word_count_violation", "constraint_violation", ("exact word count failed",)),
     ("max_word_count_violation", "constraint_violation", ("max word count failed",)),
     ("too_long", "constraint_violation", ("too long",)),
+    ("transcript_integrity_failed", "integrity_failure", ("transcript integrity failed",)),
     ("api_error", "api_error", ("API error", "HTTP ")),
 )
 
@@ -48,6 +52,8 @@ BUCKET_RULES = (
     ("voice_loss", ("lost voice markers",)),
     ("stance_drift", ("lost stance markers",)),
     ("fact_loss", ("missing required terms", "lost protected facts", "lost exact substrings")),
+    ("quote_drift", ("lost preserved quotes",)),
+    ("identity_drift", ("lost identity markers",)),
     ("reader_action_drift", ("missing reader actions",)),
     ("claim_drift", ("missing required claims", "forbidden assertions appeared")),
     ("forbidden_term", ("forbidden terms appeared",)),
@@ -75,10 +81,12 @@ BUCKET_RULES = (
     ("constraint_violation", (
         "dash constraint violated",
         "question mark count failed",
+        "exact option count failed",
         "exact word count failed",
         "max word count failed",
         "too long",
     )),
+    ("integrity_failure", ("transcript integrity failed",)),
     ("api_error", ("API error", "HTTP ")),
 )
 

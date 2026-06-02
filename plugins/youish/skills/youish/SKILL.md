@@ -2,6 +2,9 @@
 name: youish
 license: GPL-2.0-or-later
 description: Rewrite, edit, tighten, punch up, or diagnose user prose while preserving voice, intent, facts, stance, rhythm, humor, and formality. Use for emails, posts, raw notes, thought dumps, essays, docs, web copy, speeches, bios, captions, cover letters, or requests to make writing clearer, shorter, more natural, less AI-sounding, warmer, sharper, more persuasive, or more like the user. Do not use for pure from-scratch drafting unless the user provides source text or asks for a draft in an established voice.
+metadata:
+  author: Regionally Famous
+  version: "0.3.0"
 ---
 
 # Youish
@@ -20,11 +23,11 @@ Do not launder emotional stance. Keep justified anger, uncertainty, tenderness, 
 
 Use the lightest edit that satisfies the request. If the draft works, make small improvements. Do not rewrite strong sentences.
 
-For normal edits, run three silent gates: intent/facts, voice/rhythm, and constraints/output. For messy, high-stakes, or persuasive work, find the gap between draft behavior and intent before line edits.
+For normal edits, run three silent gates: intent/facts/stance, voice/rhythm/taste, and constraints/output. For messy, high-stakes, or persuasive work, find the gap between draft behavior and intent before line edits.
 
 For vague requests such as "make this better," preserve meaning, facts, stance, emotional temperature, and voice; tighten clutter; clarify the point; return only the rewrite unless the user asks for rationale or the edit involves a meaningful tradeoff.
 
-For raw notes, rough drafts, fragments, or thought dumps with no explicit task, infer the artifact from cues: email, Slack, announcement, post, note, recap, caption, or short prose. Find the throughline, keep the best texture, remove scratch-work, and return finished prose for the apparent audience. Treat false starts, corrections, repetition, and asides as voice evidence, not necessarily content. If the dump says "actually," "wait," "scratch that," "ignore that," or "no," treat the latest explicit correction as live. Do not make it more formal, certain, cheerful, generic, or complete than the source supports.
+For raw notes, rough drafts, fragments, or thought dumps with no explicit task, infer the artifact from cues: email, Slack, announcement, post, note, recap, caption, or short prose. Find the throughline, keep the best texture, remove scratch-work, and return the most usable version the notes support for the apparent audience. Treat false starts, corrections, repetition, and asides as voice evidence, not necessarily content. If the dump says "actually," "wait," "scratch that," "ignore that," or "no," treat the latest explicit correction as live. Do not make it more formal, certain, cheerful, generic, or complete than the source supports.
 
 For high-authorship or trust-sensitive writing (apologies, condolences, personal, creative, academic, testimonial, review, hiring, journalistic, or identity-heavy text), prefer minimal edits, options, or feedback unless asked for a full rewrite.
 
@@ -36,13 +39,13 @@ When purpose or audience is blurry: infer if one artifact is obvious; provide 2 
 
 ## Intake
 
-Before rewriting, identify task, audience/purpose, voice fingerprint, and protected material. Voice fingerprint includes directness, formality, humor, sentence length, punctuation, vocabulary, confidence, warmth, texture, quirks, favorite phrases, and preferences over generic alternatives. Protected material includes facts, claims, names, dates, commitments, quotes, jokes, emotional beats, technical terms, and phrases that feel like the user.
+Before rewriting, identify task, audience/purpose, voice fingerprint, and protected material. Voice fingerprint includes directness, formality, humor, sentence length, punctuation, vocabulary, confidence, warmth, texture, quirks, favorite phrases, and preferences over generic alternatives. Protected material includes facts, claims, names, dates, commitments, quotes, jokes, emotional beats, load-bearing weirdness, technical terms, and phrases that feel like the user.
 
 Keep private ledgers for constraints, claims/facts, and voice markers. Do not show them unless asked.
 
 Track stance as a first-class object: claim, emotion, pressure, ask, boundary, and certainty. Do not turn anger into concern, grief into uplift, skepticism into balance, uncertainty into confidence, or refusal into permission unless requested.
 
-Voice-source priority: explicit user instruction, current draft purpose/audience, current draft voice, then prior samples. Voice profiles transfer editing taste, not old facts. Current draft facts, audience, constraints, and precision-sensitive context beat reusable profiles.
+Voice-source priority: explicit user instruction, current draft purpose/audience, current draft voice, then prior samples. Voice profiles transfer editing taste, not old facts, opinions, relationships, or emotional posture. Current draft facts, audience, constraints, and precision-sensitive context beat reusable profiles.
 
 Treat user corrections as top-priority voice evidence. Revise without defending the prior version; preserve exact replacement phrases unless they conflict with facts or constraints.
 
@@ -52,7 +55,7 @@ Preserve format, paragraphing, line breaks, headings, bullets, subject lines, gr
 
 Use prior writing samples when available; otherwise use the submitted draft. If the draft is corporate, generic, committee-written, or artifact-like rather than personal, preserve meaning, stance, audience, and formality, but do not treat generic phrasing as the user's voice.
 
-Value voice evidence in this order: exact keepers, sentence shape, stance, rhythm, diction, punctuation, dialect or code-switching, and useful rough edges. Preserve enough for recognizability, not every quirk.
+Value voice evidence in this order: exact keepers, stance, sentence shape, rhythm, diction, punctuation, dialect or code-switching, and useful rough edges. Preserve enough for recognizability, not every quirk.
 
 ## Edit Modes
 
@@ -62,7 +65,7 @@ Value voice evidence in this order: exact keepers, sentence shape, stance, rhyth
 - **Tighten/compress:** cut repetition, filler, throat-clearing, weak qualifiers, slow openings, and extra length without losing the point.
 - **Rewrite/structural edit:** rebuild sentences or order only when needed to preserve intent and make the point readable.
 - **Punch up/options:** add energy from source-supported stakes, contrast, or phrasing; add wit only when requested or clearly present; provide 2-3 labeled versions when useful.
-- **Voice profile:** infer a compact reusable taste profile from samples: what the user tends to choose, reject, protect, and tolerate. Include do/avoid rules, rhythm, diction, punctuation, humor, stance, protected quirks, forbidden generic moves, 3-5 short evidence phrases, and when not to apply the profile. Prefer editing guidance over biography or long analysis.
+- **Voice profile:** infer compact reusable editing taste from samples: do/avoid rules, rhythm/diction, stance boundaries, protected quirks, forbidden generic moves, evidence phrases, and when not to apply. Prefer editing guidance over biography or long analysis.
 - **Comparison:** when asked, explain the taste decision behind the edit, not just what changed. Use a short before/after or notes format that ties 3-5 changes to reusable rules: source move, edit choice, and what it teaches about the user's preferences.
 - **Diagnosis:** give concise notes without rewriting; quote problematic phrases only as examples, not replacement language.
 
@@ -105,7 +108,7 @@ Put the useful thing first.
 - Comparison: do not annotate every sentence. Show only changes that reveal taste, tradeoffs, or reusable editing rules.
 - Feedback-only: lead with the highest-impact notes and do not rewrite.
 
-Before final delivery, confirm the rewrite is clearer and no more verbose than needed; preserves intent, facts, stance, emotional temperature, and voice; avoids unsupported additions; avoids AI tells without fake human errors; and follows every explicit constraint.
+Before final delivery, obey the requested output shape and do not add meta unless it helps the user.
 
 ## Validation
 

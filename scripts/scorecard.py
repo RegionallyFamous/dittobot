@@ -21,6 +21,7 @@ from regression_100 import (
     make_cases,
     run_authorship_boundary_contract_tests,
     run_boundary_contract_tests,
+    run_format_contract_tests,
     run_mixed_stance_contract_tests,
     run_mutation_tests,
     run_negative_fixture_tests,
@@ -60,6 +61,58 @@ GUARDRAILS: tuple[tuple[str, GuardrailCheck], ...] = (
     ("no_dash_constraints", lambda case: case.no_dash),
 )
 
+def run_scorecard_integrity_tests() -> list[str]:
+    """Prove live transcript records are scored from output, not trusted claims."""
+    cases = {case.id: case for case in make_cases()}
+    passing_case = cases["thought_dump_launch_note_01"]
+    spoofed_pass = {
+        "case": passing_case.id,
+        "family": family(passing_case.id),
+        "prompt_mode": passing_case.prompt_mode,
+        "errors": [],
+        "output": (
+            "Can you clarify the audience? We fixed the importer bug, and people "
+            "can retry failed rows now."
+        ),
+    }
+    normalized = normalize_transcript_records([spoofed_pass], cases)
+    failures: list[str] = []
+    if normalized[0]["validation_source"] != "recomputed_output":
+        failures.append(
+            "spoofed transcript: expected validation_source recomputed_output, "
+            f"got {normalized[0]['validation_source']}"
+        )
+    if not any("unexpected clarifying question" in error for error in normalized[0]["errors"]):
+        failures.append(
+            "spoofed transcript: expected recomputed output to catch clarifying question, "
+            f"got {normalized[0]['errors']}"
+        )
+    unproven_pass = normalize_transcript_records(
+        [{"case": passing_case.id, "errors": []}],
+        cases,
+    )
+    if not any("transcript integrity failed" in error for error in unproven_pass[0]["errors"]):
+        failures.append(
+            "unproven transcript pass: expected transcript integrity failure, "
+            f"got {unproven_pass[0]['errors']}"
+        )
+    recorded_only = normalize_transcript_records(
+        [{"case": "unknown_case", "errors": ["manual failure"]}],
+        cases,
+    )
+    if recorded_only[0]["validation_source"] != "recorded_errors":
+        failures.append(
+            "recorded-only transcript: expected recorded_errors source, "
+            f"got {recorded_only[0]['validation_source']}"
+        )
+    if recorded_only[0]["errors"] != ["manual failure"]:
+        failures.append(
+            "recorded-only transcript: expected preserved manual errors, "
+            f"got {recorded_only[0]['errors']}"
+        )
+    return failures
+
+
 CONTRACT_CHECKS = (
     ("validator_self_tests", run_validator_self_tests),
     ("negative_fixtures", run_negative_fixture_tests),
@@ -68,10 +121,12 @@ CONTRACT_CHECKS = (
     ("reader_action_contracts", run_reader_action_contract_tests),
     ("thought_dump_contracts", run_thought_dump_contract_tests),
     ("source_only_artifact_contracts", run_source_only_artifact_contract_tests),
+    ("format_contracts", run_format_contract_tests),
     ("voice_texture_contracts", run_voice_texture_contract_tests),
     ("authorship_boundary_contracts", run_authorship_boundary_contract_tests),
     ("boundary_contracts", run_boundary_contract_tests),
     ("mutation_tests", run_mutation_tests),
+    ("scorecard_integrity_contracts", run_scorecard_integrity_tests),
 )
 
 
@@ -161,22 +216,48 @@ def deterministic_records(cases: list[Case]) -> list[dict[str, Any]]:
     return records
 
 
+def transcript_integrity_errors(record: dict[str, Any], case: Case | None) -> list[str]:
+    errors: list[str] = []
+    if case is None:
+        return errors
+
+    recorded_errors = [str(error) for error in record.get("errors", []) if str(error)]
+    if "output" not in record and not recorded_errors:
+        errors.append(
+            "transcript integrity failed: known case has no output and no recorded errors"
+        )
+    source_hash = record.get("source_sha256")
+    if source_hash and str(source_hash) != sha256_text(case.source):
+        errors.append("transcript integrity failed: source_sha256 does not match case source")
+    if "output" in record and record.get("output_sha256"):
+        output = str(record.get("output") or "")
+        if str(record["output_sha256"]) != sha256_text(output):
+            errors.append("transcript integrity failed: output_sha256 does not match output")
+    if record.get("family") and str(record["family"]) != family(case.id):
+        errors.append("transcript integrity failed: family does not match canonical case")
+    if record.get("prompt_mode") and str(record["prompt_mode"]) != case.prompt_mode:
+        errors.append("transcript integrity failed: prompt_mode does not match canonical case")
+    return errors
+
+
 def normalize_transcript_records(records: list[dict[str, Any]], cases: dict[str, Case]) -> list[dict[str, Any]]:
     normalized: list[dict[str, Any]] = []
     for record in records:
         case_id = str(record.get("case", "unknown"))
         case = cases.get(case_id)
+        integrity_errors = transcript_integrity_errors(record, case)
         validation_source = "recorded_errors"
         if case and "output" in record:
             errors = validate(replace(case, rewrite=str(record.get("output") or "")))
             validation_source = "recomputed_output"
         else:
             errors = [str(error) for error in record.get("errors", []) if str(error)]
+        errors.extend(integrity_errors)
         normalized.append(
             {
                 "case": case_id,
-                "family": str(record.get("family") or family(case_id)),
-                "prompt_mode": str(record.get("prompt_mode") or (case.prompt_mode if case else "unknown")),
+                "family": family(case.id) if case else str(record.get("family") or family(case_id)),
+                "prompt_mode": case.prompt_mode if case else str(record.get("prompt_mode") or "unknown"),
                 "guardrails": guardrail_names(case) if case else [],
                 "validation_source": validation_source,
                 "errors": errors,

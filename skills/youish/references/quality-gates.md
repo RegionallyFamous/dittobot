@@ -5,7 +5,7 @@ Use this reference only for long, high-stakes, persuasive, regression-test, or a
 Between every pass, ask:
 
 ```text
-Did this preserve intent, voice, facts, stance, and desired length?
+Did this preserve intent, voice, taste, facts, stance, and desired length?
 Did it make the text clearer, tighter, more readable, or more alive?
 If not, revert or soften the change.
 ```
@@ -20,9 +20,9 @@ If not, revert or soften the change.
 6. **Structure:** move ideas only when order blocks comprehension.
 7. **Opening:** make the first sentence useful, honest, and alive.
 8. **Clarity:** replace fog with plain language in the user's cadence.
-9. **Specificity:** add concrete nouns, verbs, stakes, or examples only when source-supported.
+9. **Specificity:** surface or restore concrete nouns, verbs, stakes, or examples only when source-supported.
 10. **Actors/verbs:** put real actors near real actions.
-11. **Concision:** cut filler, repetition, inflation, throat-clearing, and needless hedging.
+11. **Concision:** cut filler, repetition, inflation, throat-clearing, and hedging that does not carry factual, emotional, legal, or relational caution.
 12. **Rhythm:** vary sentence and paragraph length by purpose.
 13. **Energy:** restore source-supported opinion, stakes, contrast, or momentum.
 14. **Humor:** sharpen wit only when requested or clearly present.

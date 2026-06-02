@@ -90,11 +90,16 @@ def looks_like_repo_root_copy(path: Path) -> bool:
     return all((path / marker).exists() for marker in markers)
 
 
+def default_install_dir() -> str:
+    codex_home = os.environ.get("CODEX_HOME", os.path.expanduser("~/.codex"))
+    return str(Path(codex_home) / "skills" / "youish")
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--install-dir",
-        default=os.path.expanduser("~/.agents/skills/youish"),
+        default=default_install_dir(),
         help="Installed skill directory to compare.",
     )
     args = parser.parse_args()
