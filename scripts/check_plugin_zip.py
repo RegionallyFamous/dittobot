@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Check a Dittobot plugin ZIP release asset."""
+"""Check a Youish plugin ZIP release asset."""
 
 from __future__ import annotations
 
@@ -18,7 +18,7 @@ from plugin_manifest import PLUGIN_NAME, SEMVER_RE
 
 ROOT = Path(__file__).resolve().parents[1]
 EXPECTED_FILES = {".codex-plugin/plugin.json"} | {
-    f"skills/dittobot/{rel}" for rel in PACKAGE_FILES
+    f"skills/youish/{rel}" for rel in PACKAGE_FILES
 }
 
 
@@ -32,7 +32,7 @@ def digest_path(path: Path) -> str:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("zip_path", help="Generated Dittobot plugin ZIP.")
+    parser.add_argument("zip_path", help="Generated Youish plugin ZIP.")
     parser.add_argument("--version", help="Expected plugin manifest version.")
     args = parser.parse_args()
 
@@ -83,7 +83,7 @@ def main() -> int:
                 errors.append("plugin license must be GPL-2.0-or-later")
 
         for rel in PACKAGE_FILES:
-            entry = f"skills/dittobot/{rel}"
+            entry = f"skills/youish/{rel}"
             source = ROOT / rel
             if entry not in actual:
                 continue

@@ -1,8 +1,8 @@
 # Release Checklist
 
-Dittobot's detailed release runbook lives in the wiki:
+Youish's detailed release runbook lives in the wiki:
 
-https://github.com/RegionallyFamous/dittobot/wiki/Release-Checklist
+https://github.com/RegionallyFamous/youish/wiki/Release-Checklist
 
 Short version:
 
@@ -15,13 +15,13 @@ Short version:
 
 ```bash
 gh release create vX.Y.Z \
-  dist/release-vX.Y.Z/dittobot-skill-vX.Y.Z.zip \
-  dist/release-vX.Y.Z/dittobot-plugin-vX.Y.Z.zip \
-  dist/release-vX.Y.Z/dittobot-scorecard-vX.Y.Z.json \
+  dist/release-vX.Y.Z/youish-skill-vX.Y.Z.zip \
+  dist/release-vX.Y.Z/youish-plugin-vX.Y.Z.zip \
+  dist/release-vX.Y.Z/youish-scorecard-vX.Y.Z.json \
   dist/release-vX.Y.Z/SHA256SUMS \
   --verify-tag \
   --fail-on-no-commits \
-  --title "Dittobot vX.Y.Z" \
+  --title "Youish vX.Y.Z" \
   --generate-notes
 ```
 

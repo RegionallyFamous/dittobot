@@ -1,6 +1,6 @@
 # Security And Privacy
 
-Dittobot is a local Codex skill, but writing samples are personal. Treat drafts, voice samples, and live-eval transcripts as sensitive.
+Youish is a local Codex skill, but writing samples are personal. Treat drafts, voice samples, and live-eval transcripts as sensitive.
 
 ## Please Do Not Post
 

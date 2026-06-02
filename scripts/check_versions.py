@@ -31,10 +31,10 @@ def main() -> int:
         errors.append(f"scripts/plugin_manifest.py DEFAULT_VERSION is {DEFAULT_VERSION}, expected {version}")
     checks = {
         "CHANGELOG.md": rf"^## {re.escape(version)} - ",
-        "install.sh": rf'REF="\$\{{DITTOBOT_REF:-v{re.escape(version)}\}}"',
+        "install.sh": rf'REF="\$\{{YOUISH_REF:-v{re.escape(version)}\}}"',
         "README.md": rf"v{re.escape(version)}",
         ".github/workflows/validate.yml": rf"{re.escape(version)}",
-        "scripts/scorecard.py": rf'default="{re.escape(version)}"',
+        "scripts/scorecard.py": r"default=DEFAULT_VERSION",
     }
     for rel, pattern in checks.items():
         flags = re.MULTILINE
@@ -44,10 +44,10 @@ def main() -> int:
     manifest = json.loads(read(".codex-plugin/plugin.json"))
     if manifest.get("version") != version:
         errors.append(f".codex-plugin/plugin.json version is {manifest.get('version')}, expected {version}")
-    mirror_manifest = json.loads(read("plugins/dittobot/.codex-plugin/plugin.json"))
+    mirror_manifest = json.loads(read("plugins/youish/.codex-plugin/plugin.json"))
     if mirror_manifest.get("version") != version:
         errors.append(
-            f"plugins/dittobot/.codex-plugin/plugin.json version is {mirror_manifest.get('version')}, "
+            f"plugins/youish/.codex-plugin/plugin.json version is {mirror_manifest.get('version')}, "
             f"expected {version}"
         )
 

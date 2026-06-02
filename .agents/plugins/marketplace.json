@@ -1,14 +1,14 @@
 {
-  "name": "dittobot",
+  "name": "youish",
   "interface": {
-    "displayName": "Dittobot"
+    "displayName": "Youish"
   },
   "plugins": [
     {
-      "name": "dittobot",
+      "name": "youish",
       "source": {
         "source": "local",
-        "path": "./plugins/dittobot"
+        "path": "./plugins/youish"
       },
       "policy": {
         "installation": "AVAILABLE",

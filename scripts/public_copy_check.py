@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Check Dittobot's public-facing copy for voice and structure regressions."""
+"""Check Youish's public-facing copy for voice and structure regressions."""
 
 from __future__ import annotations
 
@@ -17,7 +17,7 @@ REQUIRED_SECTIONS = (
     "## Watch It Work",
     "## What Skeptics Are Right About",
     "## When Not To Use It",
-    "## What Dittobot Is",
+    "## What Youish Is",
     "## Proof, Not Vibes",
     "## The Useful Boring Stuff",
 )
@@ -30,8 +30,8 @@ REQUIRED_PHRASES = (
     "It keeps your claims, stance, uncertainty",
     "It refuses fake facts",
     "When disclosure matters",
-    "Use $skill-installer to install Dittobot",
-    "A risograph-style Dittobot workshop",
+    "Use $skill-installer to install Youish",
+    "A risograph-style Youish workshop",
 )
 
 ALWAYS_BANNED = (
@@ -77,8 +77,8 @@ ALLOWED_CRITIQUE_MARKERS = (
 )
 
 OVER_INSTRUCTED_USE_PROMPTS = (
-    "use $dittobot to tighten this email but keep my voice",
-    "use $dittobot to make this less ai-sounding",
+    "use $youish to tighten this email but keep my voice",
+    "use $youish to make this less ai-sounding",
     "do not add facts, do not make it more formal",
     "preserve the weird phrasing where it works",
     "clean this legal-ish note",
@@ -121,8 +121,8 @@ def check_required_content(markdown: str, errors: list[str]) -> None:
 
 def check_heading_order(markdown: str, errors: list[str]) -> None:
     headings = [
-        "# Dittobot",
-        "## What Dittobot Is",
+        "# Youish",
+        "## What Youish Is",
         "## The Point",
         "## Watch It Work",
         "## What Skeptics Are Right About",
@@ -146,7 +146,7 @@ def check_process_examples(markdown: str, errors: list[str]) -> None:
     watch_start = markdown.find("## Watch It Work")
     next_section = markdown.find("\n## ", watch_start + 1) if watch_start != -1 else -1
     watch_section = markdown[watch_start:next_section if next_section != -1 else None]
-    process_label_pattern = re.compile(r"^What Dittobot (?:protects|notices):$", re.MULTILINE)
+    process_label_pattern = re.compile(r"^What Youish (?:protects|notices):$", re.MULTILINE)
     notices = list(process_label_pattern.finditer(watch_section))
     notice_count = len(notices)
     source_count = watch_section.count("Source:")
@@ -155,7 +155,7 @@ def check_process_examples(markdown: str, errors: list[str]) -> None:
         fail(f"README must show at least 4 in-process examples; found {notice_count}", errors)
     if not (source_count == notice_count == rewrite_count):
         fail(
-            "README process examples must have matching Source, What Dittobot protects/notices, and Rewrite blocks; "
+            "README process examples must have matching Source, What Youish protects/notices, and Rewrite blocks; "
             f"found Source={source_count}, notices={notice_count}, Rewrite={rewrite_count}",
             errors,
         )
@@ -193,7 +193,7 @@ def check_use_section(markdown: str, errors: list[str]) -> None:
     for prompt in OVER_INSTRUCTED_USE_PROMPTS:
         if prompt in normalized:
             fail(f"README Use section reintroduced over-instructed prompt: {prompt!r}", errors)
-    if "Use $dittobot on this:" not in markdown:
+    if "Use $youish on this:" not in markdown:
         fail("README must show the default drop-in usage prompt", errors)
     if "\\|" in markdown:
         fail("README should not escape shell pipes in install commands; use fenced blocks instead", errors)

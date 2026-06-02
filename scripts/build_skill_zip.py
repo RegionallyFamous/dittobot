@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build an uploadable Dittobot skill ZIP from the spec package mirror."""
+"""Build an uploadable Youish skill ZIP from the spec package mirror."""
 
 from __future__ import annotations
 
@@ -13,12 +13,12 @@ from plugin_manifest import DEFAULT_VERSION, require_semver
 
 
 ROOT = Path(__file__).resolve().parents[1]
-SKILL_ROOT = ROOT / "skills" / "dittobot"
+SKILL_ROOT = ROOT / "skills" / "youish"
 ZIP_MTIME = (2026, 1, 1, 0, 0, 0)
 
 
 def package_path(version: str, output_dir: Path) -> Path:
-    return output_dir / f"dittobot-skill-v{version}.zip"
+    return output_dir / f"youish-skill-v{version}.zip"
 
 
 def add_file(handle: zipfile.ZipFile, source: Path, archive_name: str) -> None:
@@ -38,7 +38,7 @@ def main() -> int:
 
     require_semver(args.version)
     if not SKILL_ROOT.exists():
-        raise SystemExit("Missing skills/dittobot package mirror; run scripts/sync_skill_package.py.")
+        raise SystemExit("Missing skills/youish package mirror; run scripts/sync_skill_package.py.")
     assert_mirror_fresh(ROOT)
 
     missing = [rel for rel in PACKAGE_FILES if not (SKILL_ROOT / rel).exists()]
@@ -57,7 +57,7 @@ def main() -> int:
 
     with zipfile.ZipFile(temp, "w") as handle:
         for rel in PACKAGE_FILES:
-            add_file(handle, SKILL_ROOT / rel, f"dittobot/{rel}")
+            add_file(handle, SKILL_ROOT / rel, f"youish/{rel}")
 
     temp.replace(output)
     print(f"Built skill ZIP: {output}")

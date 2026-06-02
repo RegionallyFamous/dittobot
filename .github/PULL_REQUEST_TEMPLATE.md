@@ -1,6 +1,6 @@
 ## What changed
 
-Briefly describe the change and why it improves Dittobot.
+Briefly describe the change and why it improves Youish.
 
 ## Checklist
 

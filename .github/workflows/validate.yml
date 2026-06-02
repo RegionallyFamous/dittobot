@@ -24,11 +24,11 @@ jobs:
       - name: Check spec package mirror
         run: |
           python3 scripts/sync_skill_package.py
-          git diff --exit-code -- skills/dittobot plugins/dittobot
-          python3 skills/dittobot/scripts/validate_skill.py
-          python3 skills/dittobot/scripts/regression_100.py
-          python3 skills/dittobot/scripts/install.py --copy --install-dir "$RUNNER_TEMP/mirror-install/dittobot"
-          python3 skills/dittobot/scripts/check_install.py --install-dir "$RUNNER_TEMP/mirror-install/dittobot"
+          git diff --exit-code -- skills/youish plugins/youish
+          python3 skills/youish/scripts/validate_skill.py
+          python3 skills/youish/scripts/regression_100.py
+          python3 skills/youish/scripts/install.py --copy --install-dir "$RUNNER_TEMP/mirror-install/youish"
+          python3 skills/youish/scripts/check_install.py --install-dir "$RUNNER_TEMP/mirror-install/youish"
 
       - name: Validate skill metadata
         run: python3 scripts/validate_skill.py
@@ -36,15 +36,15 @@ jobs:
       - name: Check public README copy
         run: |
           python3 scripts/public_copy_check.py --description "Paste messy notes. Get sharp rewrites that sound like you on a good day."
-          grep "^## 0.2.7 - " CHANGELOG.md
+          grep "^## 0.3.0 - " CHANGELOG.md
           python3 scripts/check_versions.py
           ! python3 scripts/check_versions.py --version 9.9.9
-          python3 scripts/check_marketplace.py --version 0.2.7
+          python3 scripts/check_marketplace.py --version 0.3.0
 
       - name: Run deterministic regression fixtures
         run: python3 scripts/regression_100.py
 
-      - name: Verify Dittobot lab tools
+      - name: Verify Youish lab tools
         run: |
           python3 scripts/audit.py --source "I think notice may be due in 10 days." --rewrite "I think notice may be due in 10 days." --preserve-uncertainty --protected "10 days"
           python3 scripts/case_lab.py --case-id sample_case_01 --source "rough but redacted source in 10 days [[boundary: do not use \"haunted changelog\" in customer notes]]" --rewrite "clean but still redacted rewrite" --must "redacted" | tee "$RUNNER_TEMP/case_lab.out"
@@ -110,7 +110,7 @@ jobs:
           import json
           import sys
           payload = json.load(open(sys.argv[1], encoding="utf-8"))
-          assert payload["schema_version"] == "dittobot.scorecard.v1"
+          assert payload["schema_version"] == "youish.scorecard.v1"
           assert payload["kind"] == "live_transcript"
           assert payload["live_eval"]["records"] == 2
           assert payload["score"]["case_pass_rate"] == 0.5
@@ -119,6 +119,21 @@ jobs:
           raw_transcript="$RUNNER_TEMP/raw.local.jsonl"
           printf '%s\n' '{"case":"thought_dump_launch_note_01","output":"raw output should not be public","errors":[]}' > "$raw_transcript"
           ! python3 scripts/scorecard.py --transcript "$raw_transcript" --public --fail-under-score 0 --format json
+          tampered_transcript="$RUNNER_TEMP/tampered.local.jsonl"
+          printf '%s\n' '{"case":"legal_precision_01","model":"gpt-5.2","output":"Based on the contract, notice is due within 10 business days.","errors":[]}' > "$tampered_transcript"
+          tampered_scorecard="$RUNNER_TEMP/tampered-scorecard.json"
+          ! python3 scripts/scorecard.py --transcript "$tampered_transcript" --format json > "$tampered_scorecard"
+          python3 - "$tampered_scorecard" <<'PY'
+          import json
+          import sys
+          payload = json.load(open(sys.argv[1], encoding="utf-8"))
+          record = payload["results"]["failed_cases"][0]
+          assert payload["score"]["status"] == "FAIL"
+          assert payload["score"]["case_pass_rate"] == 0.0
+          assert record["validation_source"] == "recomputed_output"
+          assert "lost_uncertainty" in record["failure_codes"]
+          assert payload["results"]["by_prompt_mode"][0]["failed"] == 1
+          PY
           replay="$RUNNER_TEMP/replay.local.jsonl"
           python3 - "$replay" <<'PY'
           import json
@@ -152,54 +167,54 @@ jobs:
           printf 'import pathlib, sys\npathlib.Path(sys.argv[1], "validator-ran.txt").write_text("yes")\n' > "$ok_validator"
           fail_validator="$RUNNER_TEMP/fail-validator.py"
           printf 'raise SystemExit(7)\n' > "$fail_validator"
-          python3 scripts/build_plugin.py --output-dir "$RUNNER_TEMP/dittobot-plugin-validator" --version 0.2.7 --validator "$ok_validator" --skip-package-check
-          test -f "$RUNNER_TEMP/dittobot-plugin-validator/validator-ran.txt"
-          ! python3 scripts/check_plugin_package.py "$RUNNER_TEMP/dittobot-plugin-validator" --version 0.2.7
-          ! python3 scripts/build_plugin.py --output-dir "$RUNNER_TEMP/dittobot-plugin-validator-fail" --version 0.2.7 --validator "$fail_validator"
-          ! python3 scripts/build_plugin.py --output-dir "$RUNNER_TEMP/dittobot-plugin" --validator "$RUNNER_TEMP/missing-validator.py" --require-validator
-          python3 scripts/build_plugin.py --output-dir "$RUNNER_TEMP/dittobot-plugin" --version 0.2.7 --validator ""
-          python3 scripts/check_plugin_package.py "$RUNNER_TEMP/dittobot-plugin" --version 0.2.7
-          printf 'secret=nope\n' > "$RUNNER_TEMP/dittobot-plugin/skills/dittobot/.env"
-          ! python3 scripts/check_plugin_package.py "$RUNNER_TEMP/dittobot-plugin" --version 0.2.7
-          ! python3 scripts/scorecard.py --plugin-dir "$RUNNER_TEMP/dittobot-plugin" --version 0.2.7 --format json
-          ! python3 scripts/build_plugin_zip.py "$RUNNER_TEMP/dittobot-plugin" --version 0.2.7 --output-dir "$RUNNER_TEMP"
-          rm "$RUNNER_TEMP/dittobot-plugin/skills/dittobot/.env"
+          python3 scripts/build_plugin.py --output-dir "$RUNNER_TEMP/youish-plugin-validator" --version 0.3.0 --validator "$ok_validator" --skip-package-check
+          test -f "$RUNNER_TEMP/youish-plugin-validator/validator-ran.txt"
+          ! python3 scripts/check_plugin_package.py "$RUNNER_TEMP/youish-plugin-validator" --version 0.3.0
+          ! python3 scripts/build_plugin.py --output-dir "$RUNNER_TEMP/youish-plugin-validator-fail" --version 0.3.0 --validator "$fail_validator"
+          ! python3 scripts/build_plugin.py --output-dir "$RUNNER_TEMP/youish-plugin" --validator "$RUNNER_TEMP/missing-validator.py" --require-validator
+          python3 scripts/build_plugin.py --output-dir "$RUNNER_TEMP/youish-plugin" --version 0.3.0 --validator ""
+          python3 scripts/check_plugin_package.py "$RUNNER_TEMP/youish-plugin" --version 0.3.0
+          printf 'secret=nope\n' > "$RUNNER_TEMP/youish-plugin/skills/youish/.env"
+          ! python3 scripts/check_plugin_package.py "$RUNNER_TEMP/youish-plugin" --version 0.3.0
+          ! python3 scripts/scorecard.py --plugin-dir "$RUNNER_TEMP/youish-plugin" --version 0.3.0 --format json
+          ! python3 scripts/build_plugin_zip.py "$RUNNER_TEMP/youish-plugin" --version 0.3.0 --output-dir "$RUNNER_TEMP"
+          rm "$RUNNER_TEMP/youish-plugin/skills/youish/.env"
           ! python3 scripts/build_skill_zip.py --version not-semver --output-dir "$RUNNER_TEMP"
-          python3 scripts/build_skill_zip.py --version 0.2.7 --output-dir "$RUNNER_TEMP"
-          python3 scripts/check_skill_zip.py "$RUNNER_TEMP/dittobot-skill-v0.2.7.zip"
-          python3 - "$RUNNER_TEMP/dittobot-skill-v0.2.7.zip" <<'PY'
+          python3 scripts/build_skill_zip.py --version 0.3.0 --output-dir "$RUNNER_TEMP"
+          python3 scripts/check_skill_zip.py "$RUNNER_TEMP/youish-skill-v0.3.0.zip"
+          python3 - "$RUNNER_TEMP/youish-skill-v0.3.0.zip" <<'PY'
           import sys
           import zipfile
           with zipfile.ZipFile(sys.argv[1]) as handle:
               entries = [info.filename for info in handle.infolist() if not info.filename.endswith("/")]
-          assert entries[0] == "dittobot/SKILL.md"
-          assert all(entry.startswith("dittobot/") for entry in entries)
-          assert "dittobot/README.md" not in entries
+          assert entries[0] == "youish/SKILL.md"
+          assert all(entry.startswith("youish/") for entry in entries)
+          assert "youish/README.md" not in entries
           PY
-          python3 scripts/build_plugin_zip.py "$RUNNER_TEMP/dittobot-plugin" --version 0.2.7 --output-dir "$RUNNER_TEMP"
-          python3 scripts/check_plugin_zip.py "$RUNNER_TEMP/dittobot-plugin-v0.2.7.zip" --version 0.2.7
+          python3 scripts/build_plugin_zip.py "$RUNNER_TEMP/youish-plugin" --version 0.3.0 --output-dir "$RUNNER_TEMP"
+          python3 scripts/check_plugin_zip.py "$RUNNER_TEMP/youish-plugin-v0.3.0.zip" --version 0.3.0
           unzip_dir="$RUNNER_TEMP/unzipped-plugin"
           mkdir -p "$unzip_dir"
-          python3 - "$RUNNER_TEMP/dittobot-plugin-v0.2.7.zip" "$unzip_dir" <<'PY'
+          python3 - "$RUNNER_TEMP/youish-plugin-v0.3.0.zip" "$unzip_dir" <<'PY'
           import sys
           import zipfile
           with zipfile.ZipFile(sys.argv[1]) as handle:
               handle.extractall(sys.argv[2])
           PY
-          python3 scripts/check_plugin_package.py "$unzip_dir" --version 0.2.7
-          python3 scripts/scorecard.py --plugin-dir "$unzip_dir" --version 0.2.7 --format json | grep '"status": "PASS"'
-          python3 scripts/write_checksums.py "$RUNNER_TEMP/dittobot-skill-v0.2.7.zip" "$RUNNER_TEMP/dittobot-plugin-v0.2.7.zip" --output "$RUNNER_TEMP/SHA256SUMS"
-          grep "dittobot-skill-v0.2.7.zip" "$RUNNER_TEMP/SHA256SUMS"
-          grep "dittobot-plugin-v0.2.7.zip" "$RUNNER_TEMP/SHA256SUMS"
-          ! python3 scripts/write_checksums.py "$RUNNER_TEMP/dittobot-skill-v0.2.7.zip" "$RUNNER_TEMP/dittobot-skill-v0.2.7.zip" --output "$RUNNER_TEMP/SHA256SUMS.duplicate"
-          python3 scripts/scorecard.py --plugin-dir "$RUNNER_TEMP/dittobot-plugin" --version 0.2.7 | grep "Dittobot Public Eval Scorecard"
+          python3 scripts/check_plugin_package.py "$unzip_dir" --version 0.3.0
+          python3 scripts/scorecard.py --plugin-dir "$unzip_dir" --version 0.3.0 --format json | grep '"status": "PASS"'
+          python3 scripts/write_checksums.py "$RUNNER_TEMP/youish-skill-v0.3.0.zip" "$RUNNER_TEMP/youish-plugin-v0.3.0.zip" --output "$RUNNER_TEMP/SHA256SUMS"
+          grep "youish-skill-v0.3.0.zip" "$RUNNER_TEMP/SHA256SUMS"
+          grep "youish-plugin-v0.3.0.zip" "$RUNNER_TEMP/SHA256SUMS"
+          ! python3 scripts/write_checksums.py "$RUNNER_TEMP/youish-skill-v0.3.0.zip" "$RUNNER_TEMP/youish-skill-v0.3.0.zip" --output "$RUNNER_TEMP/SHA256SUMS.duplicate"
+          python3 scripts/scorecard.py --plugin-dir "$RUNNER_TEMP/youish-plugin" --version 0.3.0 | grep "Youish Public Eval Scorecard"
           scorecard="$RUNNER_TEMP/scorecard.json"
-          python3 scripts/scorecard.py --plugin-dir "$RUNNER_TEMP/dittobot-plugin" --version 0.2.7 --format json > "$scorecard"
+          python3 scripts/scorecard.py --plugin-dir "$RUNNER_TEMP/youish-plugin" --version 0.3.0 --format json > "$scorecard"
           python3 - "$scorecard" <<'PY'
           import json
           import sys
           payload = json.load(open(sys.argv[1], encoding="utf-8"))
-          assert payload["schema_version"] == "dittobot.scorecard.v1"
+          assert payload["schema_version"] == "youish.scorecard.v1"
           assert payload["suite"]["case_count"] == 100
           assert payload["suite"]["family_count"] == 30
           assert payload["score"]["status"] == "PASS"
@@ -221,16 +236,32 @@ jobs:
           assert guardrails["unsupported_entity_guard"] == 1
           assert guardrails["anti_generic_polish"] == 79
           assert guardrails["source_only_default_inference"] == 10
+          contracts = payload["contract_tests"]
+          assert contracts["status"] == "PASS"
+          assert contracts["group_count"] == 10
+          assert [group["name"] for group in contracts["groups"]] == [
+              "validator_self_tests",
+              "negative_fixtures",
+              "profile_contracts",
+              "mixed_stance_contracts",
+              "reader_action_contracts",
+              "thought_dump_contracts",
+              "source_only_artifact_contracts",
+              "voice_texture_contracts",
+              "boundary_contracts",
+              "mutation_tests",
+          ]
+          assert all(group["failure_count"] == 0 for group in contracts["groups"])
           assert payload["plugin"]["status"] == "PASS"
           PY
           cp README.md "$RUNNER_TEMP/README.md.clean"
           printf '\nrelease dirty guard\n' >> README.md
-          ! python3 scripts/build_release_assets.py --version 0.2.7
+          ! python3 scripts/build_release_assets.py --version 0.3.0
           mv "$RUNNER_TEMP/README.md.clean" README.md
-          python3 scripts/build_release_assets.py --version 0.2.7
-          python3 scripts/check_release_assets.py dist/release-v0.2.7 --version 0.2.7
-          cp -R dist/release-v0.2.7 "$RUNNER_TEMP/release-hash-mismatch"
-          python3 - "$RUNNER_TEMP/release-hash-mismatch/dittobot-scorecard-v0.2.7.json" <<'PY'
+          python3 scripts/build_release_assets.py --version 0.3.0
+          python3 scripts/check_release_assets.py dist/release-v0.3.0 --version 0.3.0
+          cp -R dist/release-v0.3.0 "$RUNNER_TEMP/release-hash-mismatch"
+          python3 - "$RUNNER_TEMP/release-hash-mismatch/youish-scorecard-v0.3.0.json" <<'PY'
           import json
           import sys
           path = sys.argv[1]
@@ -238,8 +269,21 @@ jobs:
           payload["subject"]["skill_sha256"] = "0" * 64
           json.dump(payload, open(path, "w", encoding="utf-8"), indent=2)
           PY
-          python3 scripts/write_checksums.py "$RUNNER_TEMP/release-hash-mismatch/dittobot-skill-v0.2.7.zip" "$RUNNER_TEMP/release-hash-mismatch/dittobot-plugin-v0.2.7.zip" "$RUNNER_TEMP/release-hash-mismatch/dittobot-scorecard-v0.2.7.json" --output "$RUNNER_TEMP/release-hash-mismatch/SHA256SUMS"
-          ! python3 scripts/check_release_assets.py "$RUNNER_TEMP/release-hash-mismatch" --version 0.2.7
+          python3 scripts/write_checksums.py "$RUNNER_TEMP/release-hash-mismatch/youish-skill-v0.3.0.zip" "$RUNNER_TEMP/release-hash-mismatch/youish-plugin-v0.3.0.zip" "$RUNNER_TEMP/release-hash-mismatch/youish-scorecard-v0.3.0.json" --output "$RUNNER_TEMP/release-hash-mismatch/SHA256SUMS"
+          ! python3 scripts/check_release_assets.py "$RUNNER_TEMP/release-hash-mismatch" --version 0.3.0
+          cp -R dist/release-v0.3.0 "$RUNNER_TEMP/release-contract-mismatch"
+          python3 - "$RUNNER_TEMP/release-contract-mismatch/youish-scorecard-v0.3.0.json" <<'PY'
+          import json
+          import sys
+          path = sys.argv[1]
+          payload = json.load(open(path, encoding="utf-8"))
+          payload["contract_tests"]["status"] = "FAIL"
+          payload["contract_tests"]["groups"][0]["failure_count"] = 1
+          payload["contract_tests"]["groups"][0]["failures"] = ["simulated contract failure"]
+          json.dump(payload, open(path, "w", encoding="utf-8"), indent=2)
+          PY
+          python3 scripts/write_checksums.py "$RUNNER_TEMP/release-contract-mismatch/youish-skill-v0.3.0.zip" "$RUNNER_TEMP/release-contract-mismatch/youish-plugin-v0.3.0.zip" "$RUNNER_TEMP/release-contract-mismatch/youish-scorecard-v0.3.0.json" --output "$RUNNER_TEMP/release-contract-mismatch/SHA256SUMS"
+          ! python3 scripts/check_release_assets.py "$RUNNER_TEMP/release-contract-mismatch" --version 0.3.0
 
       - name: Compile scripts
         run: python3 -m py_compile scripts/*.py
@@ -247,36 +291,36 @@ jobs:
       - name: Check install verifier without local paths
         run: |
           mkdir -p "$RUNNER_TEMP/codex-skills"
-          ln -s "$GITHUB_WORKSPACE" "$RUNNER_TEMP/codex-skills/dittobot"
-          python3 scripts/check_install.py --install-dir "$RUNNER_TEMP/codex-skills/dittobot"
-          root_copy="$RUNNER_TEMP/codex-skills-root-copy/dittobot"
+          ln -s "$GITHUB_WORKSPACE" "$RUNNER_TEMP/codex-skills/youish"
+          python3 scripts/check_install.py --install-dir "$RUNNER_TEMP/codex-skills/youish"
+          root_copy="$RUNNER_TEMP/codex-skills-root-copy/youish"
           mkdir -p "$root_copy"
           git archive --format=tar HEAD | tar -x -C "$root_copy"
           python3 scripts/check_install.py --install-dir "$root_copy"
 
       - name: Check installer
         run: |
-          python3 scripts/install.py --install-dir "$RUNNER_TEMP/codex-skills-installed/dittobot"
-          python3 scripts/install.py --install-dir "$RUNNER_TEMP/codex-skills-installed/dittobot"
-          python3 scripts/install.py --copy --install-dir "$RUNNER_TEMP/codex-skills-copy/dittobot"
-          python3 scripts/check_install.py --install-dir "$RUNNER_TEMP/codex-skills-copy/dittobot"
-          printf 'stale file\n' > "$RUNNER_TEMP/codex-skills-copy/dittobot/README.md"
-          ! python3 scripts/check_install.py --install-dir "$RUNNER_TEMP/codex-skills-copy/dittobot"
-          python3 scripts/install.py --copy --install-dir "$RUNNER_TEMP/codex-skills-copy/dittobot"
-          python3 scripts/check_install.py --install-dir "$RUNNER_TEMP/codex-skills-copy/dittobot"
+          python3 scripts/install.py --install-dir "$RUNNER_TEMP/codex-skills-installed/youish"
+          python3 scripts/install.py --install-dir "$RUNNER_TEMP/codex-skills-installed/youish"
+          python3 scripts/install.py --copy --install-dir "$RUNNER_TEMP/codex-skills-copy/youish"
+          python3 scripts/check_install.py --install-dir "$RUNNER_TEMP/codex-skills-copy/youish"
+          printf 'stale file\n' > "$RUNNER_TEMP/codex-skills-copy/youish/README.md"
+          ! python3 scripts/check_install.py --install-dir "$RUNNER_TEMP/codex-skills-copy/youish"
+          python3 scripts/install.py --copy --install-dir "$RUNNER_TEMP/codex-skills-copy/youish"
+          python3 scripts/check_install.py --install-dir "$RUNNER_TEMP/codex-skills-copy/youish"
 
       - name: Check installer safety guards
         run: |
-          ! python3 scripts/install.py --install-dir "$RUNNER_TEMP/codex-skills-installed/not-dittobot"
+          ! python3 scripts/install.py --install-dir "$RUNNER_TEMP/codex-skills-installed/not-youish"
           ! python3 scripts/install.py --install-dir "$GITHUB_WORKSPACE"
-          ! python3 scripts/install.py --install-dir "$GITHUB_WORKSPACE/dittobot"
+          ! python3 scripts/install.py --install-dir "$GITHUB_WORKSPACE/youish"
           mkdir -p "$GITHUB_WORKSPACE/nested"
-          ! python3 scripts/install.py --install-dir "$GITHUB_WORKSPACE/nested/dittobot"
-          mkdir -p "$RUNNER_TEMP/unsafe-target/dittobot"
-          printf 'not dittobot\n' > "$RUNNER_TEMP/unsafe-target/dittobot/README.md"
-          ! python3 scripts/install.py --install-dir "$RUNNER_TEMP/unsafe-target/dittobot"
-          python3 scripts/install.py --force --install-dir "$RUNNER_TEMP/unsafe-target/dittobot"
-          existing="$RUNNER_TEMP/preflight-existing/dittobot"
+          ! python3 scripts/install.py --install-dir "$GITHUB_WORKSPACE/nested/youish"
+          mkdir -p "$RUNNER_TEMP/unsafe-target/youish"
+          printf 'not youish\n' > "$RUNNER_TEMP/unsafe-target/youish/README.md"
+          ! python3 scripts/install.py --install-dir "$RUNNER_TEMP/unsafe-target/youish"
+          python3 scripts/install.py --force --install-dir "$RUNNER_TEMP/unsafe-target/youish"
+          existing="$RUNNER_TEMP/preflight-existing/youish"
           python3 scripts/install.py --copy --install-dir "$existing"
           broken="$RUNNER_TEMP/broken-source"
           mkdir -p "$broken/scripts"
@@ -288,7 +332,7 @@ jobs:
       - name: Check one-line installer
         run: |
           bash -n install.sh
-          archive="$RUNNER_TEMP/dittobot.tar.gz"
+          archive="$RUNNER_TEMP/youish.tar.gz"
           tar -czf "$archive" --exclude .git --exclude dist -C "$GITHUB_WORKSPACE/.." "$(basename "$GITHUB_WORKSPACE")"
           archive_sha="$(python3 - "$archive" <<'PY'
           import hashlib
@@ -296,17 +340,17 @@ jobs:
           print(hashlib.sha256(open(sys.argv[1], "rb").read()).hexdigest())
           PY
           )"
-          DITTOBOT_ARCHIVE_URL="file://$archive" DITTOBOT_ARCHIVE_SHA256="$archive_sha" bash install.sh --install-dir "$RUNNER_TEMP/codex-skills-one-line-sha/dittobot"
-          python3 scripts/check_install.py --install-dir "$RUNNER_TEMP/codex-skills-one-line-sha/dittobot"
-          ! DITTOBOT_ARCHIVE_URL="file://$archive" DITTOBOT_ARCHIVE_SHA256="0000000000000000000000000000000000000000000000000000000000000000" bash install.sh --install-dir "$RUNNER_TEMP/codex-skills-one-line-bad-sha/dittobot"
-          symlink_source="$RUNNER_TEMP/symlink-source/dittobot-bad"
+          YOUISH_ARCHIVE_URL="file://$archive" YOUISH_ARCHIVE_SHA256="$archive_sha" bash install.sh --install-dir "$RUNNER_TEMP/codex-skills-one-line-sha/youish"
+          python3 scripts/check_install.py --install-dir "$RUNNER_TEMP/codex-skills-one-line-sha/youish"
+          ! YOUISH_ARCHIVE_URL="file://$archive" YOUISH_ARCHIVE_SHA256="0000000000000000000000000000000000000000000000000000000000000000" bash install.sh --install-dir "$RUNNER_TEMP/codex-skills-one-line-bad-sha/youish"
+          symlink_source="$RUNNER_TEMP/symlink-source/youish-bad"
           mkdir -p "$symlink_source/scripts"
           cp SKILL.md "$symlink_source/SKILL.md"
           ln -s /tmp "$symlink_source/scripts/install.py"
-          symlink_archive="$RUNNER_TEMP/dittobot-symlink.tar.gz"
-          tar -czf "$symlink_archive" -C "$RUNNER_TEMP/symlink-source" dittobot-bad
-          ! DITTOBOT_ARCHIVE_URL="file://$symlink_archive" bash install.sh --install-dir "$RUNNER_TEMP/codex-skills-symlink/dittobot"
-          traversal_archive="$RUNNER_TEMP/dittobot-traversal.tar.gz"
+          symlink_archive="$RUNNER_TEMP/youish-symlink.tar.gz"
+          tar -czf "$symlink_archive" -C "$RUNNER_TEMP/symlink-source" youish-bad
+          ! YOUISH_ARCHIVE_URL="file://$symlink_archive" bash install.sh --install-dir "$RUNNER_TEMP/codex-skills-symlink/youish"
+          traversal_archive="$RUNNER_TEMP/youish-traversal.tar.gz"
           python3 - "$traversal_archive" <<'PY'
           import pathlib
           import sys
@@ -316,18 +360,18 @@ jobs:
           with tarfile.open(sys.argv[1], "w:gz") as handle:
               handle.add(payload, arcname="../escape.txt")
           PY
-          ! DITTOBOT_ARCHIVE_URL="file://$traversal_archive" bash install.sh --install-dir "$RUNNER_TEMP/codex-skills-traversal/dittobot"
-          DITTOBOT_ARCHIVE_URL="file://$archive" bash install.sh --install-dir "$RUNNER_TEMP/codex-skills-one-line/dittobot"
-          python3 scripts/check_install.py --install-dir "$RUNNER_TEMP/codex-skills-one-line/dittobot"
+          ! YOUISH_ARCHIVE_URL="file://$traversal_archive" bash install.sh --install-dir "$RUNNER_TEMP/codex-skills-traversal/youish"
+          YOUISH_ARCHIVE_URL="file://$archive" bash install.sh --install-dir "$RUNNER_TEMP/codex-skills-one-line/youish"
+          python3 scripts/check_install.py --install-dir "$RUNNER_TEMP/codex-skills-one-line/youish"
           decoy_source="$RUNNER_TEMP/decoy-source"
-          mkdir -p "$decoy_source/dittobot-decoy"
-          tar -cf - --exclude .git --exclude dist -C "$GITHUB_WORKSPACE" . | tar -xf - -C "$decoy_source/dittobot-decoy"
-          mkdir -p "$decoy_source/dittobot-decoy/aaa/scripts"
-          printf '#!/usr/bin/env python3\nraise SystemExit(42)\n' > "$decoy_source/dittobot-decoy/aaa/scripts/install.py"
-          decoy_archive="$RUNNER_TEMP/dittobot-decoy.tar.gz"
-          tar -czf "$decoy_archive" -C "$decoy_source" dittobot-decoy
-          DITTOBOT_ARCHIVE_URL="file://$decoy_archive" bash install.sh --install-dir "$RUNNER_TEMP/codex-skills-decoy/dittobot"
-          python3 scripts/check_install.py --install-dir "$RUNNER_TEMP/codex-skills-decoy/dittobot"
+          mkdir -p "$decoy_source/youish-decoy"
+          tar -cf - --exclude .git --exclude dist -C "$GITHUB_WORKSPACE" . | tar -xf - -C "$decoy_source/youish-decoy"
+          mkdir -p "$decoy_source/youish-decoy/aaa/scripts"
+          printf '#!/usr/bin/env python3\nraise SystemExit(42)\n' > "$decoy_source/youish-decoy/aaa/scripts/install.py"
+          decoy_archive="$RUNNER_TEMP/youish-decoy.tar.gz"
+          tar -czf "$decoy_archive" -C "$decoy_source" youish-decoy
+          YOUISH_ARCHIVE_URL="file://$decoy_archive" bash install.sh --install-dir "$RUNNER_TEMP/codex-skills-decoy/youish"
+          python3 scripts/check_install.py --install-dir "$RUNNER_TEMP/codex-skills-decoy/youish"
 
       - name: Verify live eval skip path
         env:

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Check Dittobot's repo plugin manifest and marketplace entry."""
+"""Check Youish's repo plugin manifest and marketplace entry."""
 
 from __future__ import annotations
 
@@ -44,21 +44,21 @@ def main() -> int:
         errors.append("missing .agents/plugins/marketplace.json")
     else:
         marketplace = json.loads(marketplace_path.read_text(encoding="utf-8"))
-        if marketplace.get("name") != "dittobot":
-            errors.append("marketplace name must be dittobot")
-        if marketplace.get("interface", {}).get("displayName") != "Dittobot":
-            errors.append("marketplace interface.displayName must be Dittobot")
+        if marketplace.get("name") != "youish":
+            errors.append("marketplace name must be youish")
+        if marketplace.get("interface", {}).get("displayName") != "Youish":
+            errors.append("marketplace interface.displayName must be Youish")
         plugins = marketplace.get("plugins")
         if not isinstance(plugins, list) or len(plugins) != 1:
             errors.append("marketplace must contain exactly one plugin entry")
         else:
             entry = plugins[0]
-            if entry.get("name") != "dittobot":
-                errors.append("marketplace plugin name must be dittobot")
+            if entry.get("name") != "youish":
+                errors.append("marketplace plugin name must be youish")
             source = entry.get("source", {})
-            if source != {"source": "local", "path": "./plugins/dittobot"}:
+            if source != {"source": "local", "path": "./plugins/youish"}:
                 errors.append(
-                    'marketplace source must be {"source": "local", "path": "./plugins/dittobot"}'
+                    'marketplace source must be {"source": "local", "path": "./plugins/youish"}'
                 )
             policy = entry.get("policy", {})
             if policy.get("installation") != "AVAILABLE":
@@ -68,7 +68,7 @@ def main() -> int:
             if entry.get("category") != "Productivity":
                 errors.append("marketplace category must be Productivity")
 
-    plugin_mirror = ROOT / "plugins" / "dittobot"
+    plugin_mirror = ROOT / "plugins" / "youish"
     mirror_manifest = plugin_mirror / ".codex-plugin" / "plugin.json"
     if not mirror_manifest.exists():
         errors.append("missing marketplace plugin mirror manifest")
@@ -78,7 +78,7 @@ def main() -> int:
             errors.append("marketplace plugin mirror manifest differs from scripts/plugin_manifest.py")
     for rel in PACKAGE_FILES:
         source = ROOT / rel
-        packaged = plugin_mirror / "skills" / "dittobot" / rel
+        packaged = plugin_mirror / "skills" / "youish" / rel
         if not packaged.exists():
             errors.append(f"missing marketplace plugin skill file: {rel}")
         elif source.exists() and digest(source) != digest(packaged):

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build a local Codex plugin package for Dittobot."""
+"""Build a local Codex plugin package for Youish."""
 
 from __future__ import annotations
 
@@ -51,7 +51,7 @@ def check_plugin_package(plugin_root: Path, version: str) -> int:
     ).returncode
 
 
-def is_dittobot_plugin_dir(path: Path) -> bool:
+def is_youish_plugin_dir(path: Path) -> bool:
     manifest_path = path / ".codex-plugin" / "plugin.json"
     if not manifest_path.is_file():
         return False
@@ -69,9 +69,9 @@ def assert_safe_output(repo: Path, output: Path, dist_root: Path) -> None:
         repo in output.parents and output != dist_root and dist_root not in output.parents
     ):
         raise SystemExit("Refusing unsafe output directory inside the repo.")
-    if output.exists() and not is_dittobot_plugin_dir(output):
+    if output.exists() and not is_youish_plugin_dir(output):
         raise SystemExit(
-            "Refusing to replace an existing directory that is not a Dittobot plugin package."
+            "Refusing to replace an existing directory that is not a Youish plugin package."
         )
 
 
@@ -79,7 +79,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--output-dir",
-        default="dist/dittobot-plugin",
+        default="dist/youish-plugin",
         help="Directory to create or replace.",
     )
     parser.add_argument("--version", default=DEFAULT_VERSION, help="Strict semver plugin version.")
@@ -104,7 +104,7 @@ def main() -> int:
     parser.add_argument(
         "--skip-package-check",
         action="store_true",
-        help="Skip Dittobot's local package checker. Intended only for checker failure tests.",
+        help="Skip Youish's local package checker. Intended only for checker failure tests.",
     )
     args = parser.parse_args()
 

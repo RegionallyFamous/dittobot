@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Verify a complete local Dittobot release asset directory."""
+"""Verify a complete local Youish release asset directory."""
 
 from __future__ import annotations
 
@@ -23,9 +23,9 @@ ROOT = Path(__file__).resolve().parents[1]
 
 def release_asset_names(version: str) -> set[str]:
     return {
-        f"dittobot-skill-v{version}.zip",
-        f"dittobot-plugin-v{version}.zip",
-        f"dittobot-scorecard-v{version}.json",
+        f"youish-skill-v{version}.zip",
+        f"youish-plugin-v{version}.zip",
+        f"youish-scorecard-v{version}.json",
         "SHA256SUMS",
     }
 
@@ -78,10 +78,10 @@ def load_scorecard(path: Path) -> tuple[dict | None, list[str]]:
 
 def check_scorecard_payload(payload: dict, version: str) -> list[str]:
     errors: list[str] = []
-    if payload.get("schema_version") != "dittobot.scorecard.v1":
-        errors.append("scorecard schema_version must be dittobot.scorecard.v1")
-    if payload.get("project") != "dittobot":
-        errors.append("scorecard project must be dittobot")
+    if payload.get("schema_version") != "youish.scorecard.v1":
+        errors.append("scorecard schema_version must be youish.scorecard.v1")
+    if payload.get("project") != "youish":
+        errors.append("scorecard project must be youish")
     if payload.get("score", {}).get("status") != "PASS":
         errors.append("scorecard status must be PASS")
     if payload.get("suite", {}).get("case_count") != 100:
@@ -90,6 +90,15 @@ def check_scorecard_payload(payload: dict, version: str) -> list[str]:
         errors.append(f"scorecard plugin version must be {version}")
     if payload.get("plugin", {}).get("status") != "PASS":
         errors.append("scorecard plugin package status must be PASS")
+    contracts = payload.get("contract_tests")
+    if not isinstance(contracts, dict):
+        errors.append("scorecard contract_tests must be present")
+    else:
+        if contracts.get("status") != "PASS":
+            errors.append("scorecard contract_tests status must be PASS")
+        groups = contracts.get("groups")
+        if not isinstance(groups, list) or len(groups) != 10:
+            errors.append("scorecard contract_tests.groups must contain 10 groups")
     return errors
 
 
@@ -99,12 +108,12 @@ def check_scorecard_hashes(payload: dict, plugin_root: Path) -> list[str]:
         (
             "subject.skill_sha256",
             payload.get("subject", {}).get("skill_sha256"),
-            plugin_root / "skills" / "dittobot" / "SKILL.md",
+            plugin_root / "skills" / "youish" / "SKILL.md",
         ),
         (
             "suite.validator_sha256",
             payload.get("suite", {}).get("validator_sha256"),
-            plugin_root / "skills" / "dittobot" / "scripts" / "regression_100.py",
+            plugin_root / "skills" / "youish" / "scripts" / "regression_100.py",
         ),
     )
     for label, expected, path in hash_checks:
@@ -158,7 +167,7 @@ def main() -> int:
                 errors.append(f"checksum mismatch: {name}")
 
     scorecard_payload: dict | None = None
-    scorecard = release_dir / f"dittobot-scorecard-v{args.version}.json"
+    scorecard = release_dir / f"youish-scorecard-v{args.version}.json"
     if scorecard.exists():
         scorecard_payload, scorecard_errors = load_scorecard(scorecard)
         errors.extend(scorecard_errors)
@@ -171,8 +180,8 @@ def main() -> int:
             print(f"  - {error}")
         return 1
 
-    skill_zip = release_dir / f"dittobot-skill-v{args.version}.zip"
-    plugin_zip = release_dir / f"dittobot-plugin-v{args.version}.zip"
+    skill_zip = release_dir / f"youish-skill-v{args.version}.zip"
+    plugin_zip = release_dir / f"youish-plugin-v{args.version}.zip"
     run([sys.executable, str(ROOT / "scripts" / "check_skill_zip.py"), str(skill_zip)])
     run(
         [
@@ -184,7 +193,7 @@ def main() -> int:
         ]
     )
 
-    temp = Path(tempfile.mkdtemp(prefix="dittobot-release-check."))
+    temp = Path(tempfile.mkdtemp(prefix="youish-release-check."))
     try:
         with zipfile.ZipFile(plugin_zip) as handle:
             handle.extractall(temp)

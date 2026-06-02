@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Check a generated Dittobot plugin package."""
+"""Check a generated Youish plugin package."""
 
 from __future__ import annotations
 
@@ -16,7 +16,7 @@ from plugin_manifest import PLUGIN_NAME, SEMVER_RE
 
 
 EXPECTED_PLUGIN_FILES = {".codex-plugin/plugin.json"} | {
-    f"skills/dittobot/{rel}" for rel in PACKAGE_FILES
+    f"skills/youish/{rel}" for rel in PACKAGE_FILES
 }
 
 
@@ -61,8 +61,8 @@ def main() -> int:
         if manifest.get("license") != "GPL-2.0-or-later":
             errors.append("plugin license must be GPL-2.0-or-later")
         interface = manifest.get("interface", {})
-        if interface.get("displayName") != "Dittobot":
-            errors.append("plugin interface.displayName must be Dittobot")
+        if interface.get("displayName") != "Youish":
+            errors.append("plugin interface.displayName must be Youish")
         default_prompt = interface.get("defaultPrompt")
         if not isinstance(default_prompt, list):
             errors.append("plugin interface.defaultPrompt must be a list")
@@ -74,20 +74,20 @@ def main() -> int:
                     errors.append(f"plugin interface.defaultPrompt[{index}] must be a non-empty string")
                 elif len(prompt) > 128:
                     errors.append(f"plugin interface.defaultPrompt[{index}] must be 128 characters or fewer")
-            if not any(isinstance(prompt, str) and "$dittobot" in prompt for prompt in default_prompt):
-                errors.append("plugin defaultPrompt must mention $dittobot")
+            if not any(isinstance(prompt, str) and "$youish" in prompt for prompt in default_prompt):
+                errors.append("plugin defaultPrompt must mention $youish")
         if interface.get("brandColor") != "#4F46E5":
             errors.append("plugin interface.brandColor must be #4F46E5")
         for field, expected in (
-            ("composerIcon", "skills/dittobot/assets/icon-small.svg"),
-            ("logo", "skills/dittobot/assets/icon-large.svg"),
+            ("composerIcon", "skills/youish/assets/icon-small.svg"),
+            ("logo", "skills/youish/assets/icon-large.svg"),
         ):
             if interface.get(field) != expected:
                 errors.append(f"plugin interface.{field} must be {expected}")
             elif not (plugin / expected).exists():
                 errors.append(f"plugin interface.{field} points to a missing file")
 
-    skill_root = plugin / "skills" / "dittobot"
+    skill_root = plugin / "skills" / "youish"
     actual_files = package_files_in(plugin) if plugin.exists() else set()
     for rel in sorted(EXPECTED_PLUGIN_FILES - actual_files):
         errors.append(f"missing plugin file: {rel}")

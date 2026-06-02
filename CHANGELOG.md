@@ -4,6 +4,14 @@
 
 Nothing yet.
 
+## 0.3.0 - 2026-06-02
+
+- Rename the project from Dittobot to Youish to avoid confusion with an existing Ditto writing app.
+- Rename the installable skill, Codex plugin package, marketplace metadata, release asset names, scorecard schema, and public docs to Youish.
+- Expose deterministic contract-test groups in public scorecards and release validation.
+- Add source-only artifact contracts for buried asks, owner/action recaps, and keyword-salad failures.
+- Add sentence-quality guards for finished source-only prose so protected-term clusters cannot pass as rewrites.
+
 ## 0.2.7 - 2026-06-02
 
 - Add reader-action preservation as a first-class deterministic guardrail for asks, owners, deadlines, and next steps.
@@ -16,7 +24,7 @@ Nothing yet.
 
 ## 0.2.6 - 2026-06-02
 
-- Teach the install verifier to accept full repo-root skill copies, matching installers such as `npx skills add RegionallyFamous/dittobot`.
+- Teach the install verifier to accept full repo-root skill copies, matching installers such as `npx skills add RegionallyFamous/youish`.
 - Add CI coverage for root-copy installs so package-copy, symlink, and full-repo install paths stay supported.
 
 ## 0.2.5 - 2026-06-02
@@ -34,7 +42,7 @@ Nothing yet.
 
 ## 0.2.3 - 2026-06-02
 
-- Make the Codex plugin marketplace path installable by adding a `plugins/dittobot` package mirror and validating it.
+- Make the Codex plugin marketplace path installable by adding a `plugins/youish` package mirror and validating it.
 - Strengthen regression coverage for unsupported entities, generic AI patterns, stance preservation, artifact leaks, over-formalizing, extra jokes, therapy-speak, dialect preservation, and plain-word flattening.
 - Add new public scorecard guardrails for stance preservation, artifact cleanup, unsupported entity protection, and anti-generic polish.
 - Make copied install checks tolerate GitHub CLI source metadata without ignoring the actual skill body.
@@ -48,7 +56,7 @@ Nothing yet.
 
 ## 0.2.1 - 2026-06-02
 
-- Add repo plugin marketplace metadata so Dittobot can be exposed as a Codex marketplace source.
+- Add repo plugin marketplace metadata so Youish can be exposed as a Codex marketplace source.
 - Add one-command release asset building, exact release asset verification, scorecard checksums, and stricter plugin package validation.
 - Tighten README examples and skeptic-facing copy so the argument lands faster with less manifesto echo.
 - Add optional archive checksum verification to the terminal installer and make the default install ref release-pinned.
@@ -57,7 +65,7 @@ Nothing yet.
 
 ### Install And Distribution
 
-- Add `$skill-installer`-first setup docs, a no-git terminal installer, and a GitHub CLI-compatible `skills/dittobot` package mirror.
+- Add `$skill-installer`-first setup docs, a no-git terminal installer, and a GitHub CLI-compatible `skills/youish` package mirror.
 - Make copied installs safer by detecting drift, replacing stale package files cleanly, backing up existing installs, and refusing unsafe targets.
 - Add deterministic Codex plugin package building, plugin verification, uploadable skill ZIPs, plugin ZIPs, checksums, and CI release-asset checks.
 - Add Codex UI icon assets, wire them into skill/plugin metadata, and add a risograph README banner for the voice-preserving editing metaphor.
@@ -77,10 +85,10 @@ Nothing yet.
 
 ### Docs And Governance
 
-- Refocus the README on the anti-slop argument, Dittobot's origin story, and in-process examples.
+- Refocus the README on the anti-slop argument, Youish's origin story, and in-process examples.
 - Move operational runbooks into the GitHub wiki.
 - Add bad-rewrite and regression-case issue templates, a pull request checklist, contributor guide, security/privacy guidance, and release checklist.
 
 ## 0.1.0
 
-- Initial public Dittobot skill release.
+- Initial public Youish skill release.

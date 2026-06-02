@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build a deterministic Dittobot plugin ZIP from a checked plugin directory."""
+"""Build a deterministic Youish plugin ZIP from a checked plugin directory."""
 
 from __future__ import annotations
 
@@ -13,13 +13,13 @@ from plugin_manifest import DEFAULT_VERSION, require_semver
 
 
 EXPECTED_FILES = {".codex-plugin/plugin.json"} | {
-    f"skills/dittobot/{rel}" for rel in PACKAGE_FILES
+    f"skills/youish/{rel}" for rel in PACKAGE_FILES
 }
 ZIP_MTIME = (2026, 1, 1, 0, 0, 0)
 
 
 def output_path(version: str, output_dir: Path) -> Path:
-    return output_dir / f"dittobot-plugin-v{version}.zip"
+    return output_dir / f"youish-plugin-v{version}.zip"
 
 
 def files_in(path: Path) -> set[str]:
@@ -59,7 +59,7 @@ def main() -> int:
             print(f"missing plugin file: {rel}")
         for rel in unexpected:
             print(f"unexpected plugin file: {rel}")
-        raise SystemExit("Plugin directory is not a clean Dittobot plugin package.")
+        raise SystemExit("Plugin directory is not a clean Youish plugin package.")
 
     output = Path(args.output).expanduser() if args.output else output_path(args.version, Path(args.output_dir))
     output = output.resolve()

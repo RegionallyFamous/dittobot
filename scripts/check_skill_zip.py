@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Check an uploadable Dittobot skill ZIP."""
+"""Check an uploadable Youish skill ZIP."""
 
 from __future__ import annotations
 
@@ -15,8 +15,8 @@ from package_files import PACKAGE_FILES, assert_mirror_fresh
 
 
 ROOT = Path(__file__).resolve().parents[1]
-SKILL_ROOT = ROOT / "skills" / "dittobot"
-PREFIX = "dittobot/"
+SKILL_ROOT = ROOT / "skills" / "youish"
+PREFIX = "youish/"
 
 
 def digest_bytes(data: bytes) -> str:
@@ -29,7 +29,7 @@ def digest_path(path: Path) -> str:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("zip_path", help="Generated Dittobot skill ZIP.")
+    parser.add_argument("zip_path", help="Generated Youish skill ZIP.")
     args = parser.parse_args()
 
     zip_path = Path(args.zip_path).expanduser()
@@ -59,7 +59,7 @@ def main() -> int:
             if name.startswith("/") or ".." in Path(name).parts:
                 errors.append(f"unsafe ZIP path: {name}")
             if not name.startswith(PREFIX):
-                errors.append(f"file is outside dittobot/ prefix: {name}")
+                errors.append(f"file is outside youish/ prefix: {name}")
 
         duplicates = sorted({name for name in seen if seen.count(name) > 1})
         for name in duplicates:
@@ -84,8 +84,8 @@ def main() -> int:
 
         if f"{PREFIX}SKILL.md" in actual:
             skill = handle.read(f"{PREFIX}SKILL.md").decode("utf-8")
-            if "name: dittobot" not in skill[:500]:
-                errors.append("SKILL.md frontmatter must name dittobot")
+            if "name: youish" not in skill[:500]:
+                errors.append("SKILL.md frontmatter must name youish")
 
     if errors:
         print("Skill ZIP check failed:")

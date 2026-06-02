@@ -1,21 +1,21 @@
-# Dittobot
+# Youish
 
 Voice-faithful rewrites for people who want AI to sound like them, not like a committee laminated a thesaurus.
 
-[![Validate](https://github.com/RegionallyFamous/dittobot/actions/workflows/validate.yml/badge.svg)](https://github.com/RegionallyFamous/dittobot/actions/workflows/validate.yml)
+[![Validate](https://github.com/RegionallyFamous/youish/actions/workflows/validate.yml/badge.svg)](https://github.com/RegionallyFamous/youish/actions/workflows/validate.yml)
 ![License: GPL-2.0-or-later](https://img.shields.io/badge/license-GPL--2.0--or--later-blue.svg)
 ![Runtime dependencies: none](https://img.shields.io/badge/runtime_deps-none-brightgreen.svg)
-[![skills.sh](https://skills.sh/b/RegionallyFamous/dittobot)](https://skills.sh/RegionallyFamous/dittobot)
+[![skills.sh](https://skills.sh/b/RegionallyFamous/youish)](https://skills.sh/RegionallyFamous/youish)
 
-![A risograph-style Dittobot workshop turning messy notes into clean prose](assets/readme-riso-banner.jpg)
+![A risograph-style Youish workshop turning messy notes into clean prose](assets/readme-riso-banner.jpg)
 
 Paste messy notes. Get sharp prose that still sounds like you. That should not be controversial. Apparently we needed a tool anyway.
 
-Dittobot turns rough drafts, notes, and rants into clear writing without sanding off the parts that sound like you. It is not AI trying to borrow a soul. It is an editor protecting the one already in the draft.
+Youish turns rough drafts, notes, and rants into clear writing without sanding off the parts that sound like you. It is not AI trying to borrow a soul. It is an editor protecting the one already in the draft.
 
-## What Dittobot Is
+## What Youish Is
 
-Dittobot is a Codex skill that edits from your source instead of inventing a new voice. It finds the point, protects facts and uncertainty, keeps useful rough edges, and cuts bland AI tells.
+Youish is a Codex skill that edits from your source instead of inventing a new voice. It finds the point, protects facts and uncertainty, keeps useful rough edges, and cuts bland AI tells.
 
 It is not a ghostwriter. It is a voice-preserving editor: your claims, your taste, your stance, your rhythm, just cleaned up enough that the reader does not have to excavate the point with a tiny shovel.
 
@@ -53,7 +53,7 @@ Source:
 ok the launch note is somehow both too long and says nothing. what i actually mean is we fixed the importer bug, people can retry failed rows now, and i need it to sound calm but not like a haunted changelog
 ```
 
-What Dittobot protects:
+What Youish protects:
 
 - The facts are "importer bug fixed" and "failed rows can be retried."
 - The voice marker worth keeping is "haunted changelog."
@@ -72,7 +72,7 @@ Source:
 In today's rapidly evolving landscape, our robust platform empowers teams to unlock seamless collaboration and drive meaningful impact.
 ```
 
-What Dittobot notices:
+What Youish notices:
 
 - The sentence sounds confident but says almost nothing.
 - Inventing specifics would make it worse.
@@ -91,7 +91,7 @@ Source:
 This draft is not bad. It just walks into the room and immediately apologizes for existing.
 ```
 
-What Dittobot protects:
+What Youish protects:
 
 - The image is the point.
 - A smoother rewrite would be worse.
@@ -110,7 +110,7 @@ Source:
 I think we probably need to send notice within 10 business days, but I am not counsel and the clause had weird carveouts.
 ```
 
-What Dittobot protects:
+What Youish protects:
 
 - "Probably," "I think," and "not counsel" are precision, not clutter.
 - The rewrite must not turn uncertainty into legal certainty.
@@ -129,7 +129,7 @@ Source:
 I am a little angry that people saw bad AI writing and decided the answer was banning the tool, but I am also genuinely excited because we can teach it taste instead of pretending pencils are holy now.
 ```
 
-What Dittobot protects:
+What Youish protects:
 
 - The anger and hope both matter.
 - The rewrite should be sharp without turning into a personal attack.
@@ -144,26 +144,26 @@ I am annoyed that people saw bad AI writing and decided the answer was banning t
 
 The AI-writing backlash has receipts. People have seen enough soulless, padded, fake-confident slop to be annoyed. Good. Stay annoyed. Just aim the annoyance at the workflow instead of pretending the tool has only one possible setting.
 
-- **"It sounds like nobody."** Correct, if you ask it to invent a voice. Dittobot starts from your words. The stance, rhythm, humor, pressure, and weird little phrase are already there.
-- **"It gets bloated."** Bad AI writes like it is being paid by the clause. Dittobot cuts filler and returns the rewrite without a lecture unless you ask for one.
-- **"It flattens everyone into the same house style."** Yes, if everyone accepts the first generic draft. Dittobot keeps dry jokes, justified edge, warmth, awkwardness, and useful rough edges.
-- **"It invents confidence."** That is a real failure mode. Dittobot does not add numbers, customers, citations, examples, legal certainty, or convenient details that were not in the source.
-- **"It hides who wrote it."** Editing is not the same as outsourcing authorship. Dittobot keeps your claims, taste, and decisions in charge.
-- **"The tells give it away."** Dashes are not the crime. Predictability is. Dittobot can obey no-dash rules, but the deeper fix is cadence and taste.
+- **"It sounds like nobody."** Correct, if you ask it to invent a voice. Youish starts from your words. The stance, rhythm, humor, pressure, and weird little phrase are already there.
+- **"It gets bloated."** Bad AI writes like it is being paid by the clause. Youish cuts filler and returns the rewrite without a lecture unless you ask for one.
+- **"It flattens everyone into the same house style."** Yes, if everyone accepts the first generic draft. Youish keeps dry jokes, justified edge, warmth, awkwardness, and useful rough edges.
+- **"It invents confidence."** That is a real failure mode. Youish does not add numbers, customers, citations, examples, legal certainty, or convenient details that were not in the source.
+- **"It hides who wrote it."** Editing is not the same as outsourcing authorship. Youish keeps your claims, taste, and decisions in charge.
+- **"The tells give it away."** Dashes are not the crime. Predictability is. Youish can obey no-dash rules, but the deeper fix is cadence and taste.
 
 The problem is not using AI. The problem is accepting the first bland answer, then blaming the whole category because nobody steered.
 
 So the behavior is deliberately boring where bad AI gets cute:
 
-- If the draft has no facts, Dittobot will not invent facts.
-- If the draft has uncertainty, Dittobot keeps the uncertainty.
-- If the draft has a weird good phrase, Dittobot protects it.
-- If the draft is bloated, Dittobot cuts before it decorates.
-- If a constraint says no dashes, no notes, or exactly 40 words, Dittobot treats that like the job.
+- If the draft has no facts, Youish will not invent facts.
+- If the draft has uncertainty, Youish keeps the uncertainty.
+- If the draft has a weird good phrase, Youish protects it.
+- If the draft is bloated, Youish cuts before it decorates.
+- If a constraint says no dashes, no notes, or exactly 40 words, Youish treats that like the job.
 
 ## When Not To Use It
 
-Dittobot needs source text or a real voice sample. It is not for making up legal, medical, financial, academic, or factual certainty. It should not bypass publication policies, disclosure rules, or common sense around private data.
+Youish needs source text or a real voice sample. It is not for making up legal, medical, financial, academic, or factual certainty. It should not bypass publication policies, disclosure rules, or common sense around private data.
 
 When disclosure matters, say the true thing: edited with AI from my draft, grammar and clarity assistance only, or AI-assisted line edit with facts checked by me. Authorship is not a magic spell. Be honest about the workflow and keep responsibility where it belongs.
 
@@ -175,18 +175,18 @@ When disclosure matters, say the true thing: edited with AI from my draft, gramm
 
 ## Use It
 
-First, install Dittobot from inside Codex:
+First, install Youish from inside Codex:
 
 ```text
-Use $skill-installer to install Dittobot from GitHub repo RegionallyFamous/dittobot. Use path "." and install it as "dittobot".
+Use $skill-installer to install Youish from GitHub repo RegionallyFamous/youish. Use path "skills/youish" and install it as "youish".
 ```
 
-That `.` means the root Dittobot skill in the GitHub repo. You do not need to clone anything.
+You do not need to clone anything.
 
 Then start a new Codex session and paste the mess. Most prompts should be this boring:
 
 ```text
-Use $dittobot on this:
+Use $youish on this:
 
 [paste the messy draft, notes, rant, email, announcement, post, caption, or half-formed thought]
 ```
@@ -198,18 +198,18 @@ You do not need to say "preserve my voice," "do not add facts," or "keep uncerta
 If the Codex prompt is unavailable, this one-line install does the same basic job:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/RegionallyFamous/dittobot/v0.2.7/install.sh | DITTOBOT_REF=v0.2.7 bash
+curl -fsSL https://raw.githubusercontent.com/RegionallyFamous/youish/v0.3.0/install.sh | YOUISH_REF=v0.3.0 bash
 ```
 
-Other install paths are in the [Install wiki](https://github.com/RegionallyFamous/dittobot/wiki/Install) for GitHub CLI, Codex plugin packaging, release assets, and open-skills ecosystems.
+Other install paths are in the [Install wiki](https://github.com/RegionallyFamous/youish/wiki/Install) for GitHub CLI, Codex plugin packaging, release assets, and open-skills ecosystems.
 
 ## Proof, Not Vibes
 
-Dittobot's quality story is not "trust me, it feels good."
+Youish's quality story is not "trust me, it feels good."
 
-Dittobot has tests for the stuff bad AI writing usually breaks: facts, uncertainty, voice markers, no-dash rules, exact word counts, reader actions, and empty buzzword paste.
+Youish has tests for the stuff bad AI writing usually breaks: facts, uncertainty, voice markers, no-dash rules, exact word counts, reader actions, and empty buzzword paste.
 
-This does not prove literary taste. It proves Dittobot keeps the constraints it claims to protect: facts, uncertainty, length, format, and anti-generic behavior.
+This does not prove literary taste. It proves Youish keeps the constraints it claims to protect: facts, uncertainty, length, format, and anti-generic behavior.
 
 | Promise | How It Is Tested |
 |---|---|
@@ -227,18 +227,18 @@ The scorecard is intentionally boring: full-suite gates, stable failure codes, h
 
 The manuals live in the wiki so the README can stay focused on the why and the examples:
 
-- [Install](https://github.com/RegionallyFamous/dittobot/wiki/Install)
-- [Validation](https://github.com/RegionallyFamous/dittobot/wiki/Validation)
-- [Dittobot Lab](https://github.com/RegionallyFamous/dittobot/wiki/Dittobot-Lab)
-- [Voice Profiles](https://github.com/RegionallyFamous/dittobot/wiki/Voice-Profiles)
-- [Privacy And Fixtures](https://github.com/RegionallyFamous/dittobot/wiki/Privacy-And-Fixtures)
-- [Live Eval And Scorecards](https://github.com/RegionallyFamous/dittobot/wiki/Live-Eval-And-Scorecards)
-- [Distribution](https://github.com/RegionallyFamous/dittobot/wiki/Distribution)
-- [Release Checklist](https://github.com/RegionallyFamous/dittobot/wiki/Release-Checklist)
+- [Install](https://github.com/RegionallyFamous/youish/wiki/Install)
+- [Validation](https://github.com/RegionallyFamous/youish/wiki/Validation)
+- [Youish Lab](https://github.com/RegionallyFamous/youish/wiki/Youish-Lab)
+- [Voice Profiles](https://github.com/RegionallyFamous/youish/wiki/Voice-Profiles)
+- [Privacy And Fixtures](https://github.com/RegionallyFamous/youish/wiki/Privacy-And-Fixtures)
+- [Live Eval And Scorecards](https://github.com/RegionallyFamous/youish/wiki/Live-Eval-And-Scorecards)
+- [Distribution](https://github.com/RegionallyFamous/youish/wiki/Distribution)
+- [Release Checklist](https://github.com/RegionallyFamous/youish/wiki/Release-Checklist)
 
 ## Research Thread
 
-The critique is worth taking seriously. Research on human-AI co-writing has found that writers care about preserving authentic voice, and other work has found AI suggestions can flatten writing toward dominant styles. Dittobot is a practical answer to that risk: keep the speed, reject the flattening.
+The critique is worth taking seriously. Research on human-AI co-writing has found that writers care about preserving authentic voice, and other work has found AI suggestions can flatten writing toward dominant styles. Youish is a practical answer to that risk: keep the speed, reject the flattening.
 
 - ["It was 80% me, 20% AI": Seeking Authenticity in Co-Writing with Large Language Models](https://arxiv.org/abs/2411.13032): authenticity depends on writers feeling the final piece still carries their choices.
 - [AI Suggestions Homogenize Writing Toward Western Styles and Diminish Cultural Nuances](https://arxiv.org/abs/2409.11360): suggestion systems can flatten voice, so voice preservation has to be a first-class requirement.
@@ -247,7 +247,7 @@ The critique is worth taking seriously. Research on human-AI co-writing has foun
 
 ## About The Name
 
-The name nods to Ditto from Pokemon: transformation without losing the original shape. Also, "ditto" is a perfectly normal English word, so please do not sue me, Nintendo. Dittobot is unofficial and unaffiliated.
+Youish means the output should still sound like the writer: cleaned up, sharpened, and more readable, but not flattened into generic AI paste.
 
 ## License
 
@@ -255,4 +255,4 @@ SPDX-License-Identifier: GPL-2.0-or-later.
 
 Copyright (C) 2026 Regionally Famous.
 
-Dittobot does not claim ownership of text you write, rewrite, or edit with it. Your drafts and outputs are yours.
+Youish does not claim ownership of text you write, rewrite, or edit with it. Your drafts and outputs are yours.

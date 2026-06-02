@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build and verify all local Dittobot release assets in one command."""
+"""Build and verify all local Youish release assets in one command."""
 
 from __future__ import annotations
 
@@ -94,7 +94,7 @@ def main() -> int:
         shutil.rmtree(build_dir)
     build_dir.mkdir(parents=True, exist_ok=True)
     work_dir = build_dir / "_work"
-    plugin_dir = work_dir / "dittobot-plugin"
+    plugin_dir = work_dir / "youish-plugin"
     work_dir.mkdir()
 
     if not args.allow_dirty:
@@ -132,7 +132,7 @@ def main() -> int:
             str(build_dir),
         ]
     )
-    skill_zip = build_dir / f"dittobot-skill-v{args.version}.zip"
+    skill_zip = build_dir / f"youish-skill-v{args.version}.zip"
     run([sys.executable, "scripts/check_skill_zip.py", str(skill_zip)])
     run(
         [
@@ -145,7 +145,7 @@ def main() -> int:
             str(build_dir),
         ]
     )
-    plugin_zip = build_dir / f"dittobot-plugin-v{args.version}.zip"
+    plugin_zip = build_dir / f"youish-plugin-v{args.version}.zip"
     run(
         [
             sys.executable,
@@ -155,7 +155,7 @@ def main() -> int:
             args.version,
         ]
     )
-    scorecard = build_dir / f"dittobot-scorecard-v{args.version}.json"
+    scorecard = build_dir / f"youish-scorecard-v{args.version}.json"
     with scorecard.open("w", encoding="utf-8") as handle:
         run(
             [
@@ -203,12 +203,12 @@ def main() -> int:
     print("Create the GitHub release after tagging the validated commit:")
     print(
         "  gh release create v{0} "
-        "dist/release-v{0}/dittobot-skill-v{0}.zip "
-        "dist/release-v{0}/dittobot-plugin-v{0}.zip "
-        "dist/release-v{0}/dittobot-scorecard-v{0}.json "
+        "dist/release-v{0}/youish-skill-v{0}.zip "
+        "dist/release-v{0}/youish-plugin-v{0}.zip "
+        "dist/release-v{0}/youish-scorecard-v{0}.json "
         "dist/release-v{0}/SHA256SUMS "
         "--verify-tag --fail-on-no-commits "
-        '--title "Dittobot v{0}" --generate-notes'.format(args.version)
+        '--title "Youish v{0}" --generate-notes'.format(args.version)
     )
     return 0
 

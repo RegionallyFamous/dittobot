@@ -1,12 +1,12 @@
 name: Bad rewrite
-description: Report a Dittobot output that changed meaning, flattened voice, invented details, or missed the point.
+description: Report a Youish output that changed meaning, flattened voice, invented details, or missed the point.
 title: "Bad rewrite: "
 labels: ["bad rewrite", "needs regression"]
 body:
   - type: markdown
     attributes:
       value: |
-        Thanks for helping make Dittobot sharper. Please remove private names, secrets, customer data, medical/legal details, and anything you do not want public.
+        Thanks for helping make Youish sharper. Please remove private names, secrets, customer data, medical/legal details, and anything you do not want public.
         For the safest report, run `python3 scripts/failure_fixture.py` or `python3 scripts/redact_case.py` locally and paste the tool-redacted public fixture candidate.
   - type: dropdown
     id: failure_type
@@ -29,7 +29,7 @@ body:
     id: prompt_mode
     attributes:
       label: Prompt mode
-      description: How was Dittobot used?
+      description: How was Youish used?
       options:
         - Source-only messy notes
         - Explicit rewrite/edit request
@@ -65,7 +65,7 @@ body:
   - type: textarea
     id: output
     attributes:
-      label: Dittobot output
+      label: Youish output
       description: Paste the tool-redacted output that failed.
     validations:
       required: true
@@ -73,7 +73,7 @@ body:
     id: expected
     attributes:
       label: Expected behavior
-      description: What should Dittobot have preserved, changed, avoided, or inferred? Tool-redacted desired rewrites are ideal.
+      description: What should Youish have preserved, changed, avoided, or inferred? Tool-redacted desired rewrites are ideal.
     validations:
       required: true
   - type: textarea

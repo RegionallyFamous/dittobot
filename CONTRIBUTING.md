@@ -1,6 +1,6 @@
 # Contributing
 
-Dittobot improves when real writing failures become small, repeatable tests.
+Youish improves when real writing failures become small, repeatable tests.
 
 ## Where Changes Belong
 
@@ -9,11 +9,11 @@ Dittobot improves when real writing failures become small, repeatable tests.
 - Put public philosophy and examples in `README.md`; put install, validation, lab-tooling, and release runbooks in the GitHub wiki.
 - Put validation, install, and live-model tooling in `scripts/`.
 
-If a change makes normal skill use more verbose without making Dittobot more reliable, it probably belongs in the harness instead of `SKILL.md`.
+If a change makes normal skill use more verbose without making Youish more reliable, it probably belongs in the harness instead of `SKILL.md`.
 
 ## Reporting Bad Rewrites
 
-Use the "Bad rewrite" issue template when Dittobot:
+Use the "Bad rewrite" issue template when Youish:
 
 - changes meaning;
 - invents a fact, number, claim, citation, or customer;
