@@ -18,6 +18,7 @@
 - Add `scripts/redact_case.py` and `scripts/failure_fixture.py` for privacy-first bad rewrite reports and fixture candidates.
 - Add `scripts/scorecard.py` for deterministic release scorecards across fixtures, package health, skill budget, and optional live eval transcripts.
 - Move operational runbooks into the GitHub wiki and refocus the README on the anti-slop argument and in-process examples.
+- Add repo-only `scripts/public_copy_check.py` to keep README and repo-description copy sharp, voice-forward, and free of stiff marketing mush.
 - Add reusable fact-fence and voice-profile-card references.
 - Add real `[[boundary: ...]]` ledger parsing.
 - Add package-file manifest sharing between install drift checks and repo validation.

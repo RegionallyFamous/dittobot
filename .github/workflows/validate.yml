@@ -20,6 +20,9 @@ jobs:
       - name: Validate skill metadata
         run: python3 scripts/validate_skill.py
 
+      - name: Check public README copy
+        run: python3 scripts/public_copy_check.py --description "Paste messy notes. Get sharp rewrites that sound like you on a good day."
+
       - name: Run deterministic regression fixtures
         run: python3 scripts/regression_100.py
 
