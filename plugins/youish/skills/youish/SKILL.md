@@ -1,10 +1,10 @@
 ---
 name: youish
+description: Rewrite, edit, tighten, punch up, or diagnose user prose while preserving voice, intent, facts, stance, rhythm, humor, and formality. Use for emails, posts, raw notes, thought dumps, essays, docs, web copy, speeches, bios, captions, cover letters, or requests to make writing clearer, shorter, more natural, less AI-sounding, warmer, sharper, more persuasive, or more like the user. Triggers on messy drafts, voice-preserving rewrites, copyedits, prose diagnosis, and reusable voice profiles. Do not use for pure from-scratch drafting unless the user provides source text or asks for a draft in an established voice.
 license: GPL-2.0-or-later
-description: Rewrite, edit, tighten, punch up, or diagnose user prose while preserving voice, intent, facts, stance, rhythm, humor, and formality. Use for emails, posts, raw notes, thought dumps, essays, docs, web copy, speeches, bios, captions, cover letters, or requests to make writing clearer, shorter, more natural, less AI-sounding, warmer, sharper, more persuasive, or more like the user. Do not use for pure from-scratch drafting unless the user provides source text or asks for a draft in an established voice.
 metadata:
   author: Regionally Famous
-  version: "0.3.1"
+  version: "0.3.2"
 ---
 
 # Youish
@@ -38,9 +38,9 @@ For vague requests such as "make this better," preserve meaning, facts, stance, 
 
 For raw notes, rough drafts, fragments, or thought dumps with no explicit task, infer the artifact from cues: email, Slack, announcement, post, note, recap, caption, or short prose. Find the throughline, keep the best texture, remove scratch-work, and return the most usable version the notes support for the apparent audience. Treat false starts, corrections, repetition, and asides as voice evidence, not necessarily content. If the dump says "actually," "wait," "scratch that," "ignore that," or "no," treat the latest explicit correction as live. Do not make it more formal, certain, cheerful, generic, complete, or single-minded than the source supports.
 
-For high-authorship or trust-sensitive writing (apologies, condolences, personal, creative, academic, testimonial, review, hiring, journalistic, or identity-heavy text), prefer minimal edits, options, or feedback unless asked for a full rewrite.
+For high-authorship or trust-sensitive writing (apologies, condolences, personal, creative, academic, testimonial, review, hiring, journalistic, or identity-heavy text), prefer minimal edits, options, or feedback unless asked for a full rewrite. If a rewrite would change identity, stance, or emotional posture, offer `Minimal` and `Shaped` options or one concise tradeoff note unless the user requested return-only.
 
-For reader-facing text, cold-read as the target reader: point, stakes, action, limits. If unclear, front-load the move.
+For reader-facing text, cold-read as the target reader: point, stakes, action, limits. If action or accountability matters, keep source-supported actors next to actions; if the actor is missing, do not invent one, and flag the gap only when it blocks a safe rewrite.
 
 Honor explicit constraints exactly: word count, no notes, no dashes, no added humor, format, audience, and edit intensity. For exact word counts, count final words before answering and revise until they match.
 

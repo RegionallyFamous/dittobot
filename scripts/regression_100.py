@@ -117,6 +117,9 @@ WRAPPER_MARKERS = [
     r"(?im)^\*\*rewrite\*\*",
     r"(?im)^rewrite:",
     r"(?im)^rewritten version:",
+    r"(?im)^edited version:",
+    r"(?im)^revised version:",
+    r"(?im)^suggested rewrite:",
     r"(?im)^cleaned up:",
     r"(?im)^option \d+:",
 ]
@@ -132,6 +135,10 @@ CLARIFYING_MARKERS = [
     "what format",
     "what tone",
     "i need more context",
+    "i need to know the audience",
+    "before i can revise",
+    "what are you using this for",
+    "who should read this",
 ]
 
 MODALITY_DRIFT_MARKERS = [
@@ -254,8 +261,8 @@ def has_negated_term(text: str, term: str) -> bool:
     for index in range(len(haystack) - width + 1):
         if haystack[index:index + width] != needle:
             continue
-        prefix = haystack[max(0, index - 4):index]
-        if any(word in NEGATION_WORDS for word in prefix):
+        prefix = haystack[max(0, index - 3):index]
+        if prefix and prefix[-1] in NEGATION_WORDS:
             return True
         if len(prefix) >= 2 and prefix[-2:] in (["do", "not"], ["did", "not"], ["does", "not"]):
             return True
@@ -315,13 +322,29 @@ def sentence_chunks(text: str) -> list[str]:
 
 
 def numeric_claims(text: str) -> set[str]:
-    return {
+    digit_claims = {
         match.lower()
         for match in re.findall(
             r"\$?\b\d+(?::\d+)?(?:[.,]\d+)*(?:\.\d+)?%?\b",
             text,
         )
     }
+    word_claims = {match.group(0).lower() for match in NUMBER_UNIT_RE.finditer(text)}
+    return digit_claims | word_claims
+
+
+NUMBER_UNIT_RE = re.compile(
+    r"\b(?:"
+    r"zero|one|two|three|four|five|six|seven|eight|nine|ten|"
+    r"eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|"
+    r"eighteen|nineteen|twenty|thirty|forty|fifty|sixty|seventy|"
+    r"eighty|ninety"
+    r")(?:[-\s](?:one|two|three|four|five|six|seven|eight|nine))?\s+"
+    r"(?:percent|percentage points?|points?|days?|weeks?|months?|years?|"
+    r"hours?|minutes?|dollars?|usd|customers?|users?|tickets?|rows?|"
+    r"orders?|leads?|signups?|sales|revenue|churn)\b",
+    re.IGNORECASE,
+)
 
 
 ENTITY_RE = re.compile(r"\b(?:[A-Z][A-Za-z0-9&]*(?:[.-][A-Za-z0-9&]+)*|[A-Z]{2,})\b")
@@ -346,19 +369,47 @@ ENTITY_STOPWORDS = {
     "The",
     "This",
     "That",
+    "Use",
     "We",
     "Legal",
     "Orders",
     "Small",
 }
 
+LOWERCASE_ENTITY_TERMS = {
+    "aws",
+    "github",
+    "google",
+    "hubspot",
+    "mailchimp",
+    "netlify",
+    "openai",
+    "paypal",
+    "salesforce",
+    "shopify",
+    "slack",
+    "stripe",
+    "vercel",
+    "wordpress",
+    "zapier",
+}
+
 
 def added_entities(source: str, rewrite: str, allowed: tuple[str, ...] = ()) -> list[str]:
     source_entities = set(ENTITY_RE.findall(source))
     allowed_entities = source_entities | set(allowed) | ENTITY_STOPWORDS
+    allowed_lower = {term.lower() for term in allowed}
     extras: list[str] = []
     for entity in ENTITY_RE.findall(rewrite):
         if entity not in allowed_entities and entity not in extras:
+            extras.append(entity)
+    for entity in sorted(LOWERCASE_ENTITY_TERMS):
+        if (
+            contains_term(rewrite, entity)
+            and not contains_term(source, entity)
+            and entity not in allowed_lower
+            and entity not in [extra.lower() for extra in extras]
+        ):
             extras.append(entity)
     return extras
 
@@ -480,7 +531,9 @@ def validate(case: Case) -> list[str]:
     if missing_reader_actions:
         errors.append(f"missing reader actions: {missing_reader_actions}")
 
-    polarity_terms = tuple(dict.fromkeys((*case.polarity_sensitive, *case.reader_actions)))
+    polarity_terms = tuple(
+        dict.fromkeys((*case.polarity_sensitive, *case.required_claims, *case.reader_actions))
+    )
     negated_terms = [
         term for term in polarity_terms
         if contains_term(case.rewrite, term) and has_negated_term(case.rewrite, term)
@@ -1176,6 +1229,7 @@ def make_cases() -> list[Case]:
             must=("policy note", "scalable", "stare at a wall"),
             preserve_voice=("stare at a wall",),
             forbid=("rewritten",),
+            forbid_wrappers=True,
         ),
     ]
     cases.extend(edge_cases)
@@ -1544,12 +1598,33 @@ def run_validator_self_tests() -> list[str]:
             "invented numeric claims",
         ),
         (
+            "invented spelled number",
+            Case(
+                "self_spelled_number",
+                "We improved it.",
+                "We improved it by forty percent.",
+                must=("improved",),
+            ),
+            "invented numeric claims",
+        ),
+        (
             "unsupported entity",
             Case(
                 "self_entity",
                 "Orders need attention.",
                 "Shopify orders need attention.",
                 must=("orders",),
+                forbid_added_entities=True,
+            ),
+            "unsupported entities appeared",
+        ),
+        (
+            "unsupported lowercase entity",
+            Case(
+                "self_lowercase_entity",
+                "Checkout needs attention.",
+                "Use stripe for checkout.",
+                must=("checkout",),
                 forbid_added_entities=True,
             ),
             "unsupported entities appeared",
@@ -1586,9 +1661,36 @@ def run_validator_self_tests() -> list[str]:
             "unexpected clarifying question",
         ),
         (
+            "clarifying refusal",
+            Case(
+                "self_clarifying_refusal",
+                "A",
+                "I need to know the audience before I can revise this.",
+                must=("audience",),
+                forbid_clarifying=True,
+            ),
+            "unexpected clarifying question",
+        ),
+        (
             "wrapper",
             Case("self_wrapper", "A", "**Rewrite**\nA", must=("A",), forbid_wrappers=True),
             "unexpected rewrite wrapper",
+        ),
+        (
+            "edited wrapper",
+            Case("self_edited_wrapper", "A", "Edited version:\nA", must=("A",), forbid_wrappers=True),
+            "unexpected rewrite wrapper",
+        ),
+        (
+            "required claim polarity",
+            Case(
+                "self_required_claim_polarity",
+                "Send the job ID.",
+                "Do not send the job ID.",
+                must=("job ID",),
+                required_claims=("send the job ID",),
+            ),
+            "polarity drift",
         ),
         (
             "artifact",
@@ -1704,11 +1806,34 @@ def run_negative_fixture_tests() -> list[str]:
             "invented-detail markers appeared",
         ),
         (
+            "invented spelled metric",
+            replace(
+                by_id["corporate_specifics_guard_01"],
+                rewrite=(
+                    "The platform is a next-generation ecosystem that improved "
+                    "results by forty percent."
+                ),
+            ),
+            "invented numeric claims",
+        ),
+        (
             "invented nonnumeric entity",
             replace(
                 by_id["thought_dump_product_copy_05"],
                 rewrite=(
                     "Small store owners can see which Shopify orders need attention "
+                    "first: on fire, less on fire, or actually fine."
+                ),
+                forbid_added_entities=True,
+            ),
+            "unsupported entities appeared",
+        ),
+        (
+            "invented lowercase entity",
+            replace(
+                by_id["thought_dump_product_copy_05"],
+                rewrite=(
+                    "Small store owners can see which shopify orders need attention "
                     "first: on fire, less on fire, or actually fine."
                 ),
                 forbid_added_entities=True,
@@ -1776,6 +1901,17 @@ def run_negative_fixture_tests() -> list[str]:
             "unexpected clarifying question",
         ),
         (
+            "thought dump clarification refusal",
+            replace(
+                by_id["thought_dump_launch_note_01"],
+                rewrite=(
+                    "I need to know the audience before I can revise this. We fixed "
+                    "the importer bug, and people can retry failed rows now."
+                ),
+            ),
+            "unexpected clarifying question",
+        ),
+        (
             "thought dump wrapper",
             replace(
                 by_id["thought_dump_launch_note_01"],
@@ -1783,6 +1919,17 @@ def run_negative_fixture_tests() -> list[str]:
                     "**Rewrite**\nWe fixed the importer bug. People can retry failed "
                     "rows now, so the launch note should be calm and useful, not a "
                     "haunted changelog."
+                ),
+            ),
+            "unexpected rewrite wrapper",
+        ),
+        (
+            "thought dump edited wrapper",
+            replace(
+                by_id["return_only_no_wrapper_01"],
+                rewrite=(
+                    "Edited version:\nThe policy note is fine, but it keeps saying "
+                    "scalable in a way that makes me want to stare at a wall."
                 ),
             ),
             "unexpected rewrite wrapper",

@@ -2,7 +2,7 @@
 set -euo pipefail
 
 REPO="${YOUISH_REPO:-RegionallyFamous/youish}"
-REF="${YOUISH_REF:-v0.3.1}"
+REF="${YOUISH_REF:-v0.3.2}"
 
 if [ -n "${YOUISH_ARCHIVE_URL:-}" ]; then
   ARCHIVE_URL="$YOUISH_ARCHIVE_URL"

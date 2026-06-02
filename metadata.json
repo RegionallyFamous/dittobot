@@ -1,12 +1,68 @@
 {
-  "version": "0.3.1",
+  "name": "youish",
+  "displayName": "Youish",
+  "version": "0.3.2",
   "organization": "Regionally Famous",
   "date": "June 2026",
   "abstract": "Voice-faithful rewriting for AI agents, designed to preserve a writer's claims, stance, rhythm, uncertainty, useful weirdness, and exact constraints while removing clutter and generic AI polish. Includes compact runtime instructions, optional quality-gate references, and deterministic regression checks for facts, quotes, identity markers, output shape, source-only thought dumps, and live-eval integrity.",
+  "homepage": "https://github.com/RegionallyFamous/youish",
+  "repository": "https://github.com/RegionallyFamous/youish",
+  "license": "GPL-2.0-or-later",
+  "skillsSh": {
+    "url": "https://www.skills.sh/regionallyfamous/youish/youish",
+    "repoUrl": "https://www.skills.sh/regionallyfamous/youish",
+    "installCommand": "npx skills add https://github.com/RegionallyFamous/youish --skill youish",
+    "topics": [
+      "Writing",
+      "Editing",
+      "Copywriting",
+      "Agent workflows"
+    ],
+    "agents": [
+      "Codex",
+      "Claude Code",
+      "Cursor",
+      "GitHub Copilot",
+      "Windsurf",
+      "Gemini",
+      "Cline",
+      "AMP",
+      "Antigravity"
+    ],
+    "summary": "Voice-faithful rewriting and editing for messy drafts, notes, emails, posts, captions, docs, and reusable voice profiles.",
+    "summaryBullets": [
+      "Preserves the user's claims, stance, uncertainty, rhythm, humor, useful weirdness, and exact constraints.",
+      "Turns rough notes, rants, fragments, and corporate fog into usable prose without inventing facts or flattening voice.",
+      "Includes deterministic regression checks for fact drift, invented details, unsupported entities, wrappers, word counts, output shape, and live scorecard integrity.",
+      "Uses progressive disclosure: compact runtime guidance, optional quality gates, and scripts loaded only for validation or profile work."
+    ],
+    "sourceControlledFields": [
+      "name",
+      "description",
+      "license",
+      "author",
+      "version",
+      "install command",
+      "repository",
+      "grouping",
+      "summary",
+      "SKILL.md preview"
+    ],
+    "skillsShGeneratedFields": [
+      "installs",
+      "GitHub stars",
+      "first seen",
+      "security audits",
+      "related skills",
+      "topic chips"
+    ]
+  },
   "references": [
     "https://github.com/RegionallyFamous/youish",
     "https://arxiv.org/abs/2411.13032",
     "https://arxiv.org/abs/2409.11360",
+    "https://arxiv.org/abs/2603.18161",
+    "https://openreview.net/pdf?id=n0AIlfxDU0",
     "https://digital.gov/guides/plain-language/principles",
     "https://www.cpsc.gov/About-CPSC/Policies-Statements-and-Directives/plain-language-principles"
   ]

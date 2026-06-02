@@ -104,6 +104,8 @@ def main() -> int:
     )
     parser.add_argument("--allow-note", action="store_true", help="Allow notes or rationale.")
     parser.add_argument("--allow-wrapper", action="store_true", help="Allow rewrite labels/wrappers.")
+    parser.add_argument("--allow-clarifying", action="store_true", help="Allow clarifying questions.")
+    parser.add_argument("--max-question-marks", type=int, help="Maximum allowed question marks.")
     parser.add_argument("--json", action="store_true", help="Emit machine-readable JSON.")
     args = parser.parse_args()
 
@@ -138,6 +140,8 @@ def main() -> int:
         no_dash=args.no_dash,
         allow_note=args.allow_note,
         forbid_wrappers=not args.allow_wrapper,
+        forbid_clarifying=not args.allow_clarifying,
+        max_question_marks=args.max_question_marks,
         preserve_uncertainty=args.preserve_uncertainty,
     )
     errors = validate(case)

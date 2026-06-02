@@ -36,10 +36,10 @@ jobs:
       - name: Check public README copy
         run: |
           python3 scripts/public_copy_check.py --description "Paste messy notes. Get sharp rewrites that sound like you on a good day."
-          grep "^## 0.3.1 - " CHANGELOG.md
+          grep "^## 0.3.2 - " CHANGELOG.md
           python3 scripts/check_versions.py
           ! python3 scripts/check_versions.py --version 9.9.9
-          python3 scripts/check_marketplace.py --version 0.3.1
+          python3 scripts/check_marketplace.py --version 0.3.2
 
       - name: Run deterministic regression fixtures
         run: python3 scripts/regression_100.py
@@ -196,22 +196,22 @@ jobs:
           printf 'import pathlib, sys\npathlib.Path(sys.argv[1], "validator-ran.txt").write_text("yes")\n' > "$ok_validator"
           fail_validator="$RUNNER_TEMP/fail-validator.py"
           printf 'raise SystemExit(7)\n' > "$fail_validator"
-          python3 scripts/build_plugin.py --output-dir "$RUNNER_TEMP/youish-plugin-validator" --version 0.3.1 --validator "$ok_validator" --skip-package-check
+          python3 scripts/build_plugin.py --output-dir "$RUNNER_TEMP/youish-plugin-validator" --version 0.3.2 --validator "$ok_validator" --skip-package-check
           test -f "$RUNNER_TEMP/youish-plugin-validator/validator-ran.txt"
-          ! python3 scripts/check_plugin_package.py "$RUNNER_TEMP/youish-plugin-validator" --version 0.3.1
-          ! python3 scripts/build_plugin.py --output-dir "$RUNNER_TEMP/youish-plugin-validator-fail" --version 0.3.1 --validator "$fail_validator"
+          ! python3 scripts/check_plugin_package.py "$RUNNER_TEMP/youish-plugin-validator" --version 0.3.2
+          ! python3 scripts/build_plugin.py --output-dir "$RUNNER_TEMP/youish-plugin-validator-fail" --version 0.3.2 --validator "$fail_validator"
           ! python3 scripts/build_plugin.py --output-dir "$RUNNER_TEMP/youish-plugin" --validator "$RUNNER_TEMP/missing-validator.py" --require-validator
-          python3 scripts/build_plugin.py --output-dir "$RUNNER_TEMP/youish-plugin" --version 0.3.1 --validator ""
-          python3 scripts/check_plugin_package.py "$RUNNER_TEMP/youish-plugin" --version 0.3.1
+          python3 scripts/build_plugin.py --output-dir "$RUNNER_TEMP/youish-plugin" --version 0.3.2 --validator ""
+          python3 scripts/check_plugin_package.py "$RUNNER_TEMP/youish-plugin" --version 0.3.2
           printf 'secret=nope\n' > "$RUNNER_TEMP/youish-plugin/skills/youish/.env"
-          ! python3 scripts/check_plugin_package.py "$RUNNER_TEMP/youish-plugin" --version 0.3.1
-          ! python3 scripts/scorecard.py --plugin-dir "$RUNNER_TEMP/youish-plugin" --version 0.3.1 --format json
-          ! python3 scripts/build_plugin_zip.py "$RUNNER_TEMP/youish-plugin" --version 0.3.1 --output-dir "$RUNNER_TEMP"
+          ! python3 scripts/check_plugin_package.py "$RUNNER_TEMP/youish-plugin" --version 0.3.2
+          ! python3 scripts/scorecard.py --plugin-dir "$RUNNER_TEMP/youish-plugin" --version 0.3.2 --format json
+          ! python3 scripts/build_plugin_zip.py "$RUNNER_TEMP/youish-plugin" --version 0.3.2 --output-dir "$RUNNER_TEMP"
           rm "$RUNNER_TEMP/youish-plugin/skills/youish/.env"
           ! python3 scripts/build_skill_zip.py --version not-semver --output-dir "$RUNNER_TEMP"
-          python3 scripts/build_skill_zip.py --version 0.3.1 --output-dir "$RUNNER_TEMP"
-          python3 scripts/check_skill_zip.py "$RUNNER_TEMP/youish-skill-v0.3.1.zip"
-          python3 - "$RUNNER_TEMP/youish-skill-v0.3.1.zip" <<'PY'
+          python3 scripts/build_skill_zip.py --version 0.3.2 --output-dir "$RUNNER_TEMP"
+          python3 scripts/check_skill_zip.py "$RUNNER_TEMP/youish-skill-v0.3.2.zip"
+          python3 - "$RUNNER_TEMP/youish-skill-v0.3.2.zip" <<'PY'
           import sys
           import zipfile
           with zipfile.ZipFile(sys.argv[1]) as handle:
@@ -220,25 +220,25 @@ jobs:
           assert all(entry.startswith("youish/") for entry in entries)
           assert "youish/README.md" not in entries
           PY
-          python3 scripts/build_plugin_zip.py "$RUNNER_TEMP/youish-plugin" --version 0.3.1 --output-dir "$RUNNER_TEMP"
-          python3 scripts/check_plugin_zip.py "$RUNNER_TEMP/youish-plugin-v0.3.1.zip" --version 0.3.1
+          python3 scripts/build_plugin_zip.py "$RUNNER_TEMP/youish-plugin" --version 0.3.2 --output-dir "$RUNNER_TEMP"
+          python3 scripts/check_plugin_zip.py "$RUNNER_TEMP/youish-plugin-v0.3.2.zip" --version 0.3.2
           unzip_dir="$RUNNER_TEMP/unzipped-plugin"
           mkdir -p "$unzip_dir"
-          python3 - "$RUNNER_TEMP/youish-plugin-v0.3.1.zip" "$unzip_dir" <<'PY'
+          python3 - "$RUNNER_TEMP/youish-plugin-v0.3.2.zip" "$unzip_dir" <<'PY'
           import sys
           import zipfile
           with zipfile.ZipFile(sys.argv[1]) as handle:
               handle.extractall(sys.argv[2])
           PY
-          python3 scripts/check_plugin_package.py "$unzip_dir" --version 0.3.1
-          python3 scripts/scorecard.py --plugin-dir "$unzip_dir" --version 0.3.1 --format json | grep '"status": "PASS"'
-          python3 scripts/write_checksums.py "$RUNNER_TEMP/youish-skill-v0.3.1.zip" "$RUNNER_TEMP/youish-plugin-v0.3.1.zip" --output "$RUNNER_TEMP/SHA256SUMS"
-          grep "youish-skill-v0.3.1.zip" "$RUNNER_TEMP/SHA256SUMS"
-          grep "youish-plugin-v0.3.1.zip" "$RUNNER_TEMP/SHA256SUMS"
-          ! python3 scripts/write_checksums.py "$RUNNER_TEMP/youish-skill-v0.3.1.zip" "$RUNNER_TEMP/youish-skill-v0.3.1.zip" --output "$RUNNER_TEMP/SHA256SUMS.duplicate"
-          python3 scripts/scorecard.py --plugin-dir "$RUNNER_TEMP/youish-plugin" --version 0.3.1 | grep "Youish Public Eval Scorecard"
+          python3 scripts/check_plugin_package.py "$unzip_dir" --version 0.3.2
+          python3 scripts/scorecard.py --plugin-dir "$unzip_dir" --version 0.3.2 --format json | grep '"status": "PASS"'
+          python3 scripts/write_checksums.py "$RUNNER_TEMP/youish-skill-v0.3.2.zip" "$RUNNER_TEMP/youish-plugin-v0.3.2.zip" --output "$RUNNER_TEMP/SHA256SUMS"
+          grep "youish-skill-v0.3.2.zip" "$RUNNER_TEMP/SHA256SUMS"
+          grep "youish-plugin-v0.3.2.zip" "$RUNNER_TEMP/SHA256SUMS"
+          ! python3 scripts/write_checksums.py "$RUNNER_TEMP/youish-skill-v0.3.2.zip" "$RUNNER_TEMP/youish-skill-v0.3.2.zip" --output "$RUNNER_TEMP/SHA256SUMS.duplicate"
+          python3 scripts/scorecard.py --plugin-dir "$RUNNER_TEMP/youish-plugin" --version 0.3.2 | grep "Youish Public Eval Scorecard"
           scorecard="$RUNNER_TEMP/scorecard.json"
-          python3 scripts/scorecard.py --plugin-dir "$RUNNER_TEMP/youish-plugin" --version 0.3.1 --format json > "$scorecard"
+          python3 scripts/scorecard.py --plugin-dir "$RUNNER_TEMP/youish-plugin" --version 0.3.2 --format json > "$scorecard"
           python3 - "$scorecard" <<'PY'
           import json
           import sys
@@ -289,12 +289,12 @@ jobs:
           PY
           cp README.md "$RUNNER_TEMP/README.md.clean"
           printf '\nrelease dirty guard\n' >> README.md
-          ! python3 scripts/build_release_assets.py --version 0.3.1
+          ! python3 scripts/build_release_assets.py --version 0.3.2
           mv "$RUNNER_TEMP/README.md.clean" README.md
-          python3 scripts/build_release_assets.py --version 0.3.1
-          python3 scripts/check_release_assets.py dist/release-v0.3.1 --version 0.3.1
-          cp -R dist/release-v0.3.1 "$RUNNER_TEMP/release-hash-mismatch"
-          python3 - "$RUNNER_TEMP/release-hash-mismatch/youish-scorecard-v0.3.1.json" <<'PY'
+          python3 scripts/build_release_assets.py --version 0.3.2
+          python3 scripts/check_release_assets.py dist/release-v0.3.2 --version 0.3.2
+          cp -R dist/release-v0.3.2 "$RUNNER_TEMP/release-hash-mismatch"
+          python3 - "$RUNNER_TEMP/release-hash-mismatch/youish-scorecard-v0.3.2.json" <<'PY'
           import json
           import sys
           path = sys.argv[1]
@@ -302,10 +302,10 @@ jobs:
           payload["subject"]["skill_sha256"] = "0" * 64
           json.dump(payload, open(path, "w", encoding="utf-8"), indent=2)
           PY
-          python3 scripts/write_checksums.py "$RUNNER_TEMP/release-hash-mismatch/youish-skill-v0.3.1.zip" "$RUNNER_TEMP/release-hash-mismatch/youish-plugin-v0.3.1.zip" "$RUNNER_TEMP/release-hash-mismatch/youish-scorecard-v0.3.1.json" --output "$RUNNER_TEMP/release-hash-mismatch/SHA256SUMS"
-          ! python3 scripts/check_release_assets.py "$RUNNER_TEMP/release-hash-mismatch" --version 0.3.1
-          cp -R dist/release-v0.3.1 "$RUNNER_TEMP/release-contract-mismatch"
-          python3 - "$RUNNER_TEMP/release-contract-mismatch/youish-scorecard-v0.3.1.json" <<'PY'
+          python3 scripts/write_checksums.py "$RUNNER_TEMP/release-hash-mismatch/youish-skill-v0.3.2.zip" "$RUNNER_TEMP/release-hash-mismatch/youish-plugin-v0.3.2.zip" "$RUNNER_TEMP/release-hash-mismatch/youish-scorecard-v0.3.2.json" --output "$RUNNER_TEMP/release-hash-mismatch/SHA256SUMS"
+          ! python3 scripts/check_release_assets.py "$RUNNER_TEMP/release-hash-mismatch" --version 0.3.2
+          cp -R dist/release-v0.3.2 "$RUNNER_TEMP/release-contract-mismatch"
+          python3 - "$RUNNER_TEMP/release-contract-mismatch/youish-scorecard-v0.3.2.json" <<'PY'
           import json
           import sys
           path = sys.argv[1]
@@ -315,8 +315,8 @@ jobs:
           payload["contract_tests"]["groups"][0]["failures"] = ["simulated contract failure"]
           json.dump(payload, open(path, "w", encoding="utf-8"), indent=2)
           PY
-          python3 scripts/write_checksums.py "$RUNNER_TEMP/release-contract-mismatch/youish-skill-v0.3.1.zip" "$RUNNER_TEMP/release-contract-mismatch/youish-plugin-v0.3.1.zip" "$RUNNER_TEMP/release-contract-mismatch/youish-scorecard-v0.3.1.json" --output "$RUNNER_TEMP/release-contract-mismatch/SHA256SUMS"
-          ! python3 scripts/check_release_assets.py "$RUNNER_TEMP/release-contract-mismatch" --version 0.3.1
+          python3 scripts/write_checksums.py "$RUNNER_TEMP/release-contract-mismatch/youish-skill-v0.3.2.zip" "$RUNNER_TEMP/release-contract-mismatch/youish-plugin-v0.3.2.zip" "$RUNNER_TEMP/release-contract-mismatch/youish-scorecard-v0.3.2.json" --output "$RUNNER_TEMP/release-contract-mismatch/SHA256SUMS"
+          ! python3 scripts/check_release_assets.py "$RUNNER_TEMP/release-contract-mismatch" --version 0.3.2
 
       - name: Compile scripts
         run: python3 -m py_compile scripts/*.py

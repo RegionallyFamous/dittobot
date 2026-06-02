@@ -4,6 +4,16 @@
 
 Nothing yet.
 
+## 0.3.2 - 2026-06-02
+
+- Add spelled-out metric invention checks, such as `forty percent`, to the deterministic validator.
+- Add narrow lowercase vendor detection for unsupported entity checks.
+- Add required-claim polarity checks so `Do not send the job ID` cannot satisfy `send the job ID`.
+- Add clarifying-refusal and wrapper-label coverage, including `I need to know the audience` and `Edited version:`.
+- Mirror clarification and question-count controls in `rewrite_report.py`.
+- Fill out Skills.sh-facing metadata and README listing fields for the public skill page.
+- Add current research notes on LLM meaning drift and reusable skill quality.
+
 ## 0.3.1 - 2026-06-02
 
 - Add Vercel-style skills.sh listing metadata and sharpen the public skill preview for voice-faithful rewriting.
