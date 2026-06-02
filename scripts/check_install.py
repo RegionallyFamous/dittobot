@@ -14,6 +14,7 @@ FILES = (
     "agents/openai.yaml",
     "scripts/regression_100.py",
     "scripts/check_install.py",
+    "scripts/install.py",
     "scripts/live_eval.py",
     "scripts/validate_skill.py",
 )
@@ -33,10 +34,11 @@ def main() -> int:
     args = parser.parse_args()
 
     repo = Path(__file__).resolve().parents[1]
-    installed = Path(args.install_dir).expanduser().resolve()
+    install_path = Path(args.install_dir).expanduser()
+    installed = install_path.resolve()
 
     if not installed.exists():
-        print(f"Install missing: {installed}")
+        print(f"Install missing: {install_path}")
         return 1
 
     mismatches: list[str] = []
@@ -61,8 +63,10 @@ def main() -> int:
         print(f"  ln -s {repo} ~/.codex/skills/dittobot")
         return 1
 
-    link_note = "symlink" if Path(args.install_dir).expanduser().is_symlink() else "copy"
-    print(f"Installed skill matches repo ({link_note}): {installed}")
+    if install_path.is_symlink():
+        print(f"Installed skill matches repo (symlink): {install_path} -> {installed}")
+    else:
+        print(f"Installed skill matches repo (copy): {installed}")
     return 0
 
 

@@ -19,6 +19,8 @@ import urllib.request
 from pathlib import Path
 from urllib.parse import urlparse
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
 from regression_100 import Case, make_cases, validate, words
 
 
@@ -113,7 +115,17 @@ def selected_cases(case_ids: list[str], limit: int) -> list[Case]:
         if missing:
             raise SystemExit(f"Unknown case id(s): {', '.join(missing)}")
         return [by_id[case_id] for case_id in case_ids]
-    return cases[:limit]
+    return representative_cases(cases, limit)
+
+
+def representative_cases(cases: list[Case], limit: int) -> list[Case]:
+    """Pick a spread across the grouped deterministic suite."""
+    if limit <= 0:
+        raise SystemExit("--limit must be greater than 0.")
+    if limit >= len(cases):
+        return cases
+    step = len(cases) / limit
+    return [cases[int(index * step)] for index in range(limit)]
 
 
 def validate_api_url(api_url: str, allow_custom: bool) -> None:

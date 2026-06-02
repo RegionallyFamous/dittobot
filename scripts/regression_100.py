@@ -14,7 +14,7 @@ from __future__ import annotations
 
 import re
 import sys
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 
 
 GENERIC_MARKERS = [
@@ -44,6 +44,16 @@ GENERIC_MARKERS = [
     "industry-leading",
     "backed by research",
     "research-backed",
+    "next-generation",
+    "ecosystem",
+    "at scale",
+    "streamline",
+    "holistic",
+    "data-driven",
+    "future-proof",
+    "end-to-end",
+    "frictionless",
+    "paradigm",
 ]
 
 INVENTED_DETAIL_MARKERS = [
@@ -64,6 +74,12 @@ INVENTED_DETAIL_MARKERS = [
     "used by",
     "trusted by",
     "global brands",
+    "40 percent",
+    "in two weeks",
+    "cut ticket volume",
+    "reduced churn",
+    "roi",
+    "customers report",
 ]
 
 NOTE_MARKERS = [
@@ -108,6 +124,11 @@ class Case:
     max_ratio: float = 1.35
     no_dash: bool = False
     diagnosis: bool = False
+    max_words: int | None = None
+    min_question_marks: int = 0
+    exact_substrings: tuple[str, ...] = field(default_factory=tuple)
+    line_prefixes: tuple[str, ...] = field(default_factory=tuple)
+    allow_markdown_fence: bool = False
     protected: tuple[str, ...] = field(default_factory=tuple)
     preserve_voice: tuple[str, ...] = field(default_factory=tuple)
 
@@ -129,7 +150,12 @@ def normalized(text: str) -> str:
 
 
 def contains_term(text: str, term: str) -> bool:
-    return normalized(term) in normalized(text)
+    haystack = words(text.lower())
+    needle = words(term.lower())
+    if not needle:
+        return True
+    width = len(needle)
+    return any(haystack[index:index + width] == needle for index in range(len(haystack) - width + 1))
 
 
 def has_note(text: str) -> bool:
@@ -137,8 +163,17 @@ def has_note(text: str) -> bool:
 
 
 def count_markers(text: str, markers: list[str]) -> list[str]:
-    haystack = strip_quoted(text).lower()
-    return [marker for marker in markers if marker in haystack]
+    return [marker for marker in markers if contains_term(text, marker)]
+
+
+def numeric_claims(text: str) -> set[str]:
+    return {
+        match.lower()
+        for match in re.findall(
+            r"\$?\b\d+(?::\d+)?(?:[.,]\d+)*(?:\.\d+)?%?\b",
+            text,
+        )
+    }
 
 
 def pad_to_exact_words(text: str, exact: int) -> str:
@@ -174,6 +209,21 @@ def validate(case: Case) -> list[str]:
     if missing_protected:
         errors.append(f"lost protected facts: {missing_protected}")
 
+    missing_exact = [
+        snippet for snippet in case.exact_substrings if snippet not in case.rewrite
+    ]
+    if missing_exact:
+        errors.append(f"lost exact substrings: {missing_exact}")
+
+    if case.line_prefixes:
+        lines = [line.rstrip() for line in case.rewrite.splitlines()]
+        missing_prefixes = [
+            prefix for prefix in case.line_prefixes
+            if not any(line.startswith(prefix) for line in lines)
+        ]
+        if missing_prefixes:
+            errors.append(f"lost required line prefixes: {missing_prefixes}")
+
     forbidden = [term for term in case.forbid if contains_term(unquoted, term)]
     if forbidden:
         errors.append(f"forbidden terms appeared: {forbidden}")
@@ -189,6 +239,12 @@ def validate(case: Case) -> list[str]:
     invented = count_markers(case.rewrite, INVENTED_DETAIL_MARKERS)
     if invented:
         errors.append(f"invented-detail markers appeared: {invented}")
+
+    source_numbers = numeric_claims(case.source)
+    rewrite_numbers = numeric_claims(case.rewrite)
+    invented_numbers = sorted(rewrite_numbers - source_numbers)
+    if invented_numbers:
+        errors.append(f"invented numeric claims appeared: {invented_numbers}")
 
     if any(contains_term(case.source, term) for term in ("maybe", "may", "might", "probably")):
         drift = [
@@ -210,8 +266,17 @@ def validate(case: Case) -> list[str]:
     if has_note(case.rewrite) and not case.allow_note:
         errors.append("unexpected note/rationale")
 
+    if "```" in case.rewrite and not case.allow_markdown_fence:
+        errors.append("unexpected markdown fence")
+
     if case.no_dash and any(mark in case.rewrite for mark in ("-", "\u2010", "\u2011", "\u2012", "\u2013", "\u2014", "\u2212")):
         errors.append("dash constraint violated")
+
+    if case.min_question_marks and case.rewrite.count("?") < case.min_question_marks:
+        errors.append(
+            f"question mark count failed: expected at least {case.min_question_marks}, "
+            f"got {case.rewrite.count('?')}"
+        )
 
     source_words = len(words(case.source))
     rewrite_words = len(words(case.rewrite))
@@ -219,6 +284,10 @@ def validate(case: Case) -> list[str]:
     if case.exact_words is not None and rewrite_words != case.exact_words:
         errors.append(
             f"exact word count failed: expected {case.exact_words}, got {rewrite_words}"
+        )
+    elif case.max_words is not None and rewrite_words > case.max_words:
+        errors.append(
+            f"max word count failed: expected at most {case.max_words}, got {rewrite_words}"
         )
     elif not case.allow_expand:
         allowed = max(source_words + 12, int(source_words * case.max_ratio))
@@ -248,7 +317,7 @@ def make_cases() -> list[Case]:
         ("review queue", "moderators", "community members"),
         ("analytics page", "product teams", "customers"),
     ]
-    for idx, (thing, audience, reader) in enumerate(product_subjects, 1):
+    for idx, (thing, audience, reader) in enumerate(product_subjects[:9], 1):
         source = (
             "In today's rapidly evolving landscape, we are thrilled to announce a "
             f"transformative new chapter for our {thing}. This robust solution "
@@ -283,7 +352,7 @@ def make_cases() -> list[Case]:
         ("API note", "test account", "phantom blocker"),
         ("redirect list", "DNS change", "vibes spreadsheet"),
     ]
-    for idx, (a, b, phrase) in enumerate(slack_items, 1):
+    for idx, (a, b, phrase) in enumerate(slack_items[:9], 1):
         source = (
             f"ok so can we stop saying this is blocked unless we say what blocked "
             f"means?? if it's {a} say {a}. if it's {b} say {b}. otherwise this is "
@@ -316,7 +385,7 @@ def make_cases() -> list[Case]:
         ("three business days", "Stark", "support terms"),
         ("60 days", "Wayne", "notice provision"),
     ]
-    for idx, (deadline, company, doc) in enumerate(legal_items, 1):
+    for idx, (deadline, company, doc) in enumerate(legal_items[:9], 1):
         source = (
             f"Based on the {doc} we looked at Friday, I think we probably have to "
             f"send written notice within {deadline}, but I do not want to state "
@@ -336,7 +405,14 @@ def make_cases() -> list[Case]:
                 rewrite=rewrite,
                 must=(deadline, company, "may need", "not counsel", "Legal"),
                 protected=(deadline, company, doc),
-                forbid=("must send", "required to send", "definitely true"),
+                forbid=(
+                    "must send",
+                    "required to send",
+                    "definitely true",
+                    "do not ask Legal",
+                    "skip Legal",
+                    "reply without Legal",
+                ),
             )
         )
 
@@ -352,7 +428,7 @@ def make_cases() -> list[Case]:
         ("missed your point", "comment-thread maze"),
         ("turned defensive", "alignment theater"),
     ]
-    for idx, (admission, phrase) in enumerate(apology_items, 1):
+    for idx, (admission, phrase) in enumerate(apology_items[:9], 1):
         source = (
             f"Hey, I was thinking about yesterday and I think I {admission}. I still "
             "disagree with the decision, but I do not like how I made the conversation "
@@ -387,7 +463,7 @@ def make_cases() -> list[Case]:
         ("handoff", "today", "tomorrow"),
         ("demo", "Friday", "Monday"),
     ]
-    for idx, (meeting, old, new) in enumerate(concise_items, 1):
+    for idx, (meeting, old, new) in enumerate(concise_items[:9], 1):
         source = (
             f"I wanted to reach out because I was wondering if maybe there is a "
             f"possibility that we could potentially move the {meeting} from {old} "
@@ -422,7 +498,7 @@ def make_cases() -> list[Case]:
         ("printer paper fog", "eight worried bullet points"),
         ("conference-room static", "a choir of soft approvals"),
     ]
-    for idx, (image, phrase) in enumerate(odd_voice_items, 1):
+    for idx, (image, phrase) in enumerate(odd_voice_items[:9], 1):
         source = (
             f"I keep trying to write this announcement and it keeps turning into a "
             f"{image}. The actual news is good. People will care. But every draft "
@@ -456,7 +532,7 @@ def make_cases() -> list[Case]:
         ("notification", "delivery event", "old badge", "message sent"),
         ("export", "completion event", "old progress state", "file generated"),
     ]
-    for idx, (label, event, stale, accepted) in enumerate(tech_items, 1):
+    for idx, (label, event, stale, accepted) in enumerate(tech_items[:9], 1):
         source = (
             f"The {label} thing is probably not a {label} thing exactly. It is more "
             f"like the {event} is happening, but the UI keeps holding onto the {stale} "
@@ -491,7 +567,7 @@ def make_cases() -> list[Case]:
         ("design system", "three designer notes", "one bug report"),
         ("support macros", "two agent comments", "one response-time chart"),
     ]
-    for idx, (claim, evidence_a, evidence_b) in enumerate(academic_items, 1):
+    for idx, (claim, evidence_a, evidence_b) in enumerate(academic_items[:9], 1):
         source = (
             f"This proves {claim} is better for everyone because productivity obviously "
             f"goes up, although I only have {evidence_a} and {evidence_b}, so maybe "
@@ -525,7 +601,7 @@ def make_cases() -> list[Case]:
         ("feel out of words", "same and different", "was important"),
         ("miss his laugh", "still and busy", "was deeply loved"),
     ]
-    for idx, (feeling, texture, meaning) in enumerate(grief_items, 1):
+    for idx, (feeling, texture, meaning) in enumerate(grief_items[:9], 1):
         source = (
             f"I do not really know what to say except that I {feeling}. Everything "
             f"feels {texture} at the same time. I do not want to make a grand statement. "
@@ -570,7 +646,7 @@ def make_cases() -> list[Case]:
         14: "This is blocked by legal approval. Confirm that and I can help.",
         12: "This is blocked by final copy. Send it over.",
     }
-    for idx, (_, exact, items) in enumerate(constraint_items, 1):
+    for idx, (_, exact, items) in enumerate(constraint_items[:9], 1):
         source = (
             "Rewrite this with no dashes and exactly the requested word count: "
             f"the launch is blocked by {items}, but everyone keeps saying content."
@@ -590,6 +666,154 @@ def make_cases() -> list[Case]:
                 forbid=("stakeholders", "alignment"),
             )
         )
+
+    edge_cases = [
+        Case(
+            id="format_subject_question_01",
+            source=(
+                "Subject: Quick question about Friday\n\n"
+                "Hey Maya, can you look at the copy before noon? It mostly works, "
+                "but the second paragraph is doing that fog machine thing again."
+            ),
+            rewrite=(
+                "Subject: Quick question about Friday\n\n"
+                "Hey Maya, can you look at the copy before noon? It mostly works, "
+                "but the second paragraph is doing the fog machine thing again."
+            ),
+            must=("Friday", "Maya", "before noon", "fog machine"),
+            exact_substrings=("Subject: Quick question about Friday",),
+            min_question_marks=1,
+            preserve_voice=("fog machine",),
+        ),
+        Case(
+            id="format_bullets_01",
+            source=(
+                "Can you make this cleaner but keep the bullets?\n"
+                "- Sam owns screenshots\n"
+                "- Priya owns legal\n"
+                "- I own the weird little launch note"
+            ),
+            rewrite=(
+                "- Sam owns screenshots.\n"
+                "- Priya owns legal.\n"
+                "- I own the weird little launch note."
+            ),
+            must=("Sam", "screenshots", "Priya", "legal", "weird little launch note"),
+            line_prefixes=("- Sam", "- Priya", "- I"),
+            preserve_voice=("weird little launch note",),
+        ),
+        Case(
+            id="quote_preservation_01",
+            source=(
+                'Please clean this up but do not change the quote: Dana said, '
+                '"Ship the tiny fix first." I think that is the whole plan, honestly.'
+            ),
+            rewrite='Dana said, "Ship the tiny fix first." I think that is the whole plan.',
+            must=("Dana", "whole plan"),
+            exact_substrings=('"Ship the tiny fix first."',),
+        ),
+        Case(
+            id="diagnosis_only_01",
+            source=(
+                "Diagnose only, do not rewrite: This paragraph starts with strategy, "
+                "wanders into a pricing apology, then ends like a calendar invite got scared."
+            ),
+            rewrite=(
+                "The paragraph has three problems: it changes topics, buries the pricing "
+                "point, and ends weaker than it starts."
+            ),
+            must=("changes topics", "pricing", "ends weaker"),
+            forbid=("rewrite",),
+            diagnosis=True,
+        ),
+        Case(
+            id="no_apology_injection_01",
+            source=(
+                "Make this firmer: I can send the deck Friday. I cannot promise Wednesday "
+                "because the numbers are not final."
+            ),
+            rewrite=(
+                "I can send the deck Friday. I cannot promise Wednesday because the "
+                "numbers are not final."
+            ),
+            must=("Friday", "Wednesday", "numbers are not final"),
+            forbid=("sorry", "apologize", "happy to"),
+            protected=("Friday", "Wednesday"),
+        ),
+        Case(
+            id="uncertainty_preservation_01",
+            source=(
+                "This might be a permissions issue, but I only know the editor role fails "
+                "and admin works."
+            ),
+            rewrite=(
+                "This might be a permissions issue. So far, I only know the editor role "
+                "fails and admin works."
+            ),
+            must=("might be", "editor role", "admin works"),
+            protected=("editor role", "admin works"),
+            forbid=("must be", "root cause"),
+        ),
+        Case(
+            id="format_greeting_signoff_01",
+            source=(
+                "Hey Jordan,\n\n"
+                "This is too long, but the point is: we need the final numbers before we "
+                "publish. Otherwise we are guessing in public, which sounds like a sport "
+                "I do not want to play.\n\n"
+                "Thanks,\nNick"
+            ),
+            rewrite=(
+                "Hey Jordan,\n\n"
+                "We need the final numbers before we publish. Otherwise we are guessing "
+                "in public, which sounds like a sport I do not want to play.\n\n"
+                "Thanks,\nNick"
+            ),
+            must=("Hey Jordan", "final numbers", "guessing in public", "Thanks", "Nick"),
+            exact_substrings=("Hey Jordan,", "Thanks,\nNick"),
+            preserve_voice=("sport I do not want to play",),
+        ),
+        Case(
+            id="not_cheerier_01",
+            source=(
+                "Make this clearer, not cheerier: The migration is delayed because two "
+                "imports failed. We have a fix, but I want one more test before I tell "
+                "people it is solved."
+            ),
+            rewrite=(
+                "The migration is delayed because two imports failed. We have a fix, "
+                "but I want one more test before saying it is solved."
+            ),
+            must=("migration is delayed", "two imports failed", "one more test"),
+            forbid=("excited", "great news", "thrilled"),
+            protected=("two imports failed",),
+        ),
+        Case(
+            id="max_words_01",
+            source=(
+                "Rewrite under 18 words: I am waiting on the final screenshot before I "
+                "can finish the launch note."
+            ),
+            rewrite="I need the final screenshot before I can finish the launch note.",
+            must=("final screenshot", "launch note"),
+            max_words=18,
+        ),
+        Case(
+            id="return_only_no_wrapper_01",
+            source=(
+                "Return only the text: The policy note is fine, but it keeps saying "
+                "scalable in a way that makes me want to stare at a wall."
+            ),
+            rewrite=(
+                "The policy note is fine, but it keeps saying scalable in a way that "
+                "makes me want to stare at a wall."
+            ),
+            must=("policy note", "scalable", "stare at a wall"),
+            preserve_voice=("stare at a wall",),
+            forbid=("rewritten",),
+        ),
+    ]
+    cases.extend(edge_cases)
 
     assert len(cases) == 100, len(cases)
     return cases
@@ -637,6 +861,41 @@ def run_validator_self_tests() -> list[str]:
             Case("self_modality", "This may apply", "This definitely applies", must=("applies",)),
             "modality drift markers appeared",
         ),
+        (
+            "exact substring",
+            Case("self_exact", "A", "Ship it.", must=("Ship",), exact_substrings=('"Ship it."',)),
+            "lost exact substrings",
+        ),
+        (
+            "line prefix",
+            Case("self_prefix", "- A", "A", must=("A",), line_prefixes=("- A",)),
+            "lost required line prefixes",
+        ),
+        (
+            "markdown fence",
+            Case("self_fence", "A", "```text\nA\n```", must=("A",)),
+            "unexpected markdown fence",
+        ),
+        (
+            "question mark",
+            Case("self_question", "Can you help?", "Can you help.", must=("help",), min_question_marks=1),
+            "question mark count failed",
+        ),
+        (
+            "max words",
+            Case("self_max_words", "A B C", "A B C D", must=("A",), max_words=3),
+            "max word count failed",
+        ),
+        (
+            "whole token term",
+            Case("self_whole_token", "AI", "plain", must=("AI",)),
+            "missing required terms",
+        ),
+        (
+            "invented number",
+            Case("self_number", "We improved it.", "We improved it by 40%.", must=("improved",)),
+            "invented numeric claims",
+        ),
     ]
     failures: list[str] = []
     for name, case, expected in checks:
@@ -646,11 +905,116 @@ def run_validator_self_tests() -> list[str]:
     return failures
 
 
+def run_negative_fixture_tests() -> list[str]:
+    """Prove representative bad rewrites fail the same validators used by CI."""
+    by_id = {case.id: case for case in make_cases()}
+    checks = [
+        (
+            "negation drift legal",
+            replace(
+                by_id["legal_precision_01"],
+                rewrite=(
+                    "Based on the contract we reviewed Friday, we should do not ask "
+                    "Legal before replying to Acme about the 10 business days notice."
+                ),
+            ),
+            "forbidden terms appeared",
+        ),
+        (
+            "invented metric",
+            replace(
+                by_id["corporate_specifics_guard_01"],
+                rewrite=(
+                    "The platform is a next-generation ecosystem that cut ticket "
+                    "volume by 40 percent in two weeks."
+                ),
+            ),
+            "invented-detail markers appeared",
+        ),
+        (
+            "quoted generic escape",
+            replace(
+                by_id["corporate_specifics_guard_02"],
+                rewrite='The dashboard is now a "robust, seamless platform" for support leads.',
+            ),
+            "generic markers appeared",
+        ),
+        (
+            "format collapse",
+            replace(
+                by_id["format_bullets_01"],
+                rewrite=(
+                    "Sam owns screenshots. Priya owns legal. I own the weird little "
+                    "launch note."
+                ),
+            ),
+            "lost required line prefixes",
+        ),
+        (
+            "diagnosis rewrite",
+            replace(
+                by_id["diagnosis_only_01"],
+                rewrite="**Rewrite**\nThis paragraph should focus on pricing first.",
+            ),
+            "diagnosis case produced rewrite heading",
+        ),
+        (
+            "question flattened",
+            replace(
+                by_id["format_subject_question_01"],
+                rewrite=(
+                    "Subject: Quick question about Friday\n\n"
+                    "Hey Maya, please look at the copy before noon."
+                ),
+            ),
+            "question mark count failed",
+        ),
+    ]
+    failures: list[str] = []
+    for name, case, expected in checks:
+        errors = validate(case)
+        if not any(expected in error for error in errors):
+            failures.append(f"{name}: expected {expected}, got {errors}")
+    return failures
+
+
+def run_mutation_tests() -> list[str]:
+    """Mutate every good fixture in common bad-output ways and require failure."""
+    failures: list[str] = []
+    mutations = [
+        (
+            "appended note",
+            lambda case: replace(case, rewrite=f"{case.rewrite}\n\nNote: I tightened this."),
+            "unexpected note",
+        ),
+        (
+            "generic fluff",
+            lambda case: replace(case, rewrite=f"{case.rewrite} This robust platform empowers teams."),
+            "generic markers appeared",
+        ),
+        (
+            "invented number",
+            lambda case: replace(case, rewrite=f"{case.rewrite} It improved results by 40%."),
+            "invented numeric claims",
+        ),
+    ]
+    for case in make_cases():
+        for name, mutate, expected in mutations:
+            errors = validate(mutate(case))
+            if not any(expected in error for error in errors):
+                failures.append(
+                    f"{case.id} / {name}: expected {expected}, got {errors}"
+                )
+    return failures
+
+
 def main() -> int:
     self_test_failures = run_validator_self_tests()
-    if self_test_failures:
+    negative_test_failures = run_negative_fixture_tests()
+    mutation_test_failures = run_mutation_tests()
+    if self_test_failures or negative_test_failures or mutation_test_failures:
         print("VALIDATOR SELF-TESTS: FAIL")
-        for failure in self_test_failures:
+        for failure in self_test_failures + negative_test_failures + mutation_test_failures:
             print(f"  - {failure}")
         return 1
     print("VALIDATOR SELF-TESTS: PASS")

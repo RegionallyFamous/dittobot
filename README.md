@@ -2,7 +2,29 @@
 
 Voice-faithful rewrites for people who want AI to sound like them, not like a committee laminated a thesaurus.
 
-The name is a playful nod to Ditto from Pokemon: the whole trick is transformation without losing the original shape. Also, "ditto" is a perfectly normal English word, so please do not sue me, Nintendo. Dittobot is unofficial and unaffiliated, just a wink from one weird little tool to another.
+[![Validate](https://github.com/RegionallyFamous/dittobot/actions/workflows/validate.yml/badge.svg)](https://github.com/RegionallyFamous/dittobot/actions/workflows/validate.yml)
+![License: GPL-2.0-or-later](https://img.shields.io/badge/license-GPL--2.0--or--later-blue.svg)
+![Runtime dependencies: none](https://img.shields.io/badge/runtime_deps-none-brightgreen.svg)
+
+## Quick Start
+
+Dittobot is for the moment when your brain has the idea but the draft is still a pile of sentence laundry.
+
+```bash
+git clone https://github.com/RegionallyFamous/dittobot.git
+cd dittobot
+python3 scripts/install.py
+```
+
+Then use it like this:
+
+```text
+Use $dittobot on this:
+
+ok the launch note is somehow both too long and says nothing. what i actually mean is we fixed the importer bug, people can retry failed rows now, and i need it to sound calm but not like a haunted changelog
+```
+
+Dittobot should preserve your voice, protect your facts, remove the fog, and hand back the finished version by default.
 
 ## Why This Exists
 
@@ -64,7 +86,17 @@ Teach the system what to preserve. Teach it which claims it cannot change. Teach
 
 Writing with AI should not mean outsourcing your voice. It should mean giving your voice a better editor.
 
+## About The Name
+
+The name is a playful nod to Ditto from Pokemon: the whole trick is transformation without losing the original shape. Also, "ditto" is a perfectly normal English word, so please do not sue me, Nintendo. Dittobot is unofficial and unaffiliated, just a wink from one weird little tool to another.
+
 ## Install
+
+Requirements:
+
+- Codex with skills support;
+- Python 3 only for validation scripts;
+- a macOS/Linux shell for the symlink commands below. Windows users can use a copy install instead.
 
 Clone the repo:
 
@@ -73,7 +105,19 @@ git clone https://github.com/RegionallyFamous/dittobot.git
 cd dittobot
 ```
 
-Symlink it into your Codex skills folder:
+Install it into your Codex skills folder:
+
+```bash
+python3 scripts/install.py
+```
+
+The installer backs up an existing `~/.codex/skills/dittobot`, creates a symlink by default, and runs the install verifier. Use `--copy` if you cannot or do not want to symlink:
+
+```bash
+python3 scripts/install.py --copy
+```
+
+Manual symlink install:
 
 ```bash
 mkdir -p ~/.codex/skills
@@ -92,6 +136,8 @@ rsync -a --delete ./ ~/.codex/skills/dittobot/
 
 Then invoke it as `$dittobot`.
 
+What gets installed: `SKILL.md`, `agents/openai.yaml`, and helper scripts for validation, installation, and optional live eval. Normal Dittobot use does not run or load the scripts.
+
 Check that your installed skill still matches the repo:
 
 ```bash
@@ -100,32 +146,35 @@ python3 scripts/check_install.py
 
 ## Use
 
+Most of the time, do not over-instruct it. Drop in the mess.
+
 ```text
-Use $dittobot to tighten this email but keep my voice.
+Use $dittobot on this:
+
+[paste the stream of consciousness, rough email, notes, rant, draft, or half-formed announcement]
+```
+
+These are defaults, not chores:
+
+- preserve voice, intent, facts, stance, rhythm, humor, and formality;
+- tighten the writing and remove bland AI tells;
+- keep weird phrasing when the weird phrasing works;
+- avoid invented specifics, fake confidence, and unsupported claims;
+- preserve uncertainty in legal-ish, technical, academic, medical, financial, or factual text;
+- return only the rewrite unless you ask for notes, options, diagnosis, or a comparison.
+
+Only add instructions when you need a hard constraint or a special mode:
+
+```text
+Use $dittobot on this in exactly 40 words. No dashes.
 ```
 
 ```text
-Use $dittobot to make this less AI-sounding. Do not add facts, do not make it more formal, and keep the dry little joke.
+Use $dittobot to infer a reusable voice profile from these samples. Do not rewrite yet.
 ```
 
 ```text
-Use $dittobot to punch this up, but preserve the weird phrasing where it works.
-```
-
-```text
-Use $dittobot to clean this legal-ish note without changing the claims or making it sound more certain.
-```
-
-```text
-Use $dittobot to rewrite this in exactly 40 words. No dashes. No notes.
-```
-
-```text
-Use $dittobot to infer a voice profile from these samples. Do not rewrite yet.
-```
-
-```text
-Use $dittobot to show what changed and why after the rewrite.
+Use $dittobot to show what changed and why.
 ```
 
 ## Examples
@@ -184,6 +233,7 @@ tmpdir="$(mktemp -d)"
 mkdir -p "$tmpdir/codex-skills"
 ln -s "$(pwd)" "$tmpdir/codex-skills/dittobot"
 python3 scripts/check_install.py --install-dir "$tmpdir/codex-skills/dittobot"
+python3 scripts/install.py --install-dir "$tmpdir/codex-skills/dittobot-installed"
 ```
 
 Expected result:
@@ -193,11 +243,12 @@ Skill repo validation passed.
 VALIDATOR SELF-TESTS: PASS
 TOTAL: 100/100 passed
 Installed skill matches repo (symlink): ...
+Installed symlink: ...
 ```
 
-This validates the fixtures and the validator itself. It covers corporate slop, blunt Slack, legal precision, apologies, concision, odd voice, technical notes, unsupported claims, sensitive writing, and exact constraint handling.
+This validates the fixtures, the validator itself, mutation checks against bad outputs, and the installer. It covers corporate slop, blunt Slack, legal precision, apologies, concision, odd voice, technical notes, unsupported claims, sensitive writing, format preservation, diagnosis-only requests, and exact constraint handling.
 
-Run the optional live model smoke test when you have an API key. This is not a benchmark or a guarantee of voice fidelity; it is a sampled smoke test against one model/API configuration and the deterministic string/marker validators. A pass means no obvious fixture failures in that sample.
+Run the optional live model smoke test when you have an API key. This is not a benchmark or a guarantee of voice fidelity; it is a sampled smoke test against one model/API configuration and the deterministic string/marker validators. By default, `--limit` samples across the suite instead of only taking the first cases. A pass means no obvious fixture failures in that sample.
 
 ```bash
 export OPENAI_API_KEY="sk-..."
@@ -242,4 +293,8 @@ If a change makes the skill more verbose without making it more reliable, it pro
 
 ## License
 
-GPL-2.0-or-later.
+SPDX-License-Identifier: GPL-2.0-or-later.
+
+Copyright (C) 2026 Regionally Famous.
+
+Dittobot does not claim ownership of text you write, rewrite, or edit with it. Your drafts and outputs are yours.

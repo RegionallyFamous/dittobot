@@ -32,6 +32,10 @@ jobs:
           ln -s "$GITHUB_WORKSPACE" "$RUNNER_TEMP/codex-skills/dittobot"
           python3 scripts/check_install.py --install-dir "$RUNNER_TEMP/codex-skills/dittobot"
 
+      - name: Check installer
+        run: |
+          python3 scripts/install.py --install-dir "$RUNNER_TEMP/codex-skills-installed/dittobot"
+
       - name: Verify live eval skip path
         env:
           OPENAI_API_KEY: ""

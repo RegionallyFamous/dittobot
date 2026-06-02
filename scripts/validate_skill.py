@@ -98,6 +98,7 @@ def main() -> int:
     for rel in (
         "scripts/regression_100.py",
         "scripts/check_install.py",
+        "scripts/install.py",
         "scripts/live_eval.py",
         "scripts/validate_skill.py",
     ):

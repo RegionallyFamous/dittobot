@@ -1,4 +1,4 @@
 interface:
   display_name: "Dittobot"
   short_description: "Voice-faithful rewrites without factual drift"
-  default_prompt: "Use $dittobot to rewrite this so it sounds like me on a very good writing day. Paste the text below."
+  default_prompt: "Use $dittobot on this. Paste the messy draft, notes, or thought dump below."
