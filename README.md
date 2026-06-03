@@ -17,7 +17,7 @@ Youish turns rough drafts, notes, and rants into clear writing without saving ev
 
 Youish is a Codex skill that edits from your source instead of inventing a new voice. It finds the point, improves the structure, cuts clutter, protects facts and uncertainty, keeps useful rough edges, and removes bland AI tells.
 
-It is not a ghostwriter. It is a voice-preserving editor: your claims, your taste, your stance, your rhythm, just cleaned up enough that the reader does not have to excavate the point with a tiny shovel.
+It is not a ghostwriter. It is an editor with priorities: make the writing better, make it tighter, and keep it yours. Your claims, taste, stance, and rhythm stay in charge; the reader should not have to excavate the point with a tiny shovel.
 
 It also thinks about what the reader needs: the point, the stakes, the limits, and what to do next.
 
@@ -34,7 +34,7 @@ Sharp and concise is not a vibe here:
 
 ## The Point
 
-The answer is not "let AI write for you." The answer is "teach the tool your voice."
+The answer is not "let AI write for you." The answer is "teach the tool taste, then make it respect your voice."
 
 This started because I watched a real critique turn into a dumb rule. People saw verbose, generic, dash-happy AI writing and jumped straight to "nobody should use AI for writing." I get the rage. Bad AI writing is padded, fake-confident, weirdly bloodless, and somehow proud of saying almost nothing.
 
@@ -42,7 +42,7 @@ I agreed with the diagnosis and hated the prescription.
 
 Banning AI because bad AI writing exists treats the worst workflow as the only workflow. That is a very confident way to lose the plot.
 
-If your AI writes badly, the answer is not to throw away the tool. The answer is to teach it taste.
+If your AI writes badly, the answer is not to throw away the tool. The answer is to teach it taste, then make it earn the voice markers it keeps.
 
 ## Watch It Work
 
@@ -54,15 +54,16 @@ Source:
 ok the launch note is somehow both too long and allergic to information. what i actually mean is we fixed the importer bug, people can retry failed rows now, and i need it to sound calm, useful, and not like a haunted changelog wearing a meeting lanyard
 ```
 
-What Youish protects:
+What Youish fixes/protects:
 
 - The facts are "importer bug fixed" and "failed rows can be retried."
-- The voice markers worth keeping are "allergic to information" and "haunted changelog wearing a meeting lanyard."
+- The writing problem is throat-clearing before the facts.
+- The best voice marker is "haunted changelog wearing a meeting lanyard"; "allergic to information" is evidence, not required cargo.
 
 Rewrite:
 
 ```text
-We fixed the importer bug. Failed rows can now be retried, so the note can be calm and useful instead of a haunted changelog wearing a meeting lanyard.
+We fixed the importer bug. Failed rows can now be retried. The note should be calm and useful, not a haunted changelog wearing a meeting lanyard.
 ```
 
 ### Generic AI Paste
@@ -92,7 +93,7 @@ Source:
 This draft is not bad. It just walks into the room, apologizes for existing, and hands the reader a damp napkin labeled strategy.
 ```
 
-What Youish protects:
+What Youish fixes/protects:
 
 - The image is the point, not a joke to sand down.
 - A smoother rewrite would be worse.
@@ -111,7 +112,7 @@ Source:
 I think we probably need to send notice within 10 business days, but I am not counsel, the clause had weird carveouts, and I do not want to turn "maybe" into a courtroom kazoo.
 ```
 
-What Youish protects:
+What Youish fixes/protects:
 
 - "Probably," "I think," and "not counsel" are precision, not clutter.
 - The rewrite must keep the strange but useful warning: do not turn "maybe" into a courtroom kazoo.
@@ -130,7 +131,7 @@ Source:
 I am a little angry that people saw bad AI writing and decided the answer was banning the tool, but I am also genuinely excited because we can teach it taste instead of joining the pencils-are-holy club and polishing our typewriters by candlelight.
 ```
 
-What Youish protects:
+What Youish fixes/protects:
 
 - The anger and hope both matter.
 - The weird stance matters too: annoyed, hopeful, and unwilling to pretend pencils are holy.
@@ -198,7 +199,7 @@ Use $youish on this and return only the rewrite:
 ok the launch note is somehow both too long and allergic to information. what i actually mean is we fixed the importer bug, people can retry failed rows now, and i need it to sound calm, useful, and not like a haunted changelog wearing a meeting lanyard
 ```
 
-A good result should keep the facts: `importer bug fixed` and `failed rows can be retried`. It should also keep at least one live voice marker, like `haunted changelog`.
+A good result should frontload the facts: `importer bug fixed` and `failed rows can be retried`. It should cut the throat-clearing and keep at least one live voice marker, like `haunted changelog`.
 
 That is the point. Drop in the stream of consciousness; get back the version that sounds like you after sleep, coffee, and one more pass.
 
@@ -241,8 +242,8 @@ The live skill page is [skills.sh/regionallyfamous/youish/youish](https://www.sk
 | Topic chips | Writing, editing, copywriting, marketing, agent workflows | Generated by Skills.sh. The repo carries matching discovery notes in `SKILL.md` and `metadata.json`, but Skills.sh owns the displayed chips |
 | Installation | `npx skills add https://github.com/RegionallyFamous/youish --skill youish` | Generated by Skills.sh from the repo and skill slug; mirrored in `metadata.json` |
 | Summary | Sharp, concise rewriting for messy drafts, notes, emails, posts, captions, docs, and reusable voice profiles | Prepared in `README.md` and `metadata.json`; Skills.sh may derive, cache, or omit a Summary block unless its index renders one |
-| Summary bullets | Preserves claims, stance, uncertainty, rhythm, humor, useful weirdness, exact constraints; cleans rough notes without invented facts; validates anti-generic behavior; keeps runtime guidance compact | Prepared in `metadata.json` for catalog/reviewer use; not a documented direct Skills.sh control |
-| SKILL.md preview | Starts with the voice-preservation contract, when-to-apply guidance, defaults, intake, modes, quality gates, anti-generic rules, output rules, and validation hooks | `SKILL.md` |
+| Summary bullets | Improves writing quality first, concision second, and voice preservation inside that standard; cleans rough notes without invented facts or bloat; validates anti-generic behavior; keeps runtime guidance compact | Prepared in `metadata.json` for catalog/reviewer use; not a documented direct Skills.sh control |
+| SKILL.md preview | Starts with the better-writing/concision/voice hierarchy, when-to-apply guidance, defaults, intake, modes, quality gates, anti-generic rules, output rules, and validation hooks | `SKILL.md` |
 | Related skills | Generated from topic overlap when Skills.sh has enough indexed neighbors | Skills.sh catalog |
 | Installs | Generated from anonymous `skills` CLI install telemetry | Skills.sh telemetry |
 | Repository | `regionallyfamous/youish` | GitHub source |
@@ -258,10 +259,12 @@ Youish's quality story is not "trust me, it feels good."
 
 Youish has tests for the stuff bad AI writing usually breaks: facts, uncertainty, voice markers, exact quotes, identity markers, no-dash rules, exact word counts, requested output shape, reader actions, under-editing, timidity drift, forceful-but-tight rewrites, best-marker selection, selective voice compression, empty buzzword paste, and scorecard integrity.
 
-This does not prove literary taste. It proves Youish keeps the constraints it claims to protect: facts, uncertainty, length, format, and anti-generic behavior.
+This does not prove literary taste. It proves Youish keeps the constraints it claims to protect: better structure, concision, facts, uncertainty, format, and anti-generic behavior.
 
 | Promise | How It Is Tested |
 |---|---|
+| Improve the writing | Editorial-lift, thought-dump, reader-action, and source-only artifact contracts |
+| Keep rewrites concise | Concision fixtures, word caps, max-ratio checks, and padded-output mutations |
 | Keep the user's voice | Voice marker fixtures, profile contracts, and mutation tests that remove keeper phrases |
 | Preserve facts and claims | Protected fact checks, required claims, forbidden assertions, numeric drift checks |
 | Preserve uncertainty | Legal and technical cases that fail if "maybe" becomes false certainty |
@@ -308,7 +311,7 @@ The critique is worth taking seriously. Research on human-AI co-writing has foun
 
 | Research Risk | Youish Behavior | Tested By |
 |---|---|---|
-| The writer stops feeling like the piece is theirs | Prefer light edits, protected voice markers, and tradeoff notes for high-authorship text | Voice marker fixtures, authorship boundary contracts |
+| The writer stops feeling like the piece is theirs | Improve the writing without taking over the stance, protected voice markers, or high-authorship posture | Voice marker fixtures, authorship boundary contracts |
 | AI suggestions flatten culturally situated voice | Preserve dialect, code-switching, local idiom, indirectness, honorifics, family/community framing, and story-first structure unless the user asks otherwise | Cultural voice, identity, dialect, and boundary contracts |
 | Options become the same template in different pants | Use meaningfully different strategies: cleaner, warmer, sharper, plainer, or more source-textured | Option-count, option-diversity, and output-shape contracts |
 | Plain language turns into generic simplification | Put source-supported actors next to actions, keep uncertainty, and refuse invented facts | Reader-action, protected-fact, polarity, and numeric/entity drift checks |
