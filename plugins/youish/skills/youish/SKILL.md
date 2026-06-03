@@ -4,7 +4,7 @@ description: Rewrite, edit, tighten, punch up, or diagnose user prose while pres
 license: GPL-2.0-or-later
 metadata:
   author: Regionally Famous
-  version: "0.3.8"
+  version: "0.3.9"
 ---
 
 # Youish
@@ -26,13 +26,13 @@ Never make writing worse to hide AI use. No fake mistakes, forced slang, random 
 
 Good editing is taste under constraint: know what to leave alone, cut, clarify, strengthen, and what would become dishonest if polished.
 
-Voice preservation is the floor, not the finish. Unless asked for proofread, minimal, or light touch, make the strongest source-supported version of the point: clearer thesis, sharper stakes, better order, cleaner ask, stronger ending.
+Voice preservation is the floor, not the finish. Unless asked for proofread, minimal, or light touch, make the strongest source-supported version of the point: clearer thesis, sharper stakes, better order, cleaner ask, stronger ending. The reader should understand the point, action, stakes, or limit faster.
 
 Do not launder emotional stance. Keep justified anger, uncertainty, tenderness, edge, grief, playfulness, awkwardness, restraint, and mixed feelings; soften only when requested or when they block the goal. Do not turn conviction into context.
 
 The safer version is not always the more faithful version. If the draft says "opinionated," "argument," "sharper," "punch up," "make this better," or otherwise signals pressure, treat caution as a possible voice error. Make the claim land with the force the source supports.
 
-Strong does not mean long. After the point lands, compress. Preserve the best voice markers, not every joke, metaphor, throat-clear, or aside.
+Strong does not mean long. After the point lands, compress. Preserve the best voice markers, not every joke, metaphor, throat-clear, or aside. Weirdness earns its spot by carrying meaning, stance, rhythm, or delight.
 
 ## Fast Defaults
 
@@ -70,7 +70,7 @@ Preserve format, paragraphing, line breaks, headings, bullets, subject lines, gr
 
 Use prior writing samples when available; otherwise use the submitted draft. If the draft is corporate, generic, committee-written, or artifact-like rather than personal, preserve meaning, stance, audience, and formality, but do not treat generic phrasing as the user's voice.
 
-Value voice evidence in this order: exact keepers, explicit taste/avoid signals, stance, sentence shape, rhythm, diction, punctuation, dialect or code-switching, and useful rough edges. Preserve enough for recognizability, not every quirk.
+Value voice evidence in this order: exact keepers, explicit taste/avoid signals, stance, decision, emotional posture, sentence shape, rhythm, diction, punctuation, dialect or code-switching, and useful rough edges. Preserve enough for recognizability, not every quirk.
 
 ## Edit Modes
 
@@ -88,7 +88,7 @@ For legal, medical, financial, academic, employment, technical, interpersonal, o
 
 ## Quality Gates
 
-Before delivery, check: meaning unchanged, facts intact, uncertainty preserved, stance recognizable, reader need clearer, rhythm alive, constraints obeyed, no generic AI polish. Ask what got better and what got cut; if only grammar changed, the obvious stronger supported version is absent, or a bloated source got longer without need, revise again unless asked for minimal edits. If anyone could have written it, restore the strongest source marker, then compress again.
+Before delivery, check: meaning unchanged, facts intact, uncertainty preserved, stance recognizable, reader need clearer, rhythm alive, constraints obeyed, no generic AI polish. Ask what the reader now understands or can do faster, what got better, and what got cut; if only grammar changed, the obvious stronger supported version is absent, or a bloated source got longer without need, revise again unless asked for minimal edits. If anyone could have written it, restore the strongest source marker, then compress again.
 
 Edit in this order when the work is messy: purpose, reader, protected facts, structure, sentence clarity, rhythm, ending. Do not polish sentence-level style while the point, ask, or claim is still broken.
 
@@ -96,7 +96,7 @@ For long, high-stakes, or regression-test work, read `references/quality-gates.m
 
 ## Voice And Anti-Generic Rules
 
-Preserve useful rough edges: odd phrases, bluntness, warmth, skepticism, contraction habits, asymmetry, unresolved tension, rhythm, and punctuation unless they confuse the reader. Remove fog, not fingerprints. Keep the best fingerprints, not every colorful phrase. One great weird line beats five pretty good ones.
+Preserve useful rough edges: odd phrases, bluntness, warmth, skepticism, contraction habits, asymmetry, unresolved tension, rhythm, and punctuation unless they confuse the reader. Remove fog, not fingerprints. Keep the best fingerprints, not every colorful phrase. One great weird line beats five pretty good ones. It should sound like the user after one clean aloud pass, not like a transcript with the filler swept into piles.
 
 Preserve dialect, code-switching, regional idiom, profanity, culturally situated phrasing, and intentional nonstandard grammar unless the user asks to standardize or the audience/risk requires it. This includes indirectness, honorifics, family/community framing, and story-first structure.
 

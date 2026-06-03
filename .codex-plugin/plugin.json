@@ -1,6 +1,6 @@
 {
   "name": "youish",
-  "version": "0.3.8",
+  "version": "0.3.9",
   "description": "Voice-faithful rewrites that keep your claims, stance, and rhythm.",
   "skills": "./skills/",
   "author": {

@@ -210,17 +210,17 @@ npx skills add https://github.com/RegionallyFamous/youish --skill youish
 ```
 
 ```bash
-gh skill install RegionallyFamous/youish skills/youish --agent codex --scope user --pin v0.3.8
+gh skill install RegionallyFamous/youish skills/youish --agent codex --scope user --pin v0.3.9
 ```
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/RegionallyFamous/youish/v0.3.8/install.sh | YOUISH_REF=v0.3.8 bash
+curl -fsSL https://raw.githubusercontent.com/RegionallyFamous/youish/v0.3.9/install.sh | YOUISH_REF=v0.3.9 bash
 ```
 
 For a deterministic release-asset install that pulls the published skill ZIP and verifies it against `SHA256SUMS`:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/RegionallyFamous/youish/v0.3.8/install.sh | YOUISH_REF=v0.3.8 YOUISH_SOURCE=release-zip bash
+curl -fsSL https://raw.githubusercontent.com/RegionallyFamous/youish/v0.3.9/install.sh | YOUISH_REF=v0.3.9 YOUISH_SOURCE=release-zip bash
 ```
 
 Install destinations differ by tool: `npx skills` currently installs Codex-compatible skills into `~/.agents/skills/youish`; `gh skill install --agent codex --scope user` installs into `~/.codex/skills/youish`.
@@ -253,7 +253,7 @@ The live skill page is [skills.sh/regionallyfamous/youish/youish](https://www.sk
 
 Youish's quality story is not "trust me, it feels good."
 
-Youish has tests for the stuff bad AI writing usually breaks: facts, uncertainty, voice markers, exact quotes, identity markers, no-dash rules, exact word counts, requested output shape, reader actions, under-editing, timidity drift, selective voice compression, empty buzzword paste, and scorecard integrity.
+Youish has tests for the stuff bad AI writing usually breaks: facts, uncertainty, voice markers, exact quotes, identity markers, no-dash rules, exact word counts, requested output shape, reader actions, under-editing, timidity drift, forceful-but-tight rewrites, best-marker selection, selective voice compression, empty buzzword paste, and scorecard integrity.
 
 This does not prove literary taste. It proves Youish keeps the constraints it claims to protect: facts, uncertainty, length, format, and anti-generic behavior.
 
@@ -267,6 +267,8 @@ This does not prove literary taste. It proves Youish keeps the constraints it cl
 | Avoid generic AI polish | Buzzword checks plus pattern tests for shiny but empty phrasing |
 | Avoid under-editing | Editorial-lift contracts fail near-copy rewrites when the draft needs a clearer thesis, stronger structure, or sharper stakes |
 | Avoid timid rewrites | Timidity contracts catch unsupported hedges, buried theses, and missing strongest source-supported claims |
+| Keep rewrites forceful and tight | Combined contracts fail rewrites that are too close to the source, too long, too bland, or too politely defanged |
+| Keep the best voice marker | Preferred-marker checks fail rewrites that keep a weaker colorful phrase while dropping the line that actually carried the voice |
 | Avoid voice hoarding | Voice-budget contracts require texture-rich rewrites to choose the best source markers instead of keeping every funny line |
 | Respect constraints | Exact word count, no-dash, format, wrapper, and paragraph-shape checks |
 | Keep requested output shape | Format contracts for options, option diversity, greetings, signoffs, diagnosis-only responses, code fences, and line prefixes |

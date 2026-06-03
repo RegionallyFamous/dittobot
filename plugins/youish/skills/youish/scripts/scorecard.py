@@ -24,6 +24,7 @@ from regression_100 import (
     run_boundary_contract_tests,
     run_cultural_voice_contract_tests,
     run_editorial_lift_contract_tests,
+    run_forceful_tight_voice_contract_tests,
     run_format_contract_tests,
     run_mixed_stance_contract_tests,
     run_mutation_tests,
@@ -60,6 +61,10 @@ GUARDRAILS: tuple[tuple[str, GuardrailCheck], ...] = (
     (
         "selective_voice_compression",
         lambda case: case.max_voice_budget_terms is not None,
+    ),
+    (
+        "best_voice_selection",
+        lambda case: case.min_best_voice_terms is not None,
     ),
     ("uncertainty_handling", lambda case: case.preserve_uncertainty),
     ("stance_preservation", lambda case: bool(case.preserve_stance)),
@@ -160,6 +165,7 @@ CONTRACT_CHECKS = (
     ("editorial_lift_contracts", run_editorial_lift_contract_tests),
     ("timidity_contracts", run_timidity_contract_tests),
     ("voice_budget_contracts", run_voice_budget_contract_tests),
+    ("forceful_tight_voice_contracts", run_forceful_tight_voice_contract_tests),
     ("format_contracts", run_format_contract_tests),
     ("voice_texture_contracts", run_voice_texture_contract_tests),
     ("authorship_boundary_contracts", run_authorship_boundary_contract_tests),

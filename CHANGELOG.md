@@ -1,8 +1,10 @@
 # Changelog
 
-## Unreleased
+## 0.3.9 - 2026-06-02
 
-Nothing yet.
+- Add forceful-tight voice contracts for rewrites that must be stronger, shorter, and still recognizably the writer.
+- Add preferred-marker validation so keeping any colorful phrase is not enough when the best voice line got dropped.
+- Raise selective voice-compression coverage and teach the runtime skill that authorship, reader need, and meaning outrank ornament.
 
 ## 0.3.8 - 2026-06-02
 

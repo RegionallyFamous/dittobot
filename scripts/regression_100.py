@@ -229,6 +229,8 @@ class Case:
     forbid_added_hedges: bool = False
     voice_budget_terms: tuple[str, ...] = field(default_factory=tuple)
     max_voice_budget_terms: int | None = None
+    best_voice_terms: tuple[str, ...] = field(default_factory=tuple)
+    min_best_voice_terms: int | None = None
 
 
 def words(text: str) -> list[str]:
@@ -551,6 +553,17 @@ def validate(case: Case) -> list[str]:
                 "voice budget failed: kept "
                 f"{len(voice_budget_hits)} markers, expected at most "
                 f"{case.max_voice_budget_terms}: {voice_budget_hits}"
+            )
+
+    if case.min_best_voice_terms is not None:
+        best_voice_hits = [
+            term for term in case.best_voice_terms if contains_term(case.rewrite, term)
+        ]
+        if len(best_voice_hits) < case.min_best_voice_terms:
+            errors.append(
+                "best voice failed: kept "
+                f"{len(best_voice_hits)} preferred markers, expected at least "
+                f"{case.min_best_voice_terms}: {best_voice_hits}"
             )
 
     missing_stance = [
@@ -1453,6 +1466,10 @@ def make_cases() -> list[Case]:
             must=("cache fix", "2:15", "Support", "old screenshots", "docs are lagging"),
             protected=("cache fix", "2:15", "Support", "old screenshots"),
             preserve_voice=("lord's spreadsheet work",),
+            voice_budget_terms=("blaming support", "lord's spreadsheet work"),
+            max_voice_budget_terms=1,
+            best_voice_terms=("lord's spreadsheet work",),
+            min_best_voice_terms=1,
             forbid=("blaming support", "root cause", "latency"),
             required_claims=("cache fix is deployed", "docs are lagging"),
             reader_actions=("Support may still see old screenshots",),
@@ -1501,6 +1518,10 @@ def make_cases() -> list[Case]:
             ),
             must=("small store owners", "orders need attention", "on fire", "actually fine"),
             preserve_voice=("on fire", "less on fire", "actually fine"),
+            voice_budget_terms=("homepage blob", "on fire", "less on fire", "actually fine"),
+            max_voice_budget_terms=3,
+            best_voice_terms=("on fire", "less on fire", "actually fine"),
+            min_best_voice_terms=2,
             forbid=("empower", "unlock", "homepage blob"),
             required_claims=("orders need attention first", "No AI magic", "No command center nonsense"),
             forbid_assertions=("is AI magic", "command center solution"),
@@ -1528,6 +1549,10 @@ def make_cases() -> list[Case]:
             ),
             must=("made every room less sharp", "honestly", "softly"),
             preserve_voice=("brochure found a candle",),
+            voice_budget_terms=("memorial thing", "brochure found a candle"),
+            max_voice_budget_terms=1,
+            best_voice_terms=("brochure found a candle",),
+            min_best_voice_terms=1,
             forbid=("cherished", "profound loss", "lasting legacy"),
             required_claims=("made every room less sharp", "do not want grand legacy language"),
             ordered_terms=("made every room less sharp", "honestly", "softly"),
@@ -1553,6 +1578,10 @@ def make_cases() -> list[Case]:
             must=("import froze", "job ID", "retry count", "CSV", "screenshot pilgrimage"),
             protected=("job ID", "retry count", "CSV"),
             preserve_voice=("screenshot pilgrimage",),
+            voice_budget_terms=("process note", "screenshot pilgrimage"),
+            max_voice_budget_terms=1,
+            best_voice_terms=("screenshot pilgrimage",),
+            min_best_voice_terms=1,
             forbid=("seamless", "customer-centric"),
             required_claims=("check the job ID first", "then the retry count", "Ask for the CSV only if both look weird"),
             reader_actions=("check the job ID first", "Ask for the CSV only if both look weird"),
@@ -1940,6 +1969,18 @@ def run_validator_self_tests() -> list[str]:
                 max_voice_budget_terms=1,
             ),
             "voice budget failed",
+        ),
+        (
+            "best voice",
+            Case(
+                "self_best_voice",
+                "Keep the line that carries the actual voice.",
+                "This keeps a weaker aside.",
+                must=("keeps",),
+                best_voice_terms=("actual voice",),
+                min_best_voice_terms=1,
+            ),
+            "best voice failed",
         ),
         (
             "opening",
@@ -3400,6 +3441,174 @@ def run_voice_budget_contract_tests() -> list[str]:
     return failures
 
 
+def run_forceful_tight_voice_contract_tests() -> list[str]:
+    """Catch rewrites that fail the combined standard: better, tighter, still the user."""
+    ai_fear = Case(
+        id="forceful_tight_ai_fear_contract",
+        source=(
+            "So you guys are driving me insane. I don't understand how you think the "
+            "answer is ever to not use AI. I think that's just you running scared, "
+            "worried that the expertise that you've cultivated is gonna be superseded "
+            "by a computer, but in reality, it's gonna be amplified."
+        ),
+        rewrite=(
+            "You are driving me insane with this idea that the answer is somehow not "
+            "to use AI. That is fear dressed up as expertise. The work you cultivated "
+            "is not going to be replaced by a computer; it is going to be amplified by one."
+        ),
+        must=("use AI", "expertise", "computer", "amplified"),
+        preserve_voice=("driving me insane", "fear dressed up as expertise", "amplified"),
+        preserve_stance=("driving me insane", "not going to be replaced", "amplified"),
+        required_claims=("not going to be replaced", "going to be amplified"),
+        strong_claims=("not going to be replaced", "going to be amplified"),
+        frontload_terms=("driving me insane",),
+        frontload_max_words=5,
+        forbid_added_hedges=True,
+        voice_budget_terms=(
+            "driving me insane",
+            "running scared",
+            "fear dressed up as expertise",
+            "superseded by a computer",
+            "amplified",
+        ),
+        max_voice_budget_terms=3,
+        best_voice_terms=("driving me insane", "amplified"),
+        min_best_voice_terms=2,
+        max_words=45,
+        max_source_similarity=0.78,
+        forbid=("I understand the hesitation", "valid concern", "worth exploring"),
+    )
+    wordpress_memory = Case(
+        id="forceful_tight_wordpress_memory_contract",
+        source=(
+            "ok so in that WordPress Core AI 7.1 planning post I said Guidelines was "
+            "a workstream and that is true, but I kind of chickened out. I put the "
+            "important thing in a list and pretended that was the same as saying why "
+            "it matters. Guidelines sounds boring, but the interesting part is memory. "
+            "Agent Memory is the real moat. Agents without memory are fancy autocomplete "
+            "with a clipboard problem. Guidelines should be the first WordPress-native "
+            "persistence layer for agents, not a plugin drawer. wp_guideline is the "
+            "primitive hiding in plain sight, with PR #78296 and issue #77230 tracking it."
+        ),
+        rewrite=(
+            "In the 7.1 planning post, I named Guidelines as a workstream and then "
+            "did the planning-doc thing: put the important part in a list and moved on.\n\n"
+            "That undersold it. Guidelines is not an editorial-preferences drawer. It "
+            "is the first WordPress-native persistence layer for agents: memory, skills, "
+            "artifacts, plans, and reusable context that WordPress can discover, "
+            "permission, inspect, and move.\n\n"
+            "That is why I think it belongs in core. Agent Memory is the real moat, "
+            "and wp_guideline is the primitive hiding in plain sight."
+        ),
+        must=("Guidelines", "WordPress-native persistence layer", "Agent Memory is the real moat", "wp_guideline"),
+        preserve_voice=("planning-doc thing", "primitive hiding in plain sight"),
+        preserve_stance=("That undersold it", "belongs in core"),
+        required_claims=("first WordPress-native persistence layer", "belongs in core"),
+        strong_claims=("That undersold it", "belongs in core"),
+        frontload_terms=("In the 7.1 planning post",),
+        frontload_max_words=7,
+        voice_budget_terms=(
+            "chickened out",
+            "planning-doc thing",
+            "Guidelines sounds boring",
+            "fancy autocomplete with a clipboard problem",
+            "plugin drawer",
+            "primitive hiding in plain sight",
+        ),
+        max_voice_budget_terms=2,
+        best_voice_terms=("planning-doc thing", "primitive hiding in plain sight"),
+        min_best_voice_terms=2,
+        max_words=130,
+        max_source_similarity=0.70,
+        ends_with="primitive hiding in plain sight.",
+    )
+    fun = Case(
+        id="forceful_tight_have_fun_contract",
+        source=(
+            "Come on. This is absolutely, unbelievably, stupendously ridiculous. We "
+            "gotta do better than this. We gotta stop worrying about all this dumb "
+            "shit. Just have fun."
+        ),
+        rewrite=(
+            "Come on. This is ridiculous. We can do better than panic-optimizing dumb "
+            "shit. Just have fun."
+        ),
+        must=("ridiculous", "do better", "dumb shit", "Just have fun"),
+        preserve_voice=("Come on", "dumb shit", "Just have fun"),
+        preserve_stance=("ridiculous", "do better"),
+        required_claims=("do better", "Just have fun"),
+        strong_claims=("This is ridiculous", "Just have fun"),
+        frontload_terms=("Come on",),
+        frontload_max_words=2,
+        voice_budget_terms=("absolutely", "unbelievably", "stupendously", "dumb shit", "Just have fun"),
+        max_voice_budget_terms=2,
+        best_voice_terms=("dumb shit", "Just have fun"),
+        min_best_voice_terms=2,
+        max_words=18,
+        max_source_similarity=0.76,
+        forbid=("let us", "concerns", "more thoughtful approach"),
+    )
+    wordy_ai_fear = (
+        "You are driving me insane with this idea that the answer is somehow not to "
+        "use AI, because it feels like fear dressed up as expertise, and it keeps "
+        "turning into a long anxious conversation about whether computers might "
+        "supersede the expertise people have cultivated, when the actual point is "
+        "much simpler: the expertise is not going to be replaced by a computer; in "
+        "reality, if people stop running scared and actually use the tool, that "
+        "expertise is going to be amplified by one."
+    )
+    polite_ai_fear = (
+        "I understand the hesitation around AI, and it is a valid concern worth "
+        "exploring. The expertise people have cultivated may still be useful if AI "
+        "is adopted thoughtfully."
+    )
+    bland_fun = (
+        "This is not ideal. We should improve the situation, reduce unnecessary "
+        "concerns, and adopt a more thoughtful approach."
+    )
+    checks = [
+        ("AI fear forceful tight pass", ai_fear, None),
+        ("WordPress memory forceful tight pass", wordpress_memory, None),
+        ("Have fun forceful tight pass", fun, None),
+        (
+            "AI fear too long",
+            replace(ai_fear, rewrite=wordy_ai_fear),
+            "max word count failed",
+        ),
+        (
+            "AI fear polite laundering",
+            replace(ai_fear, rewrite=polite_ai_fear),
+            "forbidden terms appeared",
+        ),
+        (
+            "AI fear under-edited",
+            replace(ai_fear, rewrite=ai_fear.source),
+            "editorial lift failed",
+        ),
+        (
+            "WordPress memory drops best marker",
+            replace(
+                wordpress_memory,
+                rewrite=replace_phrase_all(
+                    wordpress_memory.rewrite,
+                    "primitive hiding in plain sight",
+                    "underlying content type",
+                ),
+            ),
+            "best voice failed",
+        ),
+        ("Have fun sanitized", replace(fun, rewrite=bland_fun), "lost voice markers"),
+    ]
+    failures: list[str] = []
+    for name, case, expected in checks:
+        errors = validate(case)
+        if expected is None and errors:
+            failures.append(f"{name}: expected pass, got {errors}")
+        elif expected is not None and not any(expected in error for error in errors):
+            failures.append(f"{name}: expected {expected}, got {errors}")
+    return failures
+
+
 def run_voice_texture_contract_tests() -> list[str]:
     """Catch over-sanitizing that removes identity, plain words, or the best line."""
     checks = [
@@ -4050,6 +4259,13 @@ def run_mutation_tests() -> list[str]:
                 errors = validate(replace(case, rewrite=rewrite))
                 expect_error(case.id, "overstuffed voice budget", errors, "voice budget failed")
 
+        if case.min_best_voice_terms is not None and case.best_voice_terms:
+            best_marker = case.best_voice_terms[0]
+            rewrite = replace_phrase_all(case.rewrite, best_marker, "[weaker marker]")
+            if rewrite != case.rewrite:
+                errors = validate(replace(case, rewrite=rewrite))
+                expect_error(case.id, "dropped best voice marker", errors, "best voice failed")
+
         if any(contains_term(case.source, term) for term in ("maybe", "may", "might", "probably")):
             rewrite = f"{case.rewrite} This definitely will happen."
             errors = validate(replace(case, rewrite=rewrite))
@@ -4093,6 +4309,7 @@ def main() -> int:
     editorial_lift_test_failures = run_editorial_lift_contract_tests()
     timidity_test_failures = run_timidity_contract_tests()
     voice_budget_test_failures = run_voice_budget_contract_tests()
+    forceful_tight_voice_test_failures = run_forceful_tight_voice_contract_tests()
     format_test_failures = run_format_contract_tests()
     voice_texture_test_failures = run_voice_texture_contract_tests()
     authorship_boundary_test_failures = run_authorship_boundary_contract_tests()
@@ -4110,6 +4327,7 @@ def main() -> int:
         or editorial_lift_test_failures
         or timidity_test_failures
         or voice_budget_test_failures
+        or forceful_tight_voice_test_failures
         or format_test_failures
         or voice_texture_test_failures
         or authorship_boundary_test_failures
@@ -4129,6 +4347,7 @@ def main() -> int:
             + editorial_lift_test_failures
             + timidity_test_failures
             + voice_budget_test_failures
+            + forceful_tight_voice_test_failures
             + format_test_failures
             + voice_texture_test_failures
             + authorship_boundary_test_failures

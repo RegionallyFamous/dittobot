@@ -1,10 +1,10 @@
 {
   "name": "youish",
   "displayName": "Youish",
-  "version": "0.3.8",
+  "version": "0.3.9",
   "organization": "Regionally Famous",
   "date": "June 2026",
-  "abstract": "Voice-faithful rewriting for AI agents, designed to preserve a writer's claims, stance, rhythm, uncertainty, useful weirdness, and exact constraints while removing clutter and generic AI polish. Includes compact runtime instructions, optional quality-gate references, and deterministic regression checks for facts, quotes, identity markers, output shape, source-only thought dumps, and live-eval integrity.",
+  "abstract": "Voice-faithful rewriting for AI agents, designed to preserve a writer's claims, stance, rhythm, uncertainty, useful weirdness, and exact constraints while making the source-supported point stronger and tighter. Includes compact runtime instructions, optional quality-gate references, and deterministic regression checks for facts, quotes, identity markers, output shape, source-only thought dumps, forceful-tight rewrites, best voice markers, and live-eval integrity.",
   "homepage": "https://github.com/RegionallyFamous/youish",
   "repository": "https://github.com/RegionallyFamous/youish",
   "license": "GPL-2.0-or-later",
@@ -34,10 +34,10 @@
     "summaryBullets": [
       "Preserves the user's claims, stance, uncertainty, rhythm, humor, useful weirdness, and exact constraints.",
       "Turns rough notes, rants, fragments, and corporate fog into usable prose without inventing facts or flattening voice.",
-      "Includes deterministic regression checks for fact drift, invented details, unsupported entities, cultural voice flattening, option diversity, under-editing, timidity drift, selective voice compression, wrappers, word counts, output shape, and live scorecard integrity.",
+      "Includes deterministic regression checks for fact drift, invented details, unsupported entities, cultural voice flattening, option diversity, under-editing, timidity drift, forceful-tight rewrites, best-marker selection, selective voice compression, wrappers, word counts, output shape, and live scorecard integrity.",
       "Uses progressive disclosure: compact runtime guidance, optional quality gates, and scripts loaded only for validation or profile work."
     ],
-    "summaryMarkdown": "**Voice-faithful rewriting and editing for messy drafts, notes, emails, posts, captions, docs, and reusable voice profiles.**\n\n- Preserves the user's claims, stance, uncertainty, rhythm, humor, useful weirdness, and exact constraints.\n- Turns rough notes, rants, fragments, and corporate fog into usable prose without inventing facts or flattening voice.\n- Includes deterministic regression checks for fact drift, invented details, unsupported entities, cultural voice flattening, option diversity, under-editing, timidity drift, selective voice compression, wrappers, word counts, output shape, and live scorecard integrity.\n- Uses progressive disclosure: compact runtime guidance, optional quality gates, and scripts loaded only for validation or profile work.",
+    "summaryMarkdown": "**Voice-faithful rewriting and editing for messy drafts, notes, emails, posts, captions, docs, and reusable voice profiles.**\n\n- Preserves the user's claims, stance, uncertainty, rhythm, humor, useful weirdness, and exact constraints.\n- Turns rough notes, rants, fragments, and corporate fog into usable prose without inventing facts or flattening voice.\n- Includes deterministic regression checks for fact drift, invented details, unsupported entities, cultural voice flattening, option diversity, under-editing, timidity drift, forceful-tight rewrites, best-marker selection, selective voice compression, wrappers, word counts, output shape, and live scorecard integrity.\n- Uses progressive disclosure: compact runtime guidance, optional quality gates, and scripts loaded only for validation or profile work.",
     "pageFields": [
       {
         "field": "Breadcrumb",

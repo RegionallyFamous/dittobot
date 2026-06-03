@@ -2,7 +2,7 @@
 set -euo pipefail
 
 REPO="${YOUISH_REPO:-RegionallyFamous/youish}"
-REF="${YOUISH_REF:-v0.3.8}"
+REF="${YOUISH_REF:-v0.3.9}"
 SOURCE="${YOUISH_SOURCE:-tag-archive}"
 
 if [ -n "${YOUISH_ARCHIVE_URL:-}" ]; then
@@ -36,7 +36,7 @@ trap cleanup EXIT
 
 if [ "$SOURCE" = "release-zip" ]; then
   if [[ "$REF" != v[0-9]* ]]; then
-    printf 'YOUISH_SOURCE=release-zip requires YOUISH_REF to be a release tag such as v0.3.8.\n' >&2
+    printf 'YOUISH_SOURCE=release-zip requires YOUISH_REF to be a release tag such as v0.3.9.\n' >&2
     exit 1
   fi
   version="${REF#v}"

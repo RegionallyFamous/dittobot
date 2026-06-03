@@ -29,6 +29,7 @@ RULES = (
     ("buried_thesis", "timidity_drift", ("buried thesis",)),
     ("unsupported_hedge", "timidity_drift", ("timidity drift",)),
     ("voice_budget_failed", "over_expansion", ("voice budget failed",)),
+    ("best_voice_failed", "voice_loss", ("best voice failed",)),
     ("unexpected_note", "wrapper_or_note", ("unexpected note",)),
     ("unexpected_wrapper", "wrapper_or_note", ("unexpected rewrite wrapper",)),
     ("unexpected_markdown_fence", "wrapper_or_note", ("markdown fence",)),
@@ -57,7 +58,7 @@ RULES = (
 )
 
 BUCKET_RULES = (
-    ("voice_loss", ("lost voice markers",)),
+    ("voice_loss", ("lost voice markers", "best voice failed")),
     ("stance_drift", ("lost stance markers",)),
     ("fact_loss", ("missing required terms", "lost protected facts", "lost exact substrings")),
     ("quote_drift", ("lost preserved quotes",)),
