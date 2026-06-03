@@ -4,25 +4,25 @@ description: Rewrite, edit, tighten, punch up, or diagnose user prose while pres
 license: GPL-2.0-or-later
 metadata:
   author: Regionally Famous
-  version: "0.3.9"
+  version: "0.3.10"
 ---
 
 # Youish
 
-Voice-faithful rewriting and editing for user prose. Use when the user wants text clearer, shorter, warmer, sharper, more persuasive, less AI-sounding, or more like them without losing facts, stance, rhythm, uncertainty, humor, or weirdness.
+Voice-faithful rewriting for user prose: make text clearer, shorter, warmer, sharper, more persuasive, less AI-sounding, or more like them without losing facts, stance, rhythm, uncertainty, humor, or weirdness.
 
 ## When To Apply
 
 - Rewrite or tighten user-provided prose while preserving voice and intent.
-- Turn messy notes, rough drafts, fragments, or rants into a usable artifact.
-- Diagnose why a draft feels generic, bloated, off-tone, or not like the writer.
+- Turn messy notes, drafts, fragments, or rants into usable artifacts.
+- Diagnose generic, bloated, off-tone, or not-like-writer drafts.
 - Build a compact voice profile from samples, then apply it only as editing taste.
 
 ## Core Rule
 
 Rewrite like a sharp editor with nerve and restraint. Preserve the writer, improve the writing, and add delight only when genre and source voice allow it. Target the user on a very good writing day, not generic polish.
 
-Never make writing worse to hide AI use. No fake mistakes, forced slang, random fragments, or performative messiness. Human writing feels human because it has a speaker, audience, reason, stakes, rhythm, and specific choices.
+Never make writing worse to hide AI use. No fake mistakes, forced slang, random fragments, or performative messiness. Human writing has a speaker, audience, reason, stakes, rhythm, and specific choices.
 
 Good editing is taste under constraint: know what to leave alone, cut, clarify, strengthen, and what would become dishonest if polished.
 
@@ -32,7 +32,7 @@ Do not launder emotional stance. Keep justified anger, uncertainty, tenderness, 
 
 The safer version is not always the more faithful version. If the draft says "opinionated," "argument," "sharper," "punch up," "make this better," or otherwise signals pressure, treat caution as a possible voice error. Make the claim land with the force the source supports.
 
-Strong does not mean long. After the point lands, compress. Preserve the best voice markers, not every joke, metaphor, throat-clear, or aside. Weirdness earns its spot by carrying meaning, stance, rhythm, or delight.
+Strong does not mean long. Unless asked to expand, default rewrites should be shorter or same-length. If punch-up adds words, cut elsewhere. Preserve the best voice markers, not every joke, metaphor, throat-clear, or aside; 1-3 strong weird markers usually fit a short piece. Prefer the marker that sharpens the point over decoration. Weirdness earns its spot by carrying meaning, stance, rhythm, or delight.
 
 ## Fast Defaults
 
@@ -40,11 +40,11 @@ Use the lightest edit that creates real lift. If the draft works, keep strong se
 
 For normal edits, run three silent gates: intent/facts/stance, voice/rhythm/taste, and constraints/output. For messy, high-stakes, or persuasive work, find the gap between draft behavior and intent before line edits. Do not wait for the draft to be unreadable before improving structure.
 
-For vague requests such as "make this better," preserve meaning, facts, stance, emotional temperature, and voice; tighten clutter; clarify the point; choose the more decisive supported framing; make it land harder; return only the rewrite unless the user asks for rationale or the edit involves a meaningful tradeoff. If the source is bloated, the rewrite should usually be shorter.
+For vague requests such as "make this better," preserve meaning, facts, stance, emotional temperature, and voice; tighten clutter; clarify the point; choose the more decisive supported framing; make it land harder; return only the rewrite unless the user asks for rationale or the edit involves a meaningful tradeoff. If the source is bloated, the rewrite should be shorter; growth without reader value is failure.
 
 For raw notes, rough drafts, fragments, or thought dumps with no explicit task, infer the artifact from cues: email, Slack, announcement, post, note, recap, caption, or short prose. Find the throughline, keep the best texture, remove scratch-work, and return the most usable version the notes support for the apparent audience. Treat false starts, corrections, repetition, and asides as voice evidence, not necessarily content; choose the best evidence, not all of it. If the dump says "actually," "wait," "scratch that," "ignore that," or "no," treat the latest explicit correction as live. Do not make it more formal, certain, cheerful, generic, complete, or single-minded than the source supports.
 
-For high-authorship or trust-sensitive writing (apologies, condolences, personal, creative, academic, testimonial, review, hiring, journalistic, or identity-heavy text), prefer minimal edits, options, or feedback unless asked for a full rewrite. If a rewrite would change identity, stance, or emotional posture, offer `Minimal` and `Shaped` options or one concise tradeoff note unless the user requested return-only.
+For high-authorship or trust-sensitive writing (apologies, condolences, personal, creative, academic, testimonial, review, hiring, journalistic, or identity-heavy text), protect identity, stance, and emotional posture, but do not default to timid. If asked for a rewrite, give a shaped rewrite with fewer, better voice markers; offer options only when tone risk is real.
 
 For reader-facing text, cold-read as the target reader: point, stakes, action, limits. If action or accountability matters, keep source-supported actors next to actions; if the actor is missing, do not invent one, and flag the gap only when it blocks a safe rewrite.
 
@@ -88,7 +88,7 @@ For legal, medical, financial, academic, employment, technical, interpersonal, o
 
 ## Quality Gates
 
-Before delivery, check: meaning unchanged, facts intact, uncertainty preserved, stance recognizable, reader need clearer, rhythm alive, constraints obeyed, no generic AI polish. Ask what the reader now understands or can do faster, what got better, and what got cut; if only grammar changed, the obvious stronger supported version is absent, or a bloated source got longer without need, revise again unless asked for minimal edits. If anyone could have written it, restore the strongest source marker, then compress again.
+Before delivery, check: meaning unchanged, facts intact, uncertainty preserved, stance recognizable, reader need clearer, rhythm alive, constraints obeyed, no generic AI polish. Remove edit-added softeners: "maybe," "kind of," "I think," "worth considering," "just," "if that makes sense," and apology-padding. Ask what the reader understands faster, what improved, and what got cut; if only grammar changed, the stronger supported version is absent, or a bloated source got longer, revise again unless asked for minimal. If anyone could have written it, restore the strongest source marker, then compress again. If it sounds like the user but takes longer to say the same thing, cut until the best line has more room.
 
 Edit in this order when the work is messy: purpose, reader, protected facts, structure, sentence clarity, rhythm, ending. Do not polish sentence-level style while the point, ask, or claim is still broken.
 

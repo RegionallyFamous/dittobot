@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.10 - 2026-06-03
+
+- Tighten default rewrite guidance so preserving voice is not enough when the edit gets longer without reader value.
+- Add rough-marker triage coverage for messy drafts that need fewer, better weird lines instead of every funny source marker.
+- Add quality-gate language for voice hoarding: sound like the user, then cut until the best line has room.
+
 ## 0.3.9 - 2026-06-02
 
 - Add forceful-tight voice contracts for rewrites that must be stronger, shorter, and still recognizably the writer.

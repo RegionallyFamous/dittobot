@@ -7,6 +7,7 @@ Between every pass, ask:
 ```text
 Did this preserve intent, voice, taste, facts, stance, and desired length?
 Did it make the text clearer, tighter, more readable, or more alive?
+Did it keep the best voice marker, or did it drag every funny line along for the ride?
 If not, revert or soften the change.
 ```
 
@@ -15,7 +16,7 @@ If not, revert or soften the change.
 1. **Intent:** name the job.
 2. **Audience:** tune to reader needs and context.
 3. **Voice:** catch tone, cadence, diction, punctuation, and texture.
-4. **Keepers:** preserve strongest lines, sentence shapes, jokes, and emotional beats.
+4. **Keepers:** preserve the strongest lines, sentence shapes, jokes, and emotional beats; keep fewer when the piece is short.
 5. **Meaning:** protect facts, chronology, claims, scope, and commitments.
 6. **Structure:** move ideas only when order blocks comprehension; keep deliberate detours or asides when they carry voice or stakes.
 7. **Opening:** make the first sentence useful, honest, and alive.
@@ -30,7 +31,7 @@ If not, revert or soften the change.
 16. **AI tells:** remove generic scaffolding, shiny abstractions, tidy triples, and dash dependency.
 17. **Voice check:** if anyone could have written it, put the user's texture back.
 18. **Ending:** make the close land cleanly.
-19. **Compression:** keep only the best version of each idea.
+19. **Compression:** keep only the best version of each idea. If a rewrite sounds like the user but takes longer to say the same thing, cut until the best line has more room.
 20. **Final:** deliver the strongest concise version that still sounds like the user.
 
 ## Failure Taxonomy
@@ -41,6 +42,7 @@ If not, revert or soften the change.
 - **Precision damage:** modality, caveats, attribution, quotes, dates, names, deadlines, or scope drift.
 - **Dialect sanitizing:** dialect, code-switching, profanity, regional idiom, or intentional nonstandard grammar gets silently standardized.
 - **Over-completion:** rough notes become more formal, complete, cheerful, or certain than the source supports.
+- **Voice hoarding:** every joke, metaphor, aside, and rough marker survives, so the rewrite sounds like the user but sprawls.
 - **Humor injection:** jokes or wit appear because the task asked for "human," not because the source invited it.
 - **Constraint drift:** format, word count, dash rules, no-notes rules, audience, or return-only instructions are ignored.
 - **Reader-action loss:** the reader can no longer tell what happened, why it matters, what to do next, or what the limit is.

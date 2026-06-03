@@ -1,7 +1,7 @@
 {
   "name": "youish",
   "displayName": "Youish",
-  "version": "0.3.9",
+  "version": "0.3.10",
   "organization": "Regionally Famous",
   "date": "June 2026",
   "abstract": "Voice-faithful rewriting for AI agents, designed to preserve a writer's claims, stance, rhythm, uncertainty, useful weirdness, and exact constraints while making the source-supported point stronger and tighter. Includes compact runtime instructions, optional quality-gate references, and deterministic regression checks for facts, quotes, identity markers, output shape, source-only thought dumps, forceful-tight rewrites, best voice markers, and live-eval integrity.",

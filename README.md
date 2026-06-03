@@ -210,17 +210,17 @@ npx skills add https://github.com/RegionallyFamous/youish --skill youish
 ```
 
 ```bash
-gh skill install RegionallyFamous/youish skills/youish --agent codex --scope user --pin v0.3.9
+gh skill install RegionallyFamous/youish skills/youish --agent codex --scope user --pin v0.3.10
 ```
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/RegionallyFamous/youish/v0.3.9/install.sh | YOUISH_REF=v0.3.9 bash
+curl -fsSL https://raw.githubusercontent.com/RegionallyFamous/youish/v0.3.10/install.sh | YOUISH_REF=v0.3.10 bash
 ```
 
 For a deterministic release-asset install that pulls the published skill ZIP and verifies it against `SHA256SUMS`:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/RegionallyFamous/youish/v0.3.9/install.sh | YOUISH_REF=v0.3.9 YOUISH_SOURCE=release-zip bash
+curl -fsSL https://raw.githubusercontent.com/RegionallyFamous/youish/v0.3.10/install.sh | YOUISH_REF=v0.3.10 YOUISH_SOURCE=release-zip bash
 ```
 
 Install destinations differ by tool: `npx skills` currently installs Codex-compatible skills into `~/.agents/skills/youish`; `gh skill install --agent codex --scope user` installs into `~/.codex/skills/youish`.

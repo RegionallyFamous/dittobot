@@ -1647,28 +1647,57 @@ def make_cases() -> list[Case]:
             prompt_mode="source_only",
         ),
         Case(
-            id="thought_dump_meeting_recap_10",
+            id="thought_dump_rough_marker_triage_10",
             source=(
-                "recap from call: Ana owns copy, Dev owns the weird auth question, I own "
-                "telling Finance that Friday is not a deadline it is a decorative sticker. "
-                "need clean but keep the sticker line."
+                "ok this WordPress Guidelines 7.1 post is too long and too polite. I said "
+                "Guidelines was a workstream, which is true, but I did the planning-doc "
+                "thing where you hide the actual argument in a list and call it strategy. "
+                "The point is memory. Guidelines sounds like don't say utilize, but I "
+                "think it is the first WordPress-native memory layer for agents. If "
+                "agents remember across WordPress, this cannot be seventeen plugin "
+                "drawers and vibes in a database table. wp_guideline is the primitive "
+                "hiding in plain sight. PR #78296 and issue #77230 are the receipts. "
+                "Keep it punchy, not haunted localStorage fanfic."
             ),
             rewrite=(
-                "Ana owns copy. Dev owns the auth question. I own telling Finance that "
-                "Friday is not a deadline; it is a decorative sticker."
+                "In the 7.1 planning post, I called Guidelines a workstream and "
+                "undersold it.\n\n"
+                "The point is memory. Guidelines is not a drawer for don't say utilize. "
+                "It is the first WordPress-native memory layer for agents: reusable "
+                "context WordPress can discover, permission, inspect, and move.\n\n"
+                "That is why it belongs in core. If agents remember across WordPress, "
+                "memory cannot become vibes in a database table. wp_guideline is the "
+                "primitive hiding in plain sight, with Gutenberg PR #78296 and issue "
+                "#77230 as the receipts."
             ),
-            must=("Ana", "Dev", "Finance", "Friday", "decorative sticker"),
-            protected=("Ana", "Dev", "Finance", "Friday"),
-            preserve_voice=("decorative sticker",),
-            forbid=("weird auth question", "clean but"),
-            required_claims=("Ana owns copy", "Dev owns the auth question", "Friday is not a deadline"),
-            reader_actions=("Ana owns copy", "Dev owns the auth question"),
-            ordered_terms=("Ana", "Dev", "Finance", "decorative sticker"),
-            forbid_artifacts=("recap from call",),
+            must=("Guidelines", "WordPress-native memory layer", "wp_guideline", "#78296", "#77230"),
+            protected=("wp_guideline", "#78296", "#77230", "WordPress"),
+            preserve_voice=("vibes in a database table", "primitive hiding in plain sight"),
+            voice_budget_terms=(
+                "planning-doc thing",
+                "don't say utilize",
+                "seventeen plugin drawers",
+                "vibes in a database table",
+                "primitive hiding in plain sight",
+                "haunted localStorage fanfic",
+            ),
+            max_voice_budget_terms=3,
+            best_voice_terms=("vibes in a database table", "primitive hiding in plain sight"),
+            min_best_voice_terms=2,
+            forbid=("too polite", "haunted localStorage fanfic"),
+            required_claims=("first WordPress-native memory layer", "belongs in core"),
+            reader_actions=("discover permission inspect and move",),
+            strong_claims=("first WordPress-native memory layer", "belongs in core"),
+            frontload_terms=("called Guidelines",),
+            frontload_max_words=10,
+            forbid_added_hedges=True,
+            max_source_similarity=0.70,
+            max_words=95,
+            ordered_terms=("7.1 planning post", "memory", "belongs in core", "wp_guideline"),
+            forbid_artifacts=("ok", "keep it punchy"),
             max_question_marks=0,
             forbid_clarifying=True,
             forbid_wrappers=True,
-            max_paragraphs=1,
             prompt_mode="source_only",
         ),
     ]
@@ -2745,6 +2774,51 @@ def run_thought_dump_contract_tests() -> list[str]:
         max_paragraphs=1,
         prompt_mode="source_only",
     )
+    rough_marker_triage = Case(
+        id="thought_dump_rough_marker_triage_contract",
+        source=(
+            "ok so the Guidelines post is doing the thing where it keeps every funny "
+            "line and somehow gets weaker. The actual argument is simple: Guidelines "
+            "is memory, not an editorial preference drawer. It belongs in WordPress "
+            "core because agent memory cannot be seventeen plugin junk drawers, vibes "
+            "in a database table, and haunted localStorage wearing a conference badge. "
+            "Keep the weirdest good line, make the claim sharper, and stop apologizing."
+        ),
+        rewrite=(
+            "Guidelines is memory, not an editorial-preferences drawer.\n\n"
+            "That is why it belongs in WordPress core. Agent memory cannot become "
+            "seventeen plugin junk drawers and vibes in a database table; it has to "
+            "be something WordPress understands."
+        ),
+        must=("Guidelines", "memory", "WordPress core", "agent memory"),
+        preserve_voice=("seventeen plugin junk drawers", "vibes in a database table"),
+        preserve_stance=("belongs in WordPress core",),
+        required_claims=("Guidelines is memory", "belongs in WordPress core"),
+        strong_claims=("Guidelines is memory", "belongs in WordPress core"),
+        frontload_terms=("Guidelines is memory",),
+        frontload_max_words=3,
+        forbid_added_hedges=True,
+        voice_budget_terms=(
+            "keeps every funny line",
+            "editorial preference drawer",
+            "seventeen plugin junk drawers",
+            "vibes in a database table",
+            "haunted localStorage",
+            "conference badge",
+            "stop apologizing",
+        ),
+        max_voice_budget_terms=3,
+        best_voice_terms=("seventeen plugin junk drawers", "vibes in a database table"),
+        min_best_voice_terms=2,
+        forbid=("somehow gets weaker", "stop apologizing"),
+        forbid_artifacts=("ok so", "keep the weirdest good line"),
+        max_words=45,
+        max_source_similarity=0.65,
+        max_paragraphs=2,
+        forbid_clarifying=True,
+        forbid_wrappers=True,
+        prompt_mode="source_only",
+    )
     checks = [
         ("self-correction honored", self_correction, None),
         (
@@ -2776,6 +2850,23 @@ def run_thought_dump_contract_tests() -> list[str]:
                 ),
             ),
             "forbidden terms appeared",
+        ),
+        ("rough marker triage honored", rough_marker_triage, None),
+        (
+            "rough marker triage hoards markers and sprawls",
+            replace(
+                rough_marker_triage,
+                rewrite=(
+                    "Guidelines is memory, not an editorial preference drawer, and "
+                    "the post should say that without doing the thing where it keeps "
+                    "every funny line and somehow gets weaker. It belongs in WordPress "
+                    "core because agent memory cannot be seventeen plugin junk drawers, "
+                    "vibes in a database table, and haunted localStorage wearing a "
+                    "conference badge, and the whole point is to stop apologizing and "
+                    "make the claim sharper."
+                ),
+            ),
+            "voice budget failed",
         ),
     ]
     failures: list[str] = []
